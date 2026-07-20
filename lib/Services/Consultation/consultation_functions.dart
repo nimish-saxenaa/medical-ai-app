@@ -197,7 +197,99 @@ Future<DeleteConsultationResponse> deleteConsultation({
   return DeleteConsultationResponse.fromJson(jsonDecode(response.body));
 }
 
-Future<Uint8List> textToSpeech({
+class SpeechAudio {
+  final Uint8List bytes;
+
+  /// Required by AVFoundation on iOS/macOS, which cannot sniff the container
+  /// from the byte stream the way ExoPlayer does on Android.
+  final String mimeType;
+
+  SpeechAudio({required this.bytes, required this.mimeType});
+
+  /// Container extension for the temp file we hand to the player. AVFoundation
+  /// on iOS picks its decoder from the file extension, so this has to match the
+  /// actual container rather than defaulting to something convenient.
+  String get fileExtension {
+    switch (mimeType) {
+      case "audio/wav":
+      case "audio/x-wav":
+        return "wav";
+      case "audio/ogg":
+        return "ogg";
+      case "audio/mp4":
+      case "audio/aac":
+        return "m4a";
+      default:
+        return "mp3";
+    }
+  }
+}
+
+/// Falls back to inspecting the container's magic bytes when the server does
+/// not send a usable `Content-Type`.
+///
+/// Returns null when the payload is not recognisable audio. It deliberately
+/// does NOT guess a default: labelling arbitrary bytes as mp3 makes the player
+/// swallow the failure and produce silence with no error, which is far harder
+/// to diagnose than an explicit throw.
+String? _sniffAudioMimeType(Uint8List bytes) {
+  if (bytes.length >= 3 &&
+      ((bytes[0] == 0x49 && bytes[1] == 0x44 && bytes[2] == 0x33) || // "ID3"
+          (bytes[0] == 0xFF && (bytes[1] & 0xE0) == 0xE0))) {
+    return "audio/mpeg";
+  }
+  if (bytes.length >= 12 &&
+      bytes[0] == 0x52 && bytes[1] == 0x49 && // "RIFF"
+      bytes[8] == 0x57 && bytes[9] == 0x41) { // "WAVE"
+    return "audio/wav";
+  }
+  if (bytes.length >= 4 &&
+      bytes[0] == 0x4F && bytes[1] == 0x67 && bytes[2] == 0x67) { // "OggS"
+    return "audio/ogg";
+  }
+  if (bytes.length >= 8 &&
+      bytes[4] == 0x66 && bytes[5] == 0x74 &&
+      bytes[6] == 0x79 && bytes[7] == 0x70) { // "ftyp"
+    return "audio/mp4";
+  }
+  return null;
+}
+
+/// Pulls audio out of a JSON envelope, whatever the server chose to call the
+/// field. Returns null if this isn't a recognisable JSON-wrapped clip.
+Uint8List? _decodeJsonWrappedAudio(Uint8List bodyBytes) {
+  try {
+    final decoded = jsonDecode(utf8.decode(bodyBytes));
+    if (decoded is! Map<String, dynamic>) return null;
+
+    final encoded = decoded["audio"] ??
+        decoded["audio_base64"] ??
+        decoded["audio_content"] ??
+        decoded["data"];
+    if (encoded is! String || encoded.isEmpty) return null;
+
+    // Tolerate a data: URI prefix as well as a bare base64 payload.
+    final payload = encoded.contains(",")
+        ? encoded.substring(encoded.indexOf(",") + 1)
+        : encoded;
+    return base64Decode(payload);
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Short readable preview of a non-audio body, for error messages.
+String _bodyPreview(Uint8List bytes) {
+  try {
+    final text = utf8.decode(bytes);
+    return text.length > 200 ? '${text.substring(0, 200)}…' : text;
+  } catch (_) {
+    return '<${bytes.length} bytes of binary, first: '
+        '${bytes.take(8).map((b) => b.toRadixString(16).padLeft(2, "0")).join(" ")}>';
+  }
+}
+
+Future<SpeechAudio> textToSpeech({
   required String token,
   required String text,
 }) async {
@@ -209,7 +301,7 @@ Future<Uint8List> textToSpeech({
       "Authorization": "Bearer $token",
       "Content-Type": "application/json",
     },
-    body: '{"text":"$text"}',
+    body: jsonEncode({"text": text}),
   );
 
   if (response.statusCode != 200) {
@@ -218,7 +310,44 @@ Future<Uint8List> textToSpeech({
     );
   }
 
-  return response.bodyBytes;
+  final contentType = response.headers["content-type"]?.split(";").first.trim();
+  print(
+    "🔊 [DEBUG] TTS response: ${response.statusCode}, "
+    "content-type: $contentType, ${response.bodyBytes.length} bytes",
+  );
+
+  // Raw audio body — the common case.
+  final directMime = _sniffAudioMimeType(response.bodyBytes);
+  if (directMime != null) {
+    return SpeechAudio(
+      bytes: response.bodyBytes,
+      mimeType: contentType != null && contentType.startsWith("audio/")
+          ? contentType
+          : directMime,
+    );
+  }
+
+  // Not audio. The endpoint declares `application/json`, so the clip may be
+  // base64 inside an envelope. Try that regardless of the declared
+  // content-type, since the header has already proven unreliable.
+  final unwrapped = _decodeJsonWrappedAudio(response.bodyBytes);
+  if (unwrapped != null) {
+    final unwrappedMime = _sniffAudioMimeType(unwrapped);
+    print(
+      "🔊 [DEBUG] Decoded ${unwrapped.length} bytes of base64 TTS audio "
+      "(container: ${unwrappedMime ?? 'unrecognised'})",
+    );
+    if (unwrappedMime != null) {
+      return SpeechAudio(bytes: unwrapped, mimeType: unwrappedMime);
+    }
+  }
+
+  // Give up loudly rather than handing unplayable bytes to the player, which
+  // would just produce silence with no error at all.
+  throw Exception(
+    "TTS response is not playable audio (content-type: $contentType, "
+    "${response.bodyBytes.length} bytes): ${_bodyPreview(response.bodyBytes)}",
+  );
 }
 
 

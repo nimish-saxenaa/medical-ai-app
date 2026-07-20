@@ -28,6 +28,20 @@ String formatDate(DateTime d) {
   return '${d.day} ${months[d.month - 1]} ${d.year}, ';
 }
 
+/// Parses a timestamp coming from the backend and returns it in local time.
+///
+/// The backend sends UTC, but without a `Z`/offset suffix. `DateTime.parse`
+/// treats such a string as local time, which makes `.toLocal()` a no-op, so we
+/// tag it as UTC ourselves before converting.
+DateTime parseServerDate(String? raw) {
+  if (raw == null || raw.isEmpty) return DateTime.now();
+
+  final value = raw.trim().replaceFirst(' ', 'T');
+  final hasZone = value.endsWith('Z') || RegExp(r'[+-]\d{2}:?\d{2}$').hasMatch(value);
+
+  return DateTime.parse(hasZone ? value : '${value}Z').toLocal();
+}
+
 String getSpecialtyName(String specialty) {
   switch (specialty) {
     case "general_medicine":

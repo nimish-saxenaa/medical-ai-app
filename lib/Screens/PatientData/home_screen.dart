@@ -1,4 +1,5 @@
 import 'package:clinical_ai_app/Custom%20Widgets/custom_confirmation_alert.dart';
+import 'package:clinical_ai_app/functions.dart';
 import 'package:clinical_ai_app/Models/patient_list_model.dart';
 import 'package:clinical_ai_app/Models/patient_model.dart';
 import 'package:clinical_ai_app/Screens/PatientData/patient_data_screen.dart';
@@ -264,7 +265,7 @@ class _CustomPatientBubbleState extends State<CustomPatientBubble> {
                     Text(
                       DateFormat(
                         'd MMM yy',
-                      ).format(DateTime.parse(widget.patient.createdAt!)),
+                      ).format(parseServerDate(widget.patient.createdAt)),
                     ),
                   ],
                 ),

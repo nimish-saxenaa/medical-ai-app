@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:clinical_ai_app/Screens/Authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,34 @@ import 'Services/PatientData/patient_service.dart';
 import 'Services/Authentication/access_token.dart';
 import 'test_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // The app records (mic) and plays back (Dr AI's voice) in the same session.
+  // The recorder puts iOS into `playAndRecord`, and under that category audio
+  // defaults to the receiver (earpiece) rather than the speaker — playback
+  // succeeds but is essentially inaudible. Setting `defaultToSpeaker` globally
+  // keeps voice on the loudspeaker regardless of who touched the session last.
+  await AudioPlayer.global.setAudioContext(
+    AudioContext(
+      iOS: AudioContextIOS(
+        category: AVAudioSessionCategory.playAndRecord,
+        options: const {
+          AVAudioSessionOptions.defaultToSpeaker,
+          AVAudioSessionOptions.allowBluetooth,
+          AVAudioSessionOptions.allowBluetoothA2DP,
+        },
+      ),
+      android: AudioContextAndroid(
+        isSpeakerphoneOn: true,
+        stayAwake: true,
+        contentType: AndroidContentType.speech,
+        usageType: AndroidUsageType.assistant,
+        audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+      ),
+    ),
+  );
+
   runApp(ChangeNotifierProvider(
   create: (_) => PatientListProvider(),
   child: const MyApp(),

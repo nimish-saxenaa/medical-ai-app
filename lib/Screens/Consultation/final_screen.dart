@@ -55,7 +55,6 @@ class _FinalScreenState extends State<FinalScreen> {
               confirmedDiagnosis: prescriptionController.text,
             );
 
-
             setState(() {
               prescription = response;
               isGenerating = false;
@@ -241,7 +240,7 @@ class _FinalScreenState extends State<FinalScreen> {
                           finalize(context);
                         },
                         child: Text(
-                          "Download\nRecord",
+                          "Save\nConsultation",
                           textAlign: TextAlign.center,
                         ),
                       ),

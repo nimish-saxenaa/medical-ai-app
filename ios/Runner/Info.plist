@@ -20,6 +20,8 @@
 	<string>APPL</string>
 	<key>NSMicrophoneUsageDescription</key>
     <string>This app needs microphone access to record audio.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app records the city, state and country where each consultation takes place.</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>

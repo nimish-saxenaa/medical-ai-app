@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:clinical_ai_app/Custom%20Widgets/Consultation/siri_waveform.dart';
@@ -13,7 +16,6 @@ import '../../Services/Consultation/consultation_functions.dart';
 import '../../Services/Consultation/consultation_streaming.dart';
 import '../../Services/Authentication/access_token.dart';
 import '../../Components/colors.dart';
-import 'dart:typed_data';
 
 enum QnaState { idle, thinking }
 
@@ -87,26 +89,81 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
 
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FocusNode focusNode = FocusNode();
-  Future<void> playAudio(Uint8List audioBytes) async {
+
+  /// Writes the clip to a temp file and plays that.
+  ///
+  /// BytesSource cannot be used here: audioplayers' iOS implementation returns
+  /// "setSourceBytes is not currently implemented on iOS", so in-memory
+  /// playback fails on every Apple device. DeviceFileSource works on both
+  /// platforms, so both take the same path.
+  Future<void> playAudio(SpeechAudio clip) async {
+    await _audioPlayer.stop();
+
+    final dir = await getTemporaryDirectory();
+    final file = File(
+      '${dir.path}/tts_${DateTime.now().millisecondsSinceEpoch}.${clip.fileExtension}',
+    );
+    await file.writeAsBytes(clip.bytes);
+
+    // Replace the previous clip only once the new one is written, so a failure
+    // here doesn't leave the screen with no audio at all.
+    final previous = _currentClipFile;
+    _currentClipFile = file;
+    if (previous != null && await previous.exists()) {
+      await previous.delete();
+    }
+
+    if (!mounted) return;
     setState(() {
       state = TextToSpeechState.active;
     });
-    await _audioPlayer.stop();
-    await _audioPlayer.play(BytesSource(audioBytes));
+    await _audioPlayer.setVolume(1.0);
+    await _audioPlayer.play(DeviceFileSource(file.path));
+
+    // Tells apart "the clip never decoded" (duration null/zero) from "it is
+    // playing but routed somewhere inaudible" (duration present, state
+    // playing) — the two have identical symptoms from the outside.
+    final duration = await _audioPlayer.getDuration();
+    print(
+      '🔊 [DEBUG] Playing ${file.path} '
+      '(${await file.length()} bytes), duration: $duration, '
+      'state: ${_audioPlayer.state}',
+    );
   }
 
   Future<void> playText({required String question, String? token}) async {
     setState(() {
       state = TextToSpeechState.loading;
     });
-    audio = await textToSpeech(
-      token: token ?? await AccessTokenService.getToken() ?? "",
-      text: question,
-    );
-    await playAudio(audio!);
+    try {
+      audio = await textToSpeech(
+        token: token ?? await AccessTokenService.getToken() ?? "",
+        text: question,
+      );
+      await playAudio(audio!);
+    } catch (e) {
+      // Previously this threw into an unawaited future and vanished, leaving a
+      // silent screen with no indication anything had gone wrong.
+      print('❌ [DEBUG] Text-to-speech failed: $e');
+      if (!mounted) return;
+      setState(() {
+        state = TextToSpeechState.idle;
+      });
+      // The question still shows on screen, so without this the failure is
+      // invisible and looks like the doctor simply never spoke.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Voice unavailable: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
-  Uint8List? audio;
+  File? _currentClipFile;
+
+  SpeechAudio? audio;
 
   Future<void> sendAnswer() async {
     await _audioPlayer.stop();
@@ -425,6 +482,13 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
     super.initState();
     playText(question: question);
 
+    // Decode failures surface here rather than as a thrown exception, so
+    // without this listener a bad clip is indistinguishable from silence.
+    _audioPlayer.onLog.listen(
+      (msg) => print('🔊 [DEBUG] AudioPlayer log: $msg'),
+      onError: (Object e) => print('❌ [DEBUG] AudioPlayer error: $e'),
+    );
+
     _audioPlayer.onPlayerStateChanged.listen((PlayerState audioState) {
       if (!mounted) return;
 
@@ -442,6 +506,8 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
     _audioPlayer.dispose();
     answerController.dispose();
     _recordingTimer?.cancel();
+    // Drop the last TTS clip; temp files are not cleaned up for us.
+    _currentClipFile?.delete().catchError((_) => _currentClipFile!);
     super.dispose();
   }
 

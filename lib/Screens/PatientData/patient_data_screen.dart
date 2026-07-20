@@ -14,6 +14,8 @@ import 'package:open_file/open_file.dart';
 import '../../Custom Widgets/Patients/custom_name_initial.dart';
 import '../../Models/patient_response_history_model.dart';
 import '../../Models/session_model.dart';
+import '../../Models/consultation_location_model.dart';
+import '../../Services/Location/location_service.dart';
 import '../../Services/Consultation/consultation_functions.dart';
 import '../../Services/PatientData/patient_service.dart';
 import '../../Services/PDF/pdf_generator.dart';
@@ -33,6 +35,26 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
   late var history = widget.patientHistory;
   bool isDownloading = false;
   String? downloadingSessionId; // Track which consultation is being downloaded
+
+  /// Recorded consultation locations, keyed by session id. Sessions captured
+  /// before location tracking (or on another device) are simply absent.
+  Map<String, ConsultationLocation> sessionLocations = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSessionLocations();
+  }
+
+  Future<void> _loadSessionLocations() async {
+    final locations = await ConsultationLocationService.getForSessions(
+      history.sessions.map((s) => s.sessionId).toList(),
+    );
+    if (!mounted) return;
+    setState(() {
+      sessionLocations = locations;
+    });
+  }
 
   /// Show PDF saved notification
   void _showPdfSavedNotification(String filePath) {
@@ -120,6 +142,7 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
       final pdfFile = await PatientPdfGenerator.generateConsultationReport(
         consultation: consultation,
         patient: history.patient,
+        location: sessionLocations[consultation.sessionId],
       );
 
       setState(() {
@@ -165,6 +188,7 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
       // Generate PDF
       final pdfFile = await PatientPdfGenerator.generatePatientReport(
         patientHistory: history,
+        locations: sessionLocations,
       );
 
       setState(() {
@@ -288,9 +312,8 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                                   IconText(
                                     icon: LucideIcons.calendar,
                                     text: DateFormat('d MMM yy').format(
-                                      DateTime.parse(
-                                        history.patient.createdAt ??
-                                            DateTime.now().toString(),
+                                      parseServerDate(
+                                        history.patient.createdAt,
                                       ),
                                     ),
                                   ),
@@ -396,11 +419,17 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                                           try {
                                             String? token =
                                                 await AccessTokenService.getToken();
+                                            final deletedSessionId = history
+                                                .sessions[index]
+                                                .sessionId;
                                             await deleteConsultation(
                                               token: token!,
-                                              sessionId: history
-                                                  .sessions[index]
-                                                  .sessionId,
+                                              sessionId: deletedSessionId,
+                                            );
+                                            // Don't leave the location behind
+                                            // for a consultation that's gone.
+                                            await ConsultationLocationService.removeForSession(
+                                              deletedSessionId,
                                             );
 
                                             var newHistory =
@@ -411,6 +440,9 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                                             if (!mounted) return;
                                             setState(() {
                                               history = newHistory;
+                                              sessionLocations.remove(
+                                                deletedSessionId,
+                                              );
                                             });
 
                                             _showMessage(
@@ -448,12 +480,17 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                               status: getDiagnosisStatus(
                                 history.sessions[index].currentStage ?? "",
                               ),
-                              date: DateTime.parse(
-                                history.sessions[index].createdAt ??
-                                    DateTime.now().toString(),
+                              date: parseServerDate(
+                                history.sessions[index].createdAt,
                               ),
+
                               description:
                                   history.sessions[index].chiefComplaint ?? "",
+                              location:
+                                  sessionLocations[history
+                                          .sessions[index]
+                                          .sessionId]
+                                      ?.fullLocation,
                               redFlags:
                                   history
                                       .sessions[index]

@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Custom Widgets/Patients/custom_name_initial.dart';
 import '../../Services/Consultation/consultation_functions.dart';
 import '../../Services/Authentication/access_token.dart';
+import '../../Services/Location/location_service.dart';
 import '../../Components/colors.dart';
 import '../../test_screen.dart';
 import 'history_taking_screen.dart';
@@ -132,6 +133,12 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                     patientLanguage: _languageController.text.isNotEmpty?_languageController.text:null,
                     chiefComplaint: _complaintController.text.isNotEmpty?_complaintController.text:null,
                   );
+                  // Record where this consultation is taking place. Stored
+                  // locally against the session id — never blocks the flow.
+                  await ConsultationLocationService.captureAndSaveForSession(
+                    response.sessionId,
+                  );
+
                   if (!context.mounted) return;
                   Navigator.push(
                     context,

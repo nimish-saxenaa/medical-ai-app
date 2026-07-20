@@ -40,12 +40,17 @@ class DiagnosisCard extends StatefulWidget {
   final List<SoapField> objective;
   final bool show;
 
+  /// Where the consultation was recorded. Null for consultations captured
+  /// before location tracking existed — the row is hidden in that case.
+  final String? location;
+
   const DiagnosisCard({
     super.key,
     required this.title,
     required this.status,
     required this.date,
     required this.description,
+    this.location,
     required this.redFlags,
     required this.diagnoses,
     required this.workup,
@@ -199,6 +204,31 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                               ),
                             ],
                           ),
+                          if (widget.location != null &&
+                              widget.location!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  LucideIcons.mapPin,
+                                  size: 12,
+                                  color: Color(0xFFD1D5DB),
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    widget.location!,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Color(0xFF9CA3AF),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),

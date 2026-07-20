@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:clinical_ai_app/functions.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -7,12 +8,14 @@ import 'package:intl/intl.dart';
 import '../../Models/patient_response_history_model.dart';
 import '../../Models/patient_model.dart';
 import '../../Models/session_model.dart';
+import '../../Models/consultation_location_model.dart';
 
 class PatientPdfGenerator {
   /// Generate PDF for a SINGLE consultation
   static Future<File> generateConsultationReport({
     required Session consultation,
     required Patient patient,
+    ConsultationLocation? location,
   }) async {
     final pdf = pw.Document();
 
@@ -24,7 +27,7 @@ class PatientPdfGenerator {
         margin: pw.EdgeInsets.all(32),
         build: (context) => [
           // Header
-          _buildConsultationHeader(patient, consultation),
+          _buildConsultationHeader(patient, consultation, location),
           pw.SizedBox(height: 20),
           pw.Divider(),
           pw.SizedBox(height: 20),
@@ -49,6 +52,7 @@ class PatientPdfGenerator {
   /// Generate PDF for patient with all consultation history
   static Future<File> generatePatientReport({
     required PatientHistoryResponse patientHistory,
+    Map<String, ConsultationLocation> locations = const {},
   }) async {
     final pdf = pw.Document();
 
@@ -99,7 +103,10 @@ class PatientPdfGenerator {
               ...sessionsInPage.map(
                 (session) => pw.Container(
                   margin: pw.EdgeInsets.only(bottom: 16),
-                  child: _buildCompactConsultationCard(session),
+                  child: _buildCompactConsultationCard(
+                    session,
+                    locations[session.sessionId],
+                  ),
                 ),
               ),
             ],
@@ -119,6 +126,7 @@ class PatientPdfGenerator {
   static pw.Widget _buildConsultationHeader(
     Patient patient,
     Session consultation,
+    ConsultationLocation? location,
   ) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -161,9 +169,7 @@ class PatientPdfGenerator {
                 ),
                 pw.Text(
                   DateFormat('d MMM yyyy').format(
-                    DateTime.parse(
-                      consultation.createdAt ?? DateTime.now().toString(),
-                    ),
+                    parseServerDate(consultation.createdAt),
                   ),
                   style: pw.TextStyle(
                     fontSize: 10,
@@ -174,6 +180,15 @@ class PatientPdfGenerator {
             ),
           ],
         ),
+        // Full width so a long "City, State, Country" never squeezes the
+        // date column. Omitted entirely when no location was recorded.
+        if (location != null && !location.isEmpty) ...[
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Location: ${location.fullLocation}',
+            style: pw.TextStyle(fontSize: 11),
+          ),
+        ],
       ],
     );
   }
@@ -372,7 +387,10 @@ class PatientPdfGenerator {
   }
 
   /// Build compact consultation card for full patient report
-  static pw.Widget _buildCompactConsultationCard(Session session) {
+  static pw.Widget _buildCompactConsultationCard(
+    Session session,
+    ConsultationLocation? location,
+  ) {
     return pw.Container(
       padding: pw.EdgeInsets.all(12),
       decoration: pw.BoxDecoration(
@@ -394,9 +412,7 @@ class PatientPdfGenerator {
               ),
               pw.Text(
                 DateFormat('d MMM yyyy').format(
-                  DateTime.parse(
-                    session.createdAt ?? DateTime.now().toString(),
-                  ),
+                  parseServerDate(session.createdAt),
                 ),
                 style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
               ),
@@ -417,6 +433,13 @@ class PatientPdfGenerator {
             pw.Text(
               'Dx: ${session.diagnosis!.differentialDiagnoses.first.condition}',
               style: pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+            ),
+          ],
+          if (location != null && !location.isEmpty) ...[
+            pw.SizedBox(height: 4),
+            pw.Text(
+              'Location: ${location.fullLocation}',
+              style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
             ),
           ],
         ],
@@ -465,9 +488,7 @@ class PatientPdfGenerator {
                 pw.Text('Patient Since:', style: pw.TextStyle(fontSize: 10)),
                 pw.Text(
                   DateFormat('d MMM yyyy').format(
-                    DateTime.parse(
-                      patient.createdAt ?? DateTime.now().toString(),
-                    ),
+                    parseServerDate(patient.createdAt),
                   ),
                   style: pw.TextStyle(fontSize: 10),
                 ),
@@ -567,7 +588,7 @@ class PatientPdfGenerator {
 
     final dateStr = DateFormat(
       'yyyyMMdd',
-    ).format(DateTime.parse(consultationDate));
+    ).format(parseServerDate(consultationDate));
     final fileName =
         '${patientName.replaceAll(' ', '_')}_${specialty.replaceAll(' ', '_')}_$dateStr.pdf';
 
