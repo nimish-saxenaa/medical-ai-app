@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -63,6 +65,11 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
   bool canAnswer = true;
   Duration recordingDuration = Duration.zero;
   Timer? _recordingTimer;
+  final Random _random = Random();
+
+  List<double> bars = List.generate(80, (_) => 0.0);
+
+  double volume = 0.0;
 
   void startRecordingTimer() {
     recordingDuration = Duration.zero;
@@ -259,6 +266,21 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
     }
   }
 
+  void _updateWaveform(double db) {
+    final normalized = ((db + 60) / 60).clamp(0.0, 1.0);
+
+    setState(() {
+      volume = normalized;
+
+      for (int i = 0; i < bars.length; i++) {
+        final envelope = sin((i / bars.length) * pi);
+        final noise = 0.75 + _random.nextDouble() * 0.25;
+
+        bars[i] = (normalized * envelope * noise).clamp(0.0, 1.0);
+      }
+    });
+  }
+
   Future<void> startVoiceStreaming() async {
     print("🎙️ [DEBUG] Starting voice streaming...");
     await _audioPlayer.stop();
@@ -294,6 +316,13 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
           if (await recorder.hasPermission()) {
             print("🎤 [DEBUG] Microphone permission granted");
             final stream = await recorder.startStream(recordConfig);
+            recorder
+                .onAmplitudeChanged(
+              const Duration(milliseconds: 30),
+            )
+                .listen((amplitude) {
+              _updateWaveform(amplitude.current);
+            });
             print("🎵 [DEBUG] Audio stream started");
 
             setState(() {
@@ -478,7 +507,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
 
   @override
   void initState() {
-    // TODO: implement initState
+
     super.initState();
     playText(question: question);
 
@@ -575,6 +604,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                       const SizedBox(height: 4),
                       QuestionBubble(question: question, state: state),
                       const SizedBox(height: 16),
+                      //Recording Card
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -652,6 +682,10 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                   ),
                               ],
                             ),
+                            RecordingCard(
+                              bars: bars,
+                              volume: volume,
+                            )
                           ],
                         ),
                       ),
@@ -1006,160 +1040,183 @@ class BubblePainter extends CustomPainter {
   }
 }
 
-class RecordingContainer extends StatelessWidget {
-  const RecordingContainer({
+class RecordingCard extends StatefulWidget {
+  final List<double> bars;
+  final double volume;
+  final double phase = 0;
+
+  const RecordingCard({
     super.key,
-    required this.onStop,
-    required this.recordingTime,
+    required this.bars,
+    required this.volume,
   });
 
-  final VoidCallback onStop;
-  final String recordingTime;
+  @override
+  State<RecordingCard> createState() => _RecordingCardState();
+}
+
+class _RecordingCardState extends State<RecordingCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _blinkController;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    _blinkController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _blinkController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: const Color(0xffE2E8F0),
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 8,
+            offset: Offset(0, 2),
+            color: Color(0x0A000000),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+
+          /// Header
           Row(
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: const Color(0xfff0eaff),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(LucideIcons.mic, size: 15),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Speak Your\nAnswer",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ],
+
+              FadeTransition(
+                opacity: Tween(
+                  begin: .35,
+                  end: 1.0,
+                ).animate(_blinkController),
+                child: Container(
+                  width: 7,
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    color: Color(0xffEF4444),
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-              Expanded(
-                child: Text(
-                  "-transcribed & analyzed\ninstantly",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+
+              const SizedBox(width: 8),
+
+              const Text(
+                "Recording",
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xff64748B),
+                  letterSpacing: .4,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
-          // Stop button + timer
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: onStop,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(LucideIcons.square, size: 16, fill: 1),
-                    SizedBox(width: 8),
-                    Text("Stop recording"),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 12),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Recording card
-          Container(
+          /// Waveform placeholder
+          SizedBox(
+            height: 80,
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
+            child: CustomPaint(
+              painter: LiveAudioPainter(
+                volume: widget.volume,
+                phase: widget.phase,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Recording",
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                  ],
-                ),
+          ),
 
-                const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-                const SizedBox(
-                  height: 80,
-                  child: Center(child: Text("Waveform Placeholder")),
-                ),
-
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurple.shade100,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    Row(
-                      children: [
-                        Icon(LucideIcons.mic, size: 12, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          "Speak louder",
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          /// Loudness meter placeholder
+          Container(
+            height: 4,
+            color: Colors.grey.shade300,
           ),
         ],
       ),
     );
+  }
+}
+
+class LiveAudioPainter extends CustomPainter {
+  final double volume;
+  final double phase;
+
+  LiveAudioPainter({
+    required this.volume,
+    required this.phase,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF33049F)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final path = Path();
+
+    final centerY = size.height / 2;
+
+    final amplitude =
+    lerpDouble(3, size.height * 0.38, volume)!;
+
+    const points = 180;
+
+    for (int i = 0; i <= points; i++) {
+      final x = i / points * size.width;
+
+      final progress = i / points;
+
+      // Fade toward the edges like ChatGPT/React
+      final envelope = sin(progress * pi);
+
+      // Multiple waves mixed together
+      final y = centerY -
+          envelope *
+              amplitude *
+              (
+                  sin(progress * 10 * pi + phase) * .55 +
+                      sin(progress * 21 * pi + phase * 1.7) * .25 +
+                      sin(progress * 36 * pi + phase * .6) * .12
+              );
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant LiveAudioPainter oldDelegate) {
+    return oldDelegate.phase != phase ||
+        oldDelegate.volume != volume;
   }
 }

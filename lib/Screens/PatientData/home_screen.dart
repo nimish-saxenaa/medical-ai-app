@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -78,84 +79,94 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: const Icon(Icons.person_add_alt_1_rounded),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: TextSpan(
-                text: "Patients  ",
-                style: Theme.of(context).textTheme.headlineLarge,
-                children: [
-                  TextSpan(
-                    text: "${patientList.length}",
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16.0, left: 16, right: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: TextSpan(
+                  text: "Patients  ",
+                  style: Theme.of(context).textTheme.headlineLarge,
+                  children: [
+                    TextSpan(
+                      text: "${patientList.length}",
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Manage and view your patient records",
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: searchController,
-              onChanged: (value) {
-                setState(() {});
-              },
-              decoration: InputDecoration(
-                fillColor: Colors.white,
-                filled: true,
-                prefixIcon: Icon(Icons.search, color: AppColors.grey),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: AppColors.grey.withAlpha(50),
-                    width: 0.3,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: AppColors.grey.withAlpha(50),
-                    width: 0.3,
-                  ),
-                ),
-                hintText: "Search Patients...",
-                hintStyle: Theme.of(
+              const SizedBox(height: 8),
+              Text(
+                "Manage and view your patient records",
+                style: Theme.of(
                   context,
                 ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
               ),
-            ),
-            const SizedBox(height: 16),
-            filteredPatientList.isNotEmpty
-                ? Expanded(
-                    child: ListView.builder(
-                      itemCount: filteredPatientList.length,
-                      itemBuilder: (context, index) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CustomPatientBubble(
-                              patient: filteredPatientList[index],
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-                        );
-                      },
-                    ),
-                  )
-                : Center(
-                    child: Text(
-                      "No Patients found with '${searchController.text}'",
+              const SizedBox(height: 16),
+              TextField(
+                controller: searchController,
+                onChanged: (value) {
+                  setState(() {});
+                },
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
+                  prefixIcon: Icon(Icons.search, color: AppColors.grey),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppColors.grey.withAlpha(50),
+                      width: 0.3,
                     ),
                   ),
-          ],
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: AppColors.grey.withAlpha(50),
+                      width: 0.3,
+                    ),
+                  ),
+                  hintText: "Search Patients...",
+                  hintStyle: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+                ),
+              ),
+              const SizedBox(height: 16),
+              filteredPatientList.isNotEmpty
+                  ? Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredPatientList.length,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomPatientBubble(
+                                patient: filteredPatientList[index],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          );
+                        },
+                      ),
+                    )
+                  : Expanded(
+                      child: Center(
+                        child: patientList.isNotEmpty
+                            ? Text(
+                                "No Patients found with '${searchController.text}'",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              )
+                            : Text(
+                                "No Patients Records Found",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                      ),
+                    ),
+            ],
+          ),
         ),
       ),
     );
@@ -207,7 +218,7 @@ class _CustomPatientBubbleState extends State<CustomPatientBubble> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => PatientDataScreen(patientHistory: history,),
+                builder: (_) => PatientDataScreen(patientHistory: history),
               ),
             );
 
@@ -221,9 +232,7 @@ class _CustomPatientBubbleState extends State<CustomPatientBubble> {
               children: [
                 Row(
                   children: [
-                    CustomNameInitial(
-                      name: widget.patient.name,
-                    ),
+                    CustomNameInitial(name: widget.patient.name),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(left: 8.0),
@@ -279,10 +288,7 @@ class _CustomPatientBubbleState extends State<CustomPatientBubble> {
 }
 
 class GenderLabel extends StatelessWidget {
-  const GenderLabel({
-    super.key,
-    required this.patient,
-  });
+  const GenderLabel({super.key, required this.patient});
 
   final Patient patient;
 
@@ -316,16 +322,13 @@ class GenderLabel extends StatelessWidget {
       decoration: BoxDecoration(
         color: secondaryColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          width: 1,
-          color: primaryColor,
-        ),
+        border: Border.all(width: 1, color: primaryColor),
       ),
       child: Text(
         patient.gender!,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: primaryColor,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge?.copyWith(color: primaryColor),
       ),
     );
   }

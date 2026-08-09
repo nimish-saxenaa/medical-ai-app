@@ -21,7 +21,8 @@ class NewConsultationScreen extends StatefulWidget {
     super.key,
     required this.patientName,
     required this.patientAge,
-    required this.patientGender, required this.patientId,
+    required this.patientGender,
+    required this.patientId,
   });
 
   @override
@@ -74,51 +75,59 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              PatientBox(
-                name: widget.patientName,
-                age: widget.patientAge,
-                gender: widget.patientGender,
-              ),
-              const SizedBox(height: 16),
-              TypeOfConsultation(
-                selected: _selected,
-                onSelect: (type) => setState(() => _selected = type),
-              ),
-              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PatientBox(
+                        name: widget.patientName,
+                        age: widget.patientAge,
+                        gender: widget.patientGender,
+                      ),
+                      const SizedBox(height: 16),
+                      TypeOfConsultation(
+                        selected: _selected,
+                        onSelect: (type) => setState(() => _selected = type),
+                      ),
+                      const SizedBox(height: 16),
 
-              LabeledTextField(
-                label: 'Chief complaint',
-                optionalText: '(optional)',
-                child: _InputField(
-                  controller: _complaintController,
-                  hint: 'e.g. chest pain for 2 days, fever since yesterday…',
+                      LabeledTextField(
+                        label: 'Chief complaint',
+                        optionalText: '(optional)',
+                        child: _InputField(
+                          controller: _complaintController,
+                          hint: 'e.g. chest pain for 2 days, fever since yesterday…',
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      LabeledTextField(
+                        label: 'Language preference',
+                        optionalText: '(leave blank for English)',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _InputField(
+                              controller: _languageController,
+                              hint: 'e.g. Hindi, Arabic, French, Spanish, etc.',
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'The AI will speak and understand your preferred language.',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-              LabeledTextField(
-                label: 'Language preference',
-                optionalText: '(leave blank for English)',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _InputField(
-                      controller: _languageController,
-                      hint: 'e.g. Hindi, Arabic, French, Spanish, etc.',
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'The AI will speak and understand your preferred language.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
               CustomButton(
                 onPressed: () async {
                   setState(() {
@@ -130,8 +139,12 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                     patientId: widget.patientId,
                     token: token!,
                     specialty: _selected.name.toString(),
-                    patientLanguage: _languageController.text.isNotEmpty?_languageController.text:null,
-                    chiefComplaint: _complaintController.text.isNotEmpty?_complaintController.text:null,
+                    patientLanguage: _languageController.text.isNotEmpty
+                        ? _languageController.text
+                        : null,
+                    chiefComplaint: _complaintController.text.isNotEmpty
+                        ? _complaintController.text
+                        : null,
                   );
                   // Record where this consultation is taking place. Stored
                   // locally against the session id — never blocks the flow.
@@ -143,7 +156,10 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => HistoryTakingScreen(sessionId: response.sessionId, question: response.openingQuestion!)
+                      builder: (_) => HistoryTakingScreen(
+                        sessionId: response.sessionId,
+                        question: response.openingQuestion ?? "",
+                      ),
                     ),
                   );
 
@@ -153,20 +169,20 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                 },
                 child: isTapped
                     ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            height: 14,
-                            width: 14,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text('Starting Consultation'),
-                        ],
-                      )
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 14,
+                      width: 14,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text('Starting Consultation'),
+                  ],
+                )
                     : Text('Begin Consultation'),
               ),
             ],

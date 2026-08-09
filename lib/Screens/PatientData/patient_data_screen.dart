@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:open_file/open_file.dart';
-
 import '../../Custom Widgets/Patients/custom_name_initial.dart';
 import '../../Models/patient_response_history_model.dart';
 import '../../Models/session_model.dart';
@@ -225,6 +224,19 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => NewConsultationScreen(
+              patientName: history.patient.name,
+              patientAge: history.patient.age,
+              patientGender: history.patient.gender ?? "",
+              patientId: history.patient.patientId,
+            ),
+          ),
+        );
+      },child: Icon(LucideIcons.userRoundPlus),),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
@@ -268,381 +280,274 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Material(
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomNameInitial(name: history.patient.name, size: 60),
-                      Expanded(
+                      Material(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white,
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Column(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              RichText(
-                                text: TextSpan(
-                                  text: history.patient.name,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.headlineMedium,
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          "\n${history.patient.age} Yrs · ${history.patient.gender ?? ""}",
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                children: [
-                                  IconText(
-                                    icon: LucideIcons.calendar,
-                                    text: DateFormat('d MMM yy').format(
-                                      parseServerDate(
-                                        history.patient.createdAt,
+                              CustomNameInitial(name: history.patient.name, size: 60),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      RichText(
+                                        text: TextSpan(
+                                          text: history.patient.name,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.headlineMedium,
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                                  "\n${history.patient.age} Yrs · ${history.patient.gender ?? ""}",
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 8,
+                                        children: [
+                                          IconText(
+                                            icon: LucideIcons.calendar,
+                                            text: DateFormat('d MMM yy').format(
+                                              parseServerDate(
+                                                history.patient.createdAt,
+                                              ),
+                                            ),
+                                          ),
+                                          IconText(
+                                            icon: LucideIcons.stethoscope,
+                                            text:
+                                                '${history.sessions.length} Consultations',
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                  IconText(
-                                    icon: LucideIcons.stethoscope,
-                                    text:
-                                        '${history.sessions.length} Consultations',
-                                  ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      RichText(
+                        text: TextSpan(
+                          text: "Consultation History  ",
+                          style: Theme.of(context).textTheme.displaySmall,
+                          children: [
+                            TextSpan(
+                              text: "${history.sessions.length}",
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      history.sessions.isNotEmpty
+                          ? Column(
+                              children: List.generate(
+                                history.sessions.length,
+                                (index) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    // Diagnosis Card
+                                    DiagnosisCard(
+                                      index: index,
+                                      patientHistory: history,
+                                      title: getSpecialtyName(
+                                        history.sessions[index].specialty ?? "",
+                                      ),
+                                      status: getDiagnosisStatus(
+                                        history.sessions[index].currentStage ?? "",
+                                      ),
+                                      date: parseServerDate(
+                                        history.sessions[index].createdAt,
+                                      ),
+                
+                                      description:
+                                          history.sessions[index].chiefComplaint ?? "",
+                                      location:
+                                          sessionLocations[history
+                                                  .sessions[index]
+                                                  .sessionId]
+                                              ?.fullLocation,
+                                      redFlags:
+                                          history
+                                              .sessions[index]
+                                              .diagnosis
+                                              ?.urgentConcerns ??
+                                          [],
+                                      diagnoses: List.generate(
+                                        (history
+                                                        .sessions[index]
+                                                        .diagnosis
+                                                        ?.differentialDiagnoses
+                                                        .length ??
+                                                    0) >
+                                                3
+                                            ? 3
+                                            : history
+                                                      .sessions[index]
+                                                      .diagnosis
+                                                      ?.differentialDiagnoses
+                                                      .length ??
+                                                  0,
+                                        (diffDia) => DiagnosisItem(
+                                          severity:
+                                              history
+                                                  .sessions[index]
+                                                  .diagnosis
+                                                  ?.differentialDiagnoses[diffDia]
+                                                  .likelihood ??
+                                              "",
+                                          name:
+                                              history
+                                                  .sessions[index]
+                                                  .diagnosis
+                                                  ?.differentialDiagnoses[diffDia]
+                                                  .condition ??
+                                              "",
+                                          code:
+                                              history
+                                                  .sessions[index]
+                                                  .diagnosis
+                                                  ?.differentialDiagnoses[diffDia]
+                                                  .icdCode ??
+                                              "",
+                                        ),
+                                      ),
+                                      workup:
+                                          "Workup: ${history.sessions[index].diagnosis?.suggestedWorkup.take(2).join("\n") ?? ""} + ${history.sessions[index].diagnosis?.suggestedWorkup.length ?? 2 - 2} more",
+                
+                                      subjective: [
+                                        SoapField(
+                                          label: 'Chief complaint',
+                                          value:
+                                              history.sessions[index].chiefComplaint ??
+                                              history
+                                                  .sessions[index]
+                                                  .summary
+                                                  .subjective
+                                                  .chiefComplaint,
+                                        ),
+                                        SoapField(
+                                          label: 'HPI',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .historyOfPresentingIllness,
+                                        ),
+                                        SoapField(
+                                          label: 'Past medical history',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .pastMedicalHistory,
+                                        ),
+                                        SoapField(
+                                          label: 'Surgical history',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .surgicalHistory,
+                                        ),
+                                        SoapField(
+                                          label: 'Medications',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .medications,
+                                        ),
+                                        SoapField(
+                                          label: 'Allergies',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .allergies,
+                                        ),
+                                        SoapField(
+                                          label: 'Family history',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .familyHistory,
+                                        ),
+                                        SoapField(
+                                          label: 'Social history',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .socialHistory,
+                                        ),
+                                        SoapField(
+                                          label: 'Review of systems',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .subjective
+                                              .reviewOfSystems,
+                                        ),
+                                      ],
+                                      objective: [
+                                        SoapField(
+                                          label: 'Vital signs',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .objective
+                                              .vitalSigns,
+                                        ),
+                                        SoapField(
+                                          label: 'Physical exam',
+                                          value: history
+                                              .sessions[index]
+                                              .summary
+                                              .objective
+                                              .physicalExamination,
+                                        ),
+                                      ],
+                                      show: history.sessions[index].diagnosis != null
+                                          ? true
+                                          : false,
+                                    ),
+                                    SizedBox(height: 16), // Space between consultations
+                                  ],
+                                ),
+                              ),
+                            )
+                          : const NoConsultationsEmptyState(),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              CustomButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => NewConsultationScreen(
-                        patientName: history.patient.name,
-                        patientAge: history.patient.age,
-                        patientGender: history.patient.gender ?? "",
-                        patientId: history.patient.patientId,
-                      ),
-                    ),
-                  );
-                },
-                child: Text("+ New Consultation"),
-              ),
-              const SizedBox(height: 16),
-              RichText(
-                text: TextSpan(
-                  text: "Consultation History  ",
-                  style: Theme.of(context).textTheme.displaySmall,
-                  children: [
-                    TextSpan(
-                      text: "${history.sessions.length}",
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              history.sessions.isNotEmpty
-                  ? Column(
-                      children: List.generate(
-                        history.sessions.length,
-                        (index) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Action icons - Download & Delete
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  // Download icon
-                                  IconButton(
-                                    onPressed:
-                                        downloadingSessionId ==
-                                            history.sessions[index].sessionId
-                                        ? null
-                                        : () => downloadConsultationReport(
-                                            history.sessions[index],
-                                          ),
-                                    icon:
-                                        downloadingSessionId ==
-                                            history.sessions[index].sessionId
-                                        ? SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : Icon(LucideIcons.download, size: 20),
-                                    tooltip: 'Download PDF',
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: AppColors.primary
-                                          .withOpacity(0.1),
-                                      foregroundColor: AppColors.primary,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  // Delete icon
-                                  IconButton(
-                                    onPressed: () {
-                                      showCustomConfirmationAlert(
-                                        "Do you want to delete this consultation?",
-                                        context,
-                                        () async {
-                                          // Close the confirmation dialog first
-                                          Navigator.pop(context);
-
-                                          try {
-                                            String? token =
-                                                await AccessTokenService.getToken();
-                                            final deletedSessionId = history
-                                                .sessions[index]
-                                                .sessionId;
-                                            await deleteConsultation(
-                                              token: token!,
-                                              sessionId: deletedSessionId,
-                                            );
-                                            // Don't leave the location behind
-                                            // for a consultation that's gone.
-                                            await ConsultationLocationService.removeForSession(
-                                              deletedSessionId,
-                                            );
-
-                                            var newHistory =
-                                                await getPatientHistory(
-                                                  patientId:
-                                                      history.patient.patientId,
-                                                );
-                                            if (!mounted) return;
-                                            setState(() {
-                                              history = newHistory;
-                                              sessionLocations.remove(
-                                                deletedSessionId,
-                                              );
-                                            });
-
-                                            _showMessage(
-                                              'Consultation deleted successfully',
-                                            );
-                                          } catch (e) {
-                                            print(
-                                              '❌ Error deleting consultation: $e',
-                                            );
-                                            _showMessage(
-                                              'Failed to delete consultation',
-                                              isError: true,
-                                            );
-                                          }
-                                        },
-                                      );
-                                    },
-                                    icon: Icon(LucideIcons.trash2, size: 20),
-                                    tooltip: 'Delete',
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: Colors.red.withOpacity(
-                                        0.1,
-                                      ),
-                                      foregroundColor: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Diagnosis Card
-                            DiagnosisCard(
-                              title: getSpecialtyName(
-                                history.sessions[index].specialty ?? "",
-                              ),
-                              status: getDiagnosisStatus(
-                                history.sessions[index].currentStage ?? "",
-                              ),
-                              date: parseServerDate(
-                                history.sessions[index].createdAt,
-                              ),
-
-                              description:
-                                  history.sessions[index].chiefComplaint ?? "",
-                              location:
-                                  sessionLocations[history
-                                          .sessions[index]
-                                          .sessionId]
-                                      ?.fullLocation,
-                              redFlags:
-                                  history
-                                      .sessions[index]
-                                      .diagnosis
-                                      ?.urgentConcerns ??
-                                  [],
-                              diagnoses: List.generate(
-                                (history
-                                                .sessions[index]
-                                                .diagnosis
-                                                ?.differentialDiagnoses
-                                                .length ??
-                                            0) >
-                                        3
-                                    ? 3
-                                    : history
-                                              .sessions[index]
-                                              .diagnosis
-                                              ?.differentialDiagnoses
-                                              .length ??
-                                          0,
-                                (diffDia) => DiagnosisItem(
-                                  severity:
-                                      history
-                                          .sessions[index]
-                                          .diagnosis
-                                          ?.differentialDiagnoses[diffDia]
-                                          .likelihood ??
-                                      "",
-                                  name:
-                                      history
-                                          .sessions[index]
-                                          .diagnosis
-                                          ?.differentialDiagnoses[diffDia]
-                                          .condition ??
-                                      "",
-                                  code:
-                                      history
-                                          .sessions[index]
-                                          .diagnosis
-                                          ?.differentialDiagnoses[diffDia]
-                                          .icdCode ??
-                                      "",
-                                ),
-                              ),
-                              workup:
-                                  "Workup: ${history.sessions[index].diagnosis?.suggestedWorkup.take(2).join("\n") ?? ""} + ${history.sessions[index].diagnosis?.suggestedWorkup.length ?? 2 - 2} more",
-
-                              subjective: [
-                                SoapField(
-                                  label: 'Chief complaint',
-                                  value:
-                                      history.sessions[index].chiefComplaint ??
-                                      history
-                                          .sessions[index]
-                                          .summary
-                                          .subjective
-                                          .chiefComplaint,
-                                ),
-                                SoapField(
-                                  label: 'HPI',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .historyOfPresentingIllness,
-                                ),
-                                SoapField(
-                                  label: 'Past medical history',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .pastMedicalHistory,
-                                ),
-                                SoapField(
-                                  label: 'Surgical history',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .surgicalHistory,
-                                ),
-                                SoapField(
-                                  label: 'Medications',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .medications,
-                                ),
-                                SoapField(
-                                  label: 'Allergies',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .allergies,
-                                ),
-                                SoapField(
-                                  label: 'Family history',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .familyHistory,
-                                ),
-                                SoapField(
-                                  label: 'Social history',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .socialHistory,
-                                ),
-                                SoapField(
-                                  label: 'Review of systems',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .subjective
-                                      .reviewOfSystems,
-                                ),
-                              ],
-                              objective: [
-                                SoapField(
-                                  label: 'Vital signs',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .objective
-                                      .vitalSigns,
-                                ),
-                                SoapField(
-                                  label: 'Physical exam',
-                                  value: history
-                                      .sessions[index]
-                                      .summary
-                                      .objective
-                                      .physicalExamination,
-                                ),
-                              ],
-                              show: history.sessions[index].diagnosis != null
-                                  ? true
-                                  : false,
-                            ),
-                            SizedBox(height: 16), // Space between consultations
-                          ],
-                        ),
-                      ),
-                    )
-                  : const NoConsultationsEmptyState(),
             ],
           ),
         ),

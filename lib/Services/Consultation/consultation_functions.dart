@@ -36,12 +36,12 @@ Future<StartConsultationResponse> startConsultation({
       "patient_id": patientId,
     }),
   );
+  print(response.body);
   return StartConsultationResponse.fromJson(jsonDecode(response.body));
 }
 
 /// GET /api/v1/consultation/{session_id}
 Future<SessionStateResponse> getSessionState({
-  required String baseUrl,
   required String token,
   required String sessionId,
 }) async {
@@ -50,6 +50,7 @@ Future<SessionStateResponse> getSessionState({
     url,
     headers: {"Authorization": "Bearer $token"},
   );
+  print(response.body);
   return SessionStateResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -101,7 +102,7 @@ Future<QaLogResponse> getQaLog({
     url,
     headers: {"Authorization": "Bearer $token"},
   );
-
+  print(response.body);
   return QaLogResponse.fromJson(jsonDecode(response.body));
 }
 
