@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:clinical_ai_app/Custom%20Widgets/Consultation/siri_waveform.dart';
-import 'package:clinical_ai_app/Custom%20Widgets/CustomAlertDialog.dart';
+import '../../Custom Widgets/CustomAlertDialog.dart';
 import 'package:clinical_ai_app/Screens/Consultation/review_responses_screen.dart';
 import 'package:clinical_ai_app/test_screen.dart';
 import 'package:flutter/material.dart';
@@ -180,42 +180,53 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
       questionNumber++;
       question = "";
     });
-    String token = await AccessTokenService.getToken() ?? "";
-    await for (final event in submitAnswerStream(
-      token: token,
-      sessionId: widget.sessionId,
-      answer: answerController.text,
-    )) {
-      if (event.event == "token") {
-        setState(() {
-          question += event.data["text"];
-          canAnswer = false;
-        });
-      }
-
-      if (event.event == "done") {
-        answerController.clear();
-        if (event.data["next_question"] == null) {
-          if (!mounted) return;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ReviewResponsesScreen(
-                token: token,
-                sessionId: widget.sessionId,
-              ),
-            ),
-          );
-          return;
+    try {
+      String token = await AccessTokenService.getToken() ?? "";
+      await for (final event in submitAnswerStream(
+        token: token,
+        sessionId: widget.sessionId,
+        answer: answerController.text,
+      )) {
+        if (event.event == "token") {
+          setState(() {
+            question += event.data["text"];
+            canAnswer = false;
+          });
         }
-        setState(() {
-          question = event.data["next_question"];
-          canAnswer = true;
-          qnaState = QnaState.idle;
-        });
-        playText(question: event.data["next_question"], token: token);
+
+        if (event.event == "done") {
+          answerController.clear();
+          if (event.data["next_question"] == null) {
+            if (!mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ReviewResponsesScreen(
+                  token: token,
+                  sessionId: widget.sessionId,
+                ),
+              ),
+            );
+            return;
+          }
+          setState(() {
+            question = event.data["next_question"];
+            canAnswer = true;
+            qnaState = QnaState.idle;
+          });
+          playText(question: event.data["next_question"], token: token);
+        }
+        answerController.clear();
       }
-      answerController.clear();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        qnaState = QnaState.idle;
+        state = TextToSpeechState.idle;
+        questionNumber--; // Revert question number
+        // Restore question if possible or show error
+        showCustomDialog("Failed to send answer. Please try again.", context);
+      });
     }
   }
 
@@ -227,42 +238,52 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
       questionNumber++;
       question = "";
     });
-    String token = await AccessTokenService.getToken() ?? "";
+    try {
+      String token = await AccessTokenService.getToken() ?? "";
 
-    await for (final event in submitAnswerStream(
-      token: token,
-      sessionId: widget.sessionId,
-      answer: "I'd prefer to skip this question.",
-    )) {
-      if (event.event == "token") {
-        setState(() {
-          question += event.data["text"];
-          canAnswer = false;
-        });
-      }
-
-      if (event.event == "done") {
-        answerController.clear();
-        if (event.data["next_question"] == null) {
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ReviewResponsesScreen(
-                token: token,
-                sessionId: widget.sessionId,
-              ),
-            ),
-          );
+      await for (final event in submitAnswerStream(
+        token: token,
+        sessionId: widget.sessionId,
+        answer: "I'd prefer to skip this question.",
+      )) {
+        if (event.event == "token") {
+          setState(() {
+            question += event.data["text"];
+            canAnswer = false;
+          });
         }
-        setState(() {
-          question = event.data["next_question"];
-          canAnswer = true;
-          qnaState = QnaState.idle;
-        });
-        playText(question: event.data["next_question"], token: token);
+
+        if (event.event == "done") {
+          answerController.clear();
+          if (event.data["next_question"] == null) {
+            if (!mounted) return;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ReviewResponsesScreen(
+                  token: token,
+                  sessionId: widget.sessionId,
+                ),
+              ),
+            );
+          }
+          setState(() {
+            question = event.data["next_question"];
+            canAnswer = true;
+            qnaState = QnaState.idle;
+          });
+          playText(question: event.data["next_question"], token: token);
+        }
+        answerController.clear();
       }
-      answerController.clear();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        qnaState = QnaState.idle;
+        state = TextToSpeechState.idle;
+        questionNumber--;
+        showCustomDialog("Failed to skip question. Please try again.", context);
+      });
     }
   }
 

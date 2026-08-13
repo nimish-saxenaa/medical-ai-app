@@ -211,20 +211,31 @@ class _CustomPatientBubbleState extends State<CustomPatientBubble> {
               isTapped = true;
             });
 
-            var history = await getPatientHistory(
-              patientId: widget.patient.patientId,
-            );
-            if (!context.mounted) return;
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PatientDataScreen(patientHistory: history),
-              ),
-            );
-
-            setState(() {
-              isTapped = false;
-            });
+            try {
+              var history = await getPatientHistory(
+                patientId: widget.patient.patientId,
+              );
+              if (!context.mounted) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PatientDataScreen(patientHistory: history),
+                ),
+              );
+            } catch (e) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Failed to fetch patient history. Please try again."),
+                ),
+              );
+            } finally {
+              if (mounted) {
+                setState(() {
+                  isTapped = false;
+                });
+              }
+            }
           },
           child: Padding(
             padding: const EdgeInsets.all(16.0),

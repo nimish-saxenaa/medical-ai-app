@@ -1,4 +1,5 @@
-import 'package:clinical_ai_app/Custom%20Widgets/custom_button.dart';
+import '../../Custom Widgets/CustomAlertDialog.dart';
+import '../../Custom Widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Custom Widgets/Patients/custom_name_initial.dart';
@@ -134,38 +135,48 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                     isTapped = true;
                   });
 
-                  String? token = await AccessTokenService.getToken();
-                  var response = await startConsultation(
-                    patientId: widget.patientId,
-                    token: token!,
-                    specialty: _selected.name.toString(),
-                    patientLanguage: _languageController.text.isNotEmpty
-                        ? _languageController.text
-                        : null,
-                    chiefComplaint: _complaintController.text.isNotEmpty
-                        ? _complaintController.text
-                        : null,
-                  );
-                  // Record where this consultation is taking place. Stored
-                  // locally against the session id — never blocks the flow.
-                  await ConsultationLocationService.captureAndSaveForSession(
-                    response.sessionId,
-                  );
+                  try {
+                    String? token = await AccessTokenService.getToken();
+                    var response = await startConsultation(
+                      patientId: widget.patientId,
+                      token: token!,
+                      specialty: _selected.name.toString(),
+                      patientLanguage: _languageController.text.isNotEmpty
+                          ? _languageController.text
+                          : null,
+                      chiefComplaint: _complaintController.text.isNotEmpty
+                          ? _complaintController.text
+                          : null,
+                    );
+                    // Record where this consultation is taking place. Stored
+                    // locally against the session id — never blocks the flow.
+                    await ConsultationLocationService.captureAndSaveForSession(
+                      response.sessionId,
+                    );
 
-                  if (!context.mounted) return;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => HistoryTakingScreen(
-                        sessionId: response.sessionId,
-                        question: response.openingQuestion ?? "",
+                    if (!context.mounted) return;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => HistoryTakingScreen(
+                          sessionId: response.sessionId,
+                          question: response.openingQuestion ?? "",
+                        ),
                       ),
-                    ),
-                  );
-
-                  setState(() {
-                    isTapped = false;
-                  });
+                    );
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    showCustomDialog(
+                      "Failed to start consultation. Please check your connection.",
+                      context,
+                    );
+                  } finally {
+                    if (mounted) {
+                      setState(() {
+                        isTapped = false;
+                      });
+                    }
+                  }
                 },
                 child: isTapped
                     ? Row(

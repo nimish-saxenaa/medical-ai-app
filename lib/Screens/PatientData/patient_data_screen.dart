@@ -221,22 +221,79 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
     }
   }
 
+  void _showConsultationTypeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text("Start New Session"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(LucideIcons.stethoscope, color: AppColors.primary, size: 20),
+              ),
+              title: const Text("Medical Consultation"),
+              subtitle: const Text("Standard AI-assisted history taking"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NewConsultationScreen(
+                      patientName: history.patient.name,
+                      patientAge: history.patient.age,
+                      patientGender: history.patient.gender ?? "",
+                      patientId: history.patient.patientId,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(LucideIcons.monitor, color: Colors.orange, size: 20),
+              ),
+              title: const Text("New Flow"),
+              subtitle: const Text("Additional session options"),
+              onTap: () {
+                Navigator.pop(context);
+                /*
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CabinFlowScreen(
+                      patientId: history.patient.patientId,
+                    ),
+                  ),
+                );*/
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => NewConsultationScreen(
-              patientName: history.patient.name,
-              patientAge: history.patient.age,
-              patientGender: history.patient.gender ?? "",
-              patientId: history.patient.patientId,
-            ),
-          ),
-        );
-      },child: Icon(LucideIcons.userRoundPlus),),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showConsultationTypeDialog,
+        child: Icon(LucideIcons.userRoundPlus),
+      ),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(

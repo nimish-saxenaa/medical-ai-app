@@ -99,25 +99,36 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         showCustomDialog("Enter a valid Name", context);
                         return;
                       }
-                      var response = await createAccount(
-                        name: nameController.text,
-                        email: emailController.text,
-                        password: passwordController.text,
-                      );
-                      if (response['access_token'] != null) {
-                        AccessTokenService.saveAccessToken(response['access_token']);
-                        AccessTokenService.saveRefreshToken(response['refresh_token']);
-                        PatientListProvider? patientList = await listPatients();
-                        patientsProvider.setPatients(patientList.patients!);
-                        if (!context.mounted) return;
-                        navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                          HomeScreen.routeName,
-                              (route) => false,
+                      try {
+                        var response = await createAccount(
+                          name: nameController.text,
+                          email: emailController.text,
+                          password: passwordController.text,
                         );
-                      } else {
+                        if (response['access_token'] != null) {
+                          AccessTokenService.saveAccessToken(response['access_token']);
+                          AccessTokenService.saveRefreshToken(response['refresh_token']);
+                          PatientListProvider? patientList = await listPatients();
+                          patientsProvider.setPatients(patientList.patients!);
+                          if (!context.mounted) return;
+                          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                            HomeScreen.routeName,
+                                (route) => false,
+                          );
+                        } else {
+                          if (!context.mounted) return;
+                          showCustomDialog(
+                            response['detail'].toString(),
+                            context,
+                          );
+                        }
+                      } catch (e) {
+                        setState(() {
+                          isTapped = false;
+                        });
                         if (!context.mounted) return;
                         showCustomDialog(
-                          response['detail'].toString(),
+                          "Connection error. Please check your internet or try again later.",
                           context,
                         );
                       }

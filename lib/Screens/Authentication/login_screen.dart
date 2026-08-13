@@ -97,32 +97,43 @@ class _LoginScreenState extends State<LoginScreen> {
                     setState(() {
                       isTapped = true;
                     });
-                    var response = await login(
-                      email: emailController.text,
-                      password: passwordController.text,
-                    );
-                    if (response['access_token'] != null) {
-                      AccessTokenService.saveAccessToken(
-                        response['access_token'],
+                    try {
+                      var response = await login(
+                        email: emailController.text,
+                        password: passwordController.text,
                       );
-                      AccessTokenService.saveRefreshToken(
-                        response['refresh_token'],
-                      );
-                      PatientListProvider? patientList = await listPatients();
+                      if (response['access_token'] != null) {
+                        AccessTokenService.saveAccessToken(
+                          response['access_token'],
+                        );
+                        AccessTokenService.saveRefreshToken(
+                          response['refresh_token'],
+                        );
+                        PatientListProvider? patientList = await listPatients();
 
-                      patientsProvider.setPatients(patientList.patients!);
+                        patientsProvider.setPatients(patientList.patients!);
 
-                      navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                        HomeScreen.routeName,
-                        (route) => false,
-                      );
-                    } else {
+                        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                          HomeScreen.routeName,
+                          (route) => false,
+                        );
+                      } else {
+                        setState(() {
+                          isTapped = false;
+                        });
+                        if (!context.mounted) return;
+                        showCustomDialog(
+                          response['detail'].toString(),
+                          context,
+                        );
+                      }
+                    } catch (e) {
                       setState(() {
                         isTapped = false;
                       });
                       if (!context.mounted) return;
                       showCustomDialog(
-                        response['detail'].toString(),
+                        "Connection error. Please check your internet or try again later.",
                         context,
                       );
                     }

@@ -1,4 +1,4 @@
-import 'package:clinical_ai_app/Custom%20Widgets/CustomAlertDialog.dart';
+import '../../Custom Widgets/CustomAlertDialog.dart';
 import 'package:clinical_ai_app/Screens/Consultation/analysis_screen.dart';
 import 'package:clinical_ai_app/Components/colors.dart';
 import 'package:flutter/material.dart';
@@ -61,21 +61,29 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
     setState(() {
       isEditingIds[index] = EditAnswerStatus.saving;
     });
-    var res = await editAnswer(
-      token: widget.token,
-      sessionId: widget.sessionId,
-      questionId: questionId,
-      answer: answer,
-    );
-    if(res.ok){
-      setState(() {
-        isEditingIds[index] = EditAnswerStatus.notEditing;
-      });
-      qaLog[index]['answer'] = answer;
-    }
-    else{
+    try {
+      var res = await editAnswer(
+        token: widget.token,
+        sessionId: widget.sessionId,
+        questionId: questionId,
+        answer: answer,
+      );
+      if (res.ok) {
+        setState(() {
+          isEditingIds[index] = EditAnswerStatus.notEditing;
+        });
+        qaLog[index]['answer'] = answer;
+      }
+      else {
+        if (!mounted) return;
+        showCustomDialog("Edit Failed", context);
+        setState(() {
+          isEditingIds[index] = EditAnswerStatus.notEditing;
+        });
+      }
+    } catch (e) {
       if (!mounted) return;
-      showCustomDialog("Edit Failed", context);
+      showCustomDialog("Connection error. Failed to save edit.", context);
       setState(() {
         isEditingIds[index] = EditAnswerStatus.notEditing;
       });

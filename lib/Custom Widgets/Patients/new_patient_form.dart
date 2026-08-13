@@ -1,4 +1,5 @@
-import 'package:clinical_ai_app/Custom%20Widgets/custom_button.dart';
+import '../CustomAlertDialog.dart';
+import '../custom_button.dart';
 import 'package:clinical_ai_app/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -403,19 +404,26 @@ Future<void> showNewPatientDialog(BuildContext context) {
           child: NewPatientForm(
             onClose: () => Navigator.of(context).pop(),
             onCreate: (name, age, gender, phone) async {
-              // TODO: handle patient creation
-              await createPatient(
-                name: name,
-                gender: gender,
-                age: age,
-                phone: phone,
-              );
-              if (!context.mounted) return;
-              final patientsProvider = context.read<PatientListProvider>();
-              PatientListProvider patientList = await listPatients();
-              patientsProvider.setPatients(patientList.patients!);
-              if (!context.mounted) return;
-              Navigator.of(context).pop();
+              try {
+                await createPatient(
+                  name: name,
+                  gender: gender,
+                  age: age,
+                  phone: phone,
+                );
+                if (!context.mounted) return;
+                final patientsProvider = context.read<PatientListProvider>();
+                PatientListProvider patientList = await listPatients();
+                patientsProvider.setPatients(patientList.patients!);
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+              } catch (e) {
+                if (!context.mounted) return;
+                showCustomDialog(
+                  "Failed to create patient. Please check your connection.",
+                  context,
+                );
+              }
             },
           ),
         ),
