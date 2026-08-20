@@ -80,7 +80,7 @@ class SummarySection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16),
           decoration: const BoxDecoration(
             border: Border(
-              left: BorderSide(color: Color(0xFFE5E7EB), width: 2),
+              left: BorderSide(color: AppColors.borderLight, width: 2),
             ),
           ),
           child: Column(

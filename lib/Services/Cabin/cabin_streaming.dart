@@ -54,10 +54,19 @@ class CabinStreamConnection {
     return CabinStreamConnection._(channel, messages);
   }
 
-  void start({String mimeType = "audio/l16;rate=16000", Map<String, dynamic>? extra}) {
+  void start({
+    String mimeType = "audio/l16;rate=16000",
+    String? languageCode,
+    List<String>? secondaryLanguages,
+    List<String>? keyterms,
+    Map<String, dynamic>? extra,
+  }) {
     final message = jsonEncode({
       "type": "start",
       "mime_type": mimeType,
+      "language_code": languageCode,
+      "secondary_languages": secondaryLanguages,
+      "keyterms": keyterms,
       ...?extra,
     });
     _channel.sink.add(message);

@@ -1,19 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:open_file/open_file.dart';
-
 import '../../Components/colors.dart';
-import '../../Models/consultation_location_model.dart';
 import '../../Models/patient_response_history_model.dart';
 import '../../Models/session_model.dart';
-import '../../Services/Authentication/access_token.dart';
-import '../../Services/Consultation/consultation_functions.dart';
-import '../../Services/Location/location_service.dart';
-import '../../Services/PDF/pdf_generator.dart';
-import '../../Services/PatientData/patient_service.dart';
-import '../custom_confirmation_alert.dart';
 
 /// ---------- Data models ----------
 
@@ -53,6 +42,12 @@ class DiagnosisCard extends StatefulWidget {
   final bool show;
   final PatientHistoryResponse patientHistory;
   final int index;
+  final VoidCallback? onDelete;
+  final Function(Session)? onDownload;
+  final bool isDownloading;
+  final bool isSelected;
+  final bool selectionModeActive;
+  final VoidCallback? onSelect;
 
 
   /// Where the consultation was recorded. Null for consultations captured
@@ -72,6 +67,12 @@ class DiagnosisCard extends StatefulWidget {
     required this.subjective,
     required this.objective,
     required this.show, required this.patientHistory, required this.index,
+    this.onDelete,
+    this.onDownload,
+    this.isDownloading = false,
+    this.isSelected = false,
+    this.selectionModeActive = false,
+    this.onSelect,
   });
 
   @override
@@ -83,18 +84,8 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
 
   String _formatDate(DateTime d) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     final hour12 = d.hour % 12 == 0 ? 12 : d.hour % 12;
     final period = d.hour >= 12 ? 'pm' : 'am';
@@ -102,182 +93,13 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
     return '${d.day} ${months[d.month - 1]} ${d.year}, '
         '${hour12.toString().padLeft(2, '0')}:$minute $period';
   }
- late Color primaryColor;
-  late Color lightColor;
-  late var history = widget.patientHistory;
-  Map<String, ConsultationLocation> sessionLocations = {};
-  bool isDownloading = false;
-  String? downloadingSessionId; // Track which consultation is being downloaded
-
-  /// Show PDF saved notification
-  void _showPdfSavedNotification(String filePath) {
-    if (!mounted) return;
-
-    final fileName = filePath.split('/').last;
-    final savedIn = filePath.contains('/storage/emulated/0/Download')
-        ? 'Downloads folder'
-        : 'App storage';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'PDF saved',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 4),
-            Text(fileName, style: TextStyle(fontSize: 12)),
-            SizedBox(height: 2),
-            Text(
-              'Saved to: $savedIn',
-              style: TextStyle(fontSize: 10, color: Colors.white70),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 6),
-        action: SnackBarAction(
-          label: 'OPEN',
-          textColor: Colors.white,
-          onPressed: () => OpenFile.open(filePath),
-        ),
-      ),
-    );
-  }
-
-  /// Show a simple status message
-  void _showMessage(String message, {bool isError = false}) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isError ? Icons.error : Icons.check_circle,
-              color: Colors.white,
-              size: 20,
-            ),
-            SizedBox(width: 8),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
-  /// Download SINGLE consultation report as PDF
-  Future<void> downloadConsultationReport(Session consultation) async {
-    setState(() {
-      isDownloading = true;
-      downloadingSessionId = consultation.sessionId;
-    });
-
-    try {
-      // Diagnostic: shows exactly what the history API returned for this
-      // session, so empty PDF sections can be traced to missing API data.
-      print('📄 Session payload for PDF: ${jsonEncode(consultation.toJson())}');
-
-      // Generate PDF for single consultation
-      final pdfFile = await PatientPdfGenerator.generateConsultationReport(
-        consultation: consultation,
-        patient: history.patient,
-        location: sessionLocations[consultation.sessionId],
-      );
-
-      setState(() {
-        isDownloading = false;
-        downloadingSessionId = null;
-      });
-
-      print('✅ Consultation PDF saved: ${pdfFile.path}');
-      _showPdfSavedNotification(pdfFile.path);
-    } catch (e) {
-      setState(() {
-        isDownloading = false;
-        downloadingSessionId = null;
-      });
-
-      if (!mounted) return;
-
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error, color: Colors.white),
-              SizedBox(width: 8),
-              Expanded(child: Text('Error: $e')),
-            ],
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-
-      print('❌ Error generating consultation PDF: $e');
-    }
-  }
-
-  /// Download patient report as PDF (ALL consultations)
-  Future<void> downloadPatientReport() async {
-    setState(() {
-      isDownloading = true;
-    });
-
-    try {
-      // Generate PDF
-      final pdfFile = await PatientPdfGenerator.generatePatientReport(
-        patientHistory: history,
-        locations: sessionLocations,
-      );
-
-      setState(() {
-        isDownloading = false;
-      });
-
-      print('✅ Full patient report saved: ${pdfFile.path}');
-      _showPdfSavedNotification(pdfFile.path);
-    } catch (e) {
-      setState(() {
-        isDownloading = false;
-      });
-
-      if (!mounted) return;
-
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Error generating PDF: $e'),
-            ],
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-
-      print('❌ Error generating PDF: $e');
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
+    final history = widget.patientHistory;
+    Color primaryColor;
+    Color lightColor;
+
     switch (widget.status) {
       case "Diagnosed":
         primaryColor = AppColors.diagnosedPrimary;
@@ -299,10 +121,13 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
         lightColor = AppColors.greyLight;
     }
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFFF3F4F6)), // gray-100
+        color: widget.isSelected ? AppColors.primaryLight : Colors.white,
+        border: Border.all(
+          color: widget.isSelected ? AppColors.primary.withAlpha(100) : AppColors.dividerLight,
+          width: 0.75,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
@@ -312,19 +137,29 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              /*onLongPress: () async {
-                String? token = await AccessTokenService.getToken();
-                getQaLog( token: token!, sessionId: history.sessions[widget.index].sessionId);
-                },*/
-              onTap: () => setState(() => _expanded = !_expanded),
-              hoverColor: Colors.green,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              splashColor: AppColors.primaryLight,
+              highlightColor: AppColors.primaryLight.withAlpha(100),
+              onLongPress: widget.onSelect,
+              onTap: () {
+                if (widget.selectionModeActive) {
+                  widget.onSelect?.call();
+                } else {
+                  setState(() => _expanded = !_expanded);
+                }
+              },
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
+                        if (widget.isSelected)
+                          const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+                          ),
                         Expanded(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -378,8 +213,7 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                         PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
                           splashRadius: 10,
-                          child: downloadingSessionId ==
-                              history.sessions[widget.index].sessionId
+                          child: widget.isDownloading
                               ? const SizedBox(
                             width: 18,
                             height: 18,
@@ -396,50 +230,19 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                           ),
                           onSelected: (value) {
                             if (value == 'download') {
-                              downloadConsultationReport(history.sessions[widget.index]);
+                              if (widget.onDownload != null) {
+                                widget.onDownload!(history.sessions[widget.index]);
+                              }
                             } else if (value == 'delete') {
-                              showCustomConfirmationAlert(
-                                "Do you want to delete this consultation?",
-                                context,
-                                    () async {
-                                  // Close the confirmation dialog first
-                                  Navigator.pop(context);
-
-                                  try {
-                                    String? token = await AccessTokenService.getToken();
-                                    final deletedSessionId = history.sessions[widget.index].sessionId;
-                                    await deleteConsultation(
-                                      token: token!,
-                                      sessionId: deletedSessionId,
-                                    );
-                                    // Don't leave the location behind
-                                    // for a consultation that's gone.
-                                    await ConsultationLocationService.removeForSession(
-                                      deletedSessionId,
-                                    );
-
-                                    var newHistory = await getPatientHistory(
-                                      patientId: history.patient.patientId,
-                                    );
-                                    if (!mounted) return;
-                                    setState(() {
-                                      history = newHistory;
-                                      sessionLocations.remove(deletedSessionId);
-                                    });
-
-                                    _showMessage('Consultation deleted successfully');
-                                  } catch (e) {
-                                    print('❌ Error deleting consultation: $e');
-                                    _showMessage('Failed to delete consultation', isError: true);
-                                  }
-                                },
-                              );
+                              if (widget.onDelete != null) {
+                                widget.onDelete!();
+                              }
                             }
                           },
                           itemBuilder: (context) => [
                             PopupMenuItem<String>(
                               value: 'download',
-                              enabled: downloadingSessionId != history.sessions[widget.index].sessionId,
+                              enabled: !widget.isDownloading,
                               child: Row(
                                 children: const [
                                   Icon(LucideIcons.download, size: 18),
@@ -576,8 +379,8 @@ class _ExpandedBody extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xFFF9FAFB), // gray-50/60 approximation
-        border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
+        color: AppColors.greyLight,
+        border: Border(top: BorderSide(color: AppColors.dividerLight)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Column(
@@ -652,8 +455,8 @@ class _RedFlagAlert extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2), // red-50
-        border: Border.all(color: const Color(0xFFFEE2E2)), // red-100
+        color: AppColors.redFlagBg,
+        border: Border.all(color: AppColors.redFlagBorder),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -699,13 +502,13 @@ class _DiagnosisRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            color: isHigh ? const Color(0xFFFEE2E2) : const Color(0xFFF3F4F6),
+            color: isHigh ? AppColors.redFlagBorder : AppColors.dividerLight,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
             item.severity,
             style: TextStyle(
-              color: isHigh ? const Color(0xFFB91C1C) : const Color(0xFF4B5563),
+              color: isHigh ? AppColors.redFlagText : AppColors.greyDark,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -714,7 +517,7 @@ class _DiagnosisRow extends StatelessWidget {
         Text(
           item.name,
           style: const TextStyle(
-            color: Color(0xFF1F2937),
+            color: AppColors.black,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),

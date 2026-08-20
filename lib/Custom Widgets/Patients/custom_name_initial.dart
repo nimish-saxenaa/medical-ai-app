@@ -33,26 +33,26 @@ class CustomNameInitial extends StatelessWidget {
 
     // bg-blue-100 text-blue-700
     AvatarColors(
-      background: Color(0xFFDBEAFE),
-      foreground: Color(0xFF1D4ED8),
+      background: AppColors.avatarBlueBg,
+      foreground: AppColors.avatarBlueText,
     ),
 
     // bg-emerald-100 text-emerald-700
     AvatarColors(
-      background: Color(0xFFD1FAE5),
-      foreground: Color(0xFF047857),
+      background: AppColors.avatarGreenBg,
+      foreground: AppColors.avatarGreenText,
     ),
 
     // bg-amber-100 text-amber-800
     AvatarColors(
-      background: Color(0xFFFEF3C7),
-      foreground: Color(0xFF92400E),
+      background: AppColors.avatarAmberBg,
+      foreground: AppColors.avatarAmberText,
     ),
 
     // bg-rose-100 text-rose-700
     AvatarColors(
-      background: Color(0xFFFFE4E6),
-      foreground: Color(0xFFBE123C),
+      background: AppColors.avatarPinkBg,
+      foreground: AppColors.avatarPinkText,
     ),
   ];
 

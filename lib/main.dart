@@ -12,16 +12,12 @@ import 'Services/Authentication/auth_service.dart';
 import 'Services/Authentication/navigation_service.dart';
 import 'Services/PatientData/patient_service.dart';
 import 'Services/Authentication/access_token.dart';
-import 'test_screen.dart';
+import 'Screens/Consultation/cabin_consultation_screen.dart';
+import 'package:device_preview/device_preview.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // The app records (mic) and plays back (Dr AI's voice) in the same session.
-  // The recorder puts iOS into `playAndRecord`, and under that category audio
-  // defaults to the receiver (earpiece) rather than the speaker — playback
-  // succeeds but is essentially inaudible. Setting `defaultToSpeaker` globally
-  // keeps voice on the loudspeaker regardless of who touched the session last.
   await AudioPlayer.global.setAudioContext(
     AudioContext(
       iOS: AudioContextIOS(
@@ -41,11 +37,18 @@ Future<void> main() async {
       ),
     ),
   );
-
-  runApp(ChangeNotifierProvider(
-  create: (_) => PatientListProvider(),
-  child: const MyApp(),
-  ));
+  runApp(
+    DevicePreview(
+      enabled: true,
+      tools: const [
+        ...DevicePreview.defaultTools,
+      ],
+      builder: (context) => ChangeNotifierProvider(
+        create: (_) => PatientListProvider(),
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -64,15 +67,14 @@ class MyApp extends StatelessWidget {
         HomeScreen.routeName: (context) => HomeScreen(),
         WelcomeScreen.routeName: (context) => WelcomeScreen(),
         AuthGate.routeName: (context) => AuthGate(),
-        ReviewResponsesScreen.routeName: (context) => ReviewResponsesScreen(token: '', sessionId: '',),
-        //TestScreen.routeName: (context) => TestScreen(),
+        ReviewResponsesScreen.routeName: (context) => ReviewResponsesScreen(
+              token: '',
+              sessionId: '',
+            ),
       },
     );
   }
 }
-
-
-
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -82,8 +84,6 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-
-
   Future<void> _checkAuth(BuildContext context) async {
     final refreshToken = await AccessTokenService.getRequestToken();
 
@@ -98,12 +98,11 @@ class _AuthGateState extends State<AuthGate> {
       final newAccessToken = result['access_token'] ?? result['accessToken'];
       final newRefreshToken = result['refresh_token'] ?? result['refreshToken'];
 
-
-      if (newAccessToken != null  && newRefreshToken != null) {
+      if (newAccessToken != null && newRefreshToken != null) {
         await AccessTokenService.saveAccessToken(newAccessToken.toString());
         await AccessTokenService.saveRefreshToken(newRefreshToken.toString());
       }
-      if(!context.mounted) return;
+      if (!context.mounted) return;
       final patientsProvider = context.read<PatientListProvider>();
       PatientListProvider patientList = await listPatients();
 
@@ -130,6 +129,3 @@ class _AuthGateState extends State<AuthGate> {
     );
   }
 }
-
-
-

@@ -10,12 +10,14 @@ class PrescriptionPage extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onGenerate,
+    this.onChanged,
     this.isLoading = false,
     this.prescription,
   });
 
   final TextEditingController controller;
   final VoidCallback onGenerate;
+  final ValueChanged<String>? onChanged;
   final bool isLoading;
   final Prescription? prescription;
 
@@ -31,10 +33,10 @@ class PrescriptionPage extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
+            border: Border.all(color: AppColors.dividerLight),
           ),
-          child: PrescriptionField(controller: controller, onGenerate: onGenerate, isLoading: isLoading),
-        ) : PrescriptionField(controller: controller, onGenerate: onGenerate, isLoading: isLoading),
+          child: PrescriptionField(controller: controller, onGenerate: onGenerate, onChanged: onChanged, isLoading: isLoading),
+        ) : PrescriptionField(controller: controller, onGenerate: onGenerate, onChanged: onChanged, isLoading: isLoading),
         if (prescription != null) ...[
           TreatmentPlanWidget(prescription: prescription!),
         ],
@@ -48,11 +50,13 @@ class PrescriptionField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onGenerate,
+    this.onChanged,
     required this.isLoading,
   });
 
   final TextEditingController controller;
   final VoidCallback onGenerate;
+  final ValueChanged<String>? onChanged;
   final bool isLoading;
 
   @override
@@ -76,9 +80,7 @@ class PrescriptionField extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
-                onChanged: (_) {
-                  // Parent should call setState()
-                },
+                onChanged: onChanged,
                 decoration: const InputDecoration(
                   hintText:
                       "e.g. Acute bronchitis, Major Depressive Episode…",
@@ -91,7 +93,7 @@ class PrescriptionField extends StatelessWidget {
             SizedBox(
               height: 48,
               child: ElevatedButton(
-                onPressed: canGenerate ? onGenerate : (){},
+                onPressed: canGenerate ? onGenerate : null,
                 child: isLoading
                     ? const SizedBox(
                         width: 18,
@@ -263,7 +265,7 @@ class _MedicationCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFF3F4F6),
+          color: AppColors.dividerLight,
         ),
       ),
       child: Column(
@@ -321,16 +323,16 @@ class _MedicationCard extends StatelessWidget {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
+                color: AppColors.warningBg,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: const Color(0xFFFDE68A),
+                  color: AppColors.warningBorder,
                 ),
               ),
               child: Text(
                 "⚠️ ${medication.warnings!}",
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFFB45309),
+                  color: AppColors.warningText,
                   height: 1.4,
                 ),
               ),
@@ -385,7 +387,7 @@ class _WarningCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
+        color: AppColors.redFlagBg,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.error.withAlpha(40)),
       ),

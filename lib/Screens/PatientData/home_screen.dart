@@ -1,18 +1,20 @@
-import 'package:clinical_ai_app/Custom%20Widgets/custom_confirmation_alert.dart';
-import 'package:clinical_ai_app/functions.dart';
-import 'package:clinical_ai_app/Models/patient_list_model.dart';
-import 'package:clinical_ai_app/Models/patient_model.dart';
-import 'package:clinical_ai_app/Screens/PatientData/patient_data_screen.dart';
-import 'package:clinical_ai_app/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../Components/colors.dart';
 import '../../Custom Widgets/Patients/custom_name_initial.dart';
 import '../../Custom Widgets/Patients/new_patient_form.dart';
+import '../../Custom Widgets/custom_confirmation_alert.dart';
+import '../../functions.dart';
+import '../../Models/patient_list_model.dart';
+import '../../Models/patient_model.dart';
+import '../../Models/patient_response_history_model.dart';
+import '../../Services/Authentication/access_token.dart';
 import '../../Services/Authentication/navigation_service.dart';
 import '../../Services/PatientData/patient_service.dart';
-import '../../Services/Authentication/access_token.dart';
+import 'patient_data_screen.dart';
+import 'patient_history_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,63 +27,207 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController searchController = TextEditingController();
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
+  Patient? _selectedPatient;
+  PatientHistoryResponse? _selectedHistory;
+  bool _isLoadingHistory = false;
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    searchController.clear();
     searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handlePatientSelection(Patient patient, bool isTablet) async {
+    if (!isTablet) {
+      // Phone behavior: Show loader on card then navigate
+      setState(() {
+        _selectedPatient = patient;
+        _isLoadingHistory = true;
+      });
+      try {
+        var history = await getPatientHistory(patientId: patient.patientId);
+        if (!context.mounted) return;
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PatientDataScreen(patientHistory: history),
+          ),
+        );
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to fetch patient history.")),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoadingHistory = false;
+            _selectedPatient = null;
+          });
+        }
+      }
+    } else {
+      // Tablet behavior: Update right panel state
+      if (_selectedPatient?.patientId == patient.patientId) return;
+
+      setState(() {
+        _selectedPatient = patient;
+        _isLoadingHistory = true;
+        _selectedHistory = null;
+      });
+
+      try {
+        var history = await getPatientHistory(patientId: patient.patientId);
+        if (!mounted) return;
+        setState(() {
+          _selectedHistory = history;
+          _isLoadingHistory = false;
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _isLoadingHistory = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to fetch patient history.")),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final patientsProvider = context.watch<PatientListProvider>();
-    final List<Patient> patientList = patientsProvider.patients!;
+    final List<Patient> patientList = patientsProvider.patients ?? [];
     List<Patient> filteredPatientList = patientList
         .where(
           (patient) => patient.name.toLowerCase().contains(
-            searchController.text.trim().toLowerCase(),
-          ),
+                searchController.text.trim().toLowerCase(),
+              ),
         )
         .toList();
+
     return Scaffold(
-      backgroundColor: AppColors.greyLight,
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Image.asset("assets/kuvaka_logo.png"),
+      backgroundColor: Colors.white, // White background as requested
+      appBar: _buildAppBar(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showNewPatientDialog(context),
+        child: const Icon(Icons.person_add_alt_1_rounded),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isTablet = constraints.maxWidth > 800;
+
+          if (isTablet) {
+            return Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Row(
+                children: [
+                  // 1/3 Master Panel
+                  Expanded(
+                    flex: 1,
+                    child: _buildFloatingPanel(
+                      backgroundColor: AppColors.greyLight,
+                      child: _buildPatientList(filteredPatientList, patientList, isTablet),
+                    ),
+                  ),
+                  const SizedBox(width: 24), // Space between panels
+                  // 2/3 Detail Panel
+                  Expanded(
+                    flex: 2,
+                    child: _buildFloatingPanel(
+                      backgroundColor: AppColors.greyLight,
+                      child: Stack(
+                        children: [
+                          _buildDetailContent(),
+                          if (_selectedHistory != null || _isLoadingHistory)
+                            Positioned(
+                              top: 12,
+                              right: 12,
+                              child: Material(
+                                color: Colors.white.withAlpha(200),
+                                shape: const CircleBorder(),
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedPatient = null;
+                                      _selectedHistory = null;
+                                      _isLoadingHistory = false;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.close, size: 20, color: AppColors.greyDark),
+                                  constraints: const BoxConstraints(),
+                                  padding: const EdgeInsets.all(8),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Mobile View
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildPatientList(filteredPatientList, patientList, isTablet),
+          );
+        },
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: Image.asset("assets/kuvaka_logo.png"),
+      ),
+      actions: [
+        IconButton(
+          onPressed: () async {
+            showCustomConfirmationAlert(
+              detail: "Do you want to Logout?",
+              context: context,
+              onPressed: () async {
+                await AccessTokenService.clear();
+                logout();
+              },
+            );
+          },
+          icon: const Icon(LucideIcons.logOut, color: AppColors.grey),
         ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              showCustomConfirmationAlert(
-                "Do you want to Logout?",
-                context,
-                () async {
-                  await AccessTokenService.clear();
-                  logout();
-                },
-              );
-            },
-            icon: const Icon(LucideIcons.logOut, color: AppColors.grey),
+      ],
+    );
+  }
+
+  Widget _buildFloatingPanel({required Widget child, Color backgroundColor = Colors.white}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showNewPatientDialog(context);
-        },
-        child: const Icon(Icons.person_add_alt_1_rounded),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 16.0, left: 16, right: 16),
+      clipBehavior: Clip.antiAlias,
+      child: child,
+    );
+  }
+
+  Widget _buildPatientList(List<Patient> filtered, List<Patient> full, bool isTablet) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: isTablet ? const EdgeInsets.all(24.0) : EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -91,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: Theme.of(context).textTheme.headlineLarge,
                   children: [
                     TextSpan(
-                      text: "${patientList.length}",
+                      text: "${full.length}",
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ],
@@ -99,72 +245,158 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Manage and view your patient records",
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+                "Manage your patient records",
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: searchController,
-                onChanged: (value) {
-                  setState(() {});
-                },
+                onChanged: (value) => setState(() {}),
                 decoration: InputDecoration(
-                  fillColor: Colors.white,
+                  fillColor: AppColors.greyLight,
                   filled: true,
-                  prefixIcon: Icon(Icons.search, color: AppColors.grey),
-                  enabledBorder: OutlineInputBorder(
+                  prefixIcon: const Icon(Icons.search, color: AppColors.grey),
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: AppColors.grey.withAlpha(50),
-                      width: 0.3,
-                    ),
+                    borderSide: BorderSide.none,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: AppColors.grey.withAlpha(50),
-                      width: 0.3,
-                    ),
-                  ),
-                  hintText: "Search Patients...",
-                  hintStyle: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+                  hintText: "Search...",
                 ),
               ),
-              const SizedBox(height: 16),
-              filteredPatientList.isNotEmpty
-                  ? Expanded(
-                      child: ListView.builder(
-                        itemCount: filteredPatientList.length,
-                        itemBuilder: (context, index) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CustomPatientBubble(
-                                patient: filteredPatientList[index],
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                          );
-                        },
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: filtered.isNotEmpty
+              ? ListView.builder(
+                  padding: isTablet ? const EdgeInsets.symmetric(horizontal: 16) : EdgeInsets.zero,
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final patient = filtered[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CustomPatientBubble(
+                        patient: patient,
+                        isSelected: isTablet && _selectedPatient?.patientId == patient.patientId,
+                        isLoading: !isTablet && _isLoadingHistory && _selectedPatient?.patientId == patient.patientId,
+                        onTap: () => _handlePatientSelection(patient, isTablet),
                       ),
-                    )
-                  : Expanded(
-                      child: Center(
-                        child: patientList.isNotEmpty
-                            ? Text(
-                                "No Patients found with '${searchController.text}'",
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              )
-                            : Text(
-                                "No Patients Records Found",
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
+                    );
+                  },
+                )
+              : Center(
+                  child: Text(
+                    full.isNotEmpty ? "No results found" : "No patient records",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailContent() {
+    if (_isLoadingHistory) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_selectedHistory == null) {
+      return const SizedBox.expand(); // Blank black space if background is black
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: PatientClinicalHistoryView(
+        key: ValueKey(_selectedHistory!.patient.patientId),
+        patientHistory: _selectedHistory!,
+      ),
+    );
+  }
+}
+
+class CustomPatientBubble extends StatelessWidget {
+  const CustomPatientBubble({
+    super.key,
+    required this.patient,
+    this.isSelected = false,
+    this.isLoading = false,
+    required this.onTap,
+  });
+
+  final Patient patient;
+  final bool isSelected;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: isSelected ? AppColors.primaryLight : Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.grey.withAlpha(50),
+              width: isSelected ? 1.5 : 0.5,
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  CustomNameInitial(name: patient.name),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: RichText(
+                        text: TextSpan(
+                          text: patient.name,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          children: [
+                            TextSpan(
+                              text: "\n${patient.age} Yrs · ${patient.gender ?? ""}",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                  ),
+                  if (isLoading)
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    )
+                  else
+                    Icon(
+                      Icons.keyboard_arrow_right_rounded,
+                      color: isSelected ? AppColors.primary : AppColors.grey,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  if (patient.gender != null)
+                    GenderLabel(gender: GenderExtension.fromString(patient.gender)),
+                  const Spacer(),
+                  Text(
+                    DateFormat('d MMM yy').format(parseServerDate(patient.createdAt)),
+                    style: const TextStyle(fontSize: 12, color: AppColors.grey),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -173,173 +405,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class CustomPatientBubble extends StatefulWidget {
-  const CustomPatientBubble({super.key, required this.patient});
-
-  final Patient patient;
-
-  @override
-  State<CustomPatientBubble> createState() => _CustomPatientBubbleState();
-}
-
-class _CustomPatientBubbleState extends State<CustomPatientBubble> {
-  bool isTapped = false;
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isTapped
-              ? AppColors.primary.withAlpha(100)
-              : AppColors.grey.withAlpha(50),
-          width: 0.5,
-        ),
-      ),
-      color: Colors.white,
-      child: Ink(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-        ),
-        child: InkWell(
-          splashColor: AppColors.primary.withAlpha(25),
-          highlightColor: AppColors.primary.withAlpha(25),
-          borderRadius: BorderRadius.circular(12),
-          onTap: () async {
-            setState(() {
-              isTapped = true;
-            });
-
-            try {
-              var history = await getPatientHistory(
-                patientId: widget.patient.patientId,
-              );
-              if (!context.mounted) return;
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PatientDataScreen(patientHistory: history),
-                ),
-              );
-            } catch (e) {
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Failed to fetch patient history. Please try again."),
-                ),
-              );
-            } finally {
-              if (mounted) {
-                setState(() {
-                  isTapped = false;
-                });
-              }
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    CustomNameInitial(name: widget.patient.name),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: RichText(
-                          text: TextSpan(
-                            text: widget.patient.name,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                            children: [
-                              TextSpan(
-                                text:
-                                    "\n${widget.patient.age} Yrs · ${widget.patient.gender ?? ""}",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    isTapped
-                        ? SizedBox(
-                            width: 15,
-                            height: 15,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: AppColors.primary,
-                            ),
-                          )
-                        : Icon(
-                            Icons.keyboard_arrow_right_rounded,
-                            color: AppColors.grey,
-                          ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    GenderLabel(patient: widget.patient),
-                    Expanded(child: SizedBox()),
-                    Text(
-                      DateFormat(
-                        'd MMM yy',
-                      ).format(parseServerDate(widget.patient.createdAt)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class GenderLabel extends StatelessWidget {
-  const GenderLabel({super.key, required this.patient});
+  const GenderLabel({super.key, required this.gender});
 
-  final Patient patient;
+  final Gender gender;
 
   @override
   Widget build(BuildContext context) {
-    if (patient.gender == null) {
-      return const SizedBox.shrink();
-    }
-
-    final Color primaryColor;
-    final Color secondaryColor;
-
-    switch (patient.gender) {
-      case "Male":
-        primaryColor = AppColors.primaryMale;
-        secondaryColor = AppColors.secondaryMale;
-        break;
-
-      case "Female":
-        primaryColor = AppColors.primaryFemale;
-        secondaryColor = AppColors.secondaryFemale;
-        break;
-
-      default:
-        primaryColor = AppColors.primaryOther;
-        secondaryColor = AppColors.secondaryOther;
-    }
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: secondaryColor,
+        color: gender.secondaryColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(width: 1, color: primaryColor),
+        border: Border.all(width: 1, color: gender.primaryColor),
       ),
       child: Text(
-        patient.gender!,
+        gender.label,
         style: Theme.of(
           context,
-        ).textTheme.bodyLarge?.copyWith(color: primaryColor),
+        ).textTheme.bodyLarge?.copyWith(color: gender.primaryColor),
       ),
     );
   }

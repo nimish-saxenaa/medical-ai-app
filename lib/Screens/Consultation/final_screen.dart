@@ -28,9 +28,26 @@ class FinalScreen extends StatefulWidget {
 }
 
 class _FinalScreenState extends State<FinalScreen> {
-  TextEditingController prescriptionController = TextEditingController();
+  late TextEditingController prescriptionController;
   bool isGenerating = false;
   Prescription? prescription;
+
+  @override
+  void initState() {
+    super.initState();
+    prescriptionController = TextEditingController();
+    if (widget.response.diagnosis.differentialDiagnoses.isNotEmpty) {
+      prescriptionController.text =
+          widget.response.diagnosis.differentialDiagnoses.first.condition;
+    }
+  }
+
+  @override
+  void dispose() {
+    prescriptionController.dispose();
+    super.dispose();
+  }
+
   Widget _buildContent() {
     switch (selectedTab) {
       case ResultTab.clinicalNote:
@@ -44,21 +61,37 @@ class _FinalScreenState extends State<FinalScreen> {
           isLoading: isGenerating,
           prescription: prescription,
           controller: prescriptionController,
+          onChanged: (_) => setState(() {}),
           onGenerate: () async {
             setState(() {
               isGenerating = true;
             });
 
-            final response = await prescribe(
-              token: widget.token,
-              sessionId: widget.sessionId,
-              confirmedDiagnosis: prescriptionController.text,
-            );
+            try {
+              final response = await prescribe(
+                token: widget.token,
+                sessionId: widget.sessionId,
+                confirmedDiagnosis: prescriptionController.text,
+              );
 
-            setState(() {
-              prescription = response;
-              isGenerating = false;
-            });
+              setState(() {
+                prescription = response;
+                isGenerating = false;
+              });
+            } catch (e) {
+              print('❌ Prescription generation failed: $e');
+              setState(() {
+                isGenerating = false;
+              });
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Failed to generate prescription: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
           },
         );
     }

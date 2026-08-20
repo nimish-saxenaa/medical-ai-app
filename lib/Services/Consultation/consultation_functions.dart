@@ -1,14 +1,89 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../../Models/consultation_models.dart';
-import 'dart:typed_data';
+import '../Authentication/access_token.dart';
+import '../Authentication/auth_service.dart';
+import '../Authentication/navigation_service.dart';
 
 /// POST /api/v1/consultation/start
 /// specialty must be one of: general_medicine | psychotherapy | gynecology
 /// patient_id optional — if provided, overrides name/age/gender from the patient record.
 ///
 String baseUrl = "https://med-history-agent.decrackle.io";
+
+Future<http.Response> _authenticatedPost(Uri url, Map<String, dynamic> body) async {
+  Future<http.Response> sendRequest(String token) {
+    return http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(body),
+    );
+  }
+
+  String token = await AccessTokenService.getToken() ?? "";
+  var response = await sendRequest(token);
+
+  if (response.statusCode == 401) {
+    final result = await refreshTokens();
+    final newAccessToken = result['access_token'] ?? result['accessToken'];
+    final newRefreshToken = result['refresh_token'] ?? result['refreshToken'];
+
+    if (newAccessToken != null && newRefreshToken != null) {
+      await AccessTokenService.saveAccessToken(newAccessToken.toString());
+      await AccessTokenService.saveRefreshToken(newRefreshToken.toString());
+      response = await sendRequest(newAccessToken.toString());
+    }
+
+    if (response.statusCode == 401) {
+      logout();
+      throw Exception("Unauthorized");
+    }
+  }
+
+  if (response.statusCode >= 400) {
+    throw Exception("Request failed with status: ${response.statusCode}\n${response.body}");
+  }
+
+  return response;
+}
+
+Future<http.Response> _authenticatedGet(Uri url) async {
+  Future<http.Response> sendRequest(String token) {
+    return http.get(url, headers: {"Authorization": "Bearer $token"});
+  }
+
+  String token = await AccessTokenService.getToken() ?? "";
+  var response = await sendRequest(token);
+
+  if (response.statusCode == 401) {
+    final result = await refreshTokens();
+    final newAccessToken = result['access_token'] ?? result['accessToken'];
+    final newRefreshToken = result['refresh_token'] ?? result['refreshToken'];
+
+    if (newAccessToken != null && newRefreshToken != null) {
+      await AccessTokenService.saveAccessToken(newAccessToken.toString());
+      await AccessTokenService.saveRefreshToken(newRefreshToken.toString());
+      response = await sendRequest(newAccessToken.toString());
+    }
+
+    if (response.statusCode == 401) {
+      logout();
+      throw Exception("Unauthorized");
+    }
+  }
+
+  if (response.statusCode >= 400) {
+    throw Exception("Request failed with status: ${response.statusCode}\n${response.body}");
+  }
+
+  return response;
+}
+
 Future<StartConsultationResponse> startConsultation({
   required String token,
   required String specialty,
@@ -20,22 +95,15 @@ Future<StartConsultationResponse> startConsultation({
   required String patientId,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/start");
-  final response = await http.post(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    },
-    body: jsonEncode({
-      "specialty": specialty,
-      "patient_language": ?patientLanguage,
-      "patient_name": ?patientName,
-      "patient_age": ?patientAge,
-      "patient_gender": ?patientGender,
-      "chief_complaint": ?chiefComplaint,
-      "patient_id": patientId,
-    }),
-  );
+  final response = await _authenticatedPost(url, {
+    "specialty": specialty,
+    "patient_language": patientLanguage,
+    "patient_name": patientName,
+    "patient_age": patientAge,
+    "patient_gender": patientGender,
+    "chief_complaint": chiefComplaint,
+    "patient_id": patientId,
+  });
   print(response.body);
   return StartConsultationResponse.fromJson(jsonDecode(response.body));
 }
@@ -46,10 +114,7 @@ Future<SessionStateResponse> getSessionState({
   required String sessionId,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId");
-  final response = await http.get(
-    url,
-    headers: {"Authorization": "Bearer $token"},
-  );
+  final response = await _authenticatedGet(url);
   print(response.body);
   return SessionStateResponse.fromJson(jsonDecode(response.body));
 }
@@ -62,14 +127,7 @@ Future<SubmitAnswerResponse> submitAnswer({
   required String answer,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/answer");
-  final response = await http.post(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    },
-    body: jsonEncode({"answer": answer}),
-  );
+  final response = await _authenticatedPost(url, {"answer": answer});
   return SubmitAnswerResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -83,12 +141,27 @@ Future<SubmitAnswerResponse> submitAnswerAudio({
   required File audioFile,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/answer-audio");
-  final request = http.MultipartRequest("POST", url)
-    ..headers["Authorization"] = "Bearer $token"
-    ..files.add(await http.MultipartFile.fromPath("audio_file", audioFile.path));
 
-  final streamedResponse = await request.send();
-  final response = await http.Response.fromStream(streamedResponse);
+  Future<http.Response> sendRequest(String t) async {
+    final request = http.MultipartRequest("POST", url)
+      ..headers["Authorization"] = "Bearer $t"
+      ..files.add(await http.MultipartFile.fromPath("audio_file", audioFile.path));
+    final streamedResponse = await request.send();
+    return http.Response.fromStream(streamedResponse);
+  }
+
+  String tokenStr = await AccessTokenService.getToken() ?? "";
+  var response = await sendRequest(tokenStr);
+
+  if (response.statusCode == 401) {
+    final result = await refreshTokens();
+    final newAccessToken = result['access_token'] ?? result['accessToken'];
+    if (newAccessToken != null) {
+      await AccessTokenService.saveAccessToken(newAccessToken.toString());
+      response = await sendRequest(newAccessToken.toString());
+    }
+  }
+
   return SubmitAnswerResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -98,10 +171,7 @@ Future<QaLogResponse> getQaLog({
   required String sessionId,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/qa-log");
-  final response = await http.get(
-    url,
-    headers: {"Authorization": "Bearer $token"},
-  );
+  final response = await _authenticatedGet(url);
   print(response.body);
   return QaLogResponse.fromJson(jsonDecode(response.body));
 }
@@ -115,14 +185,30 @@ Future<EditAnswerResponse> editAnswer({
   required String answer,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/answer/$questionId");
-  final response = await http.patch(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    },
-    body: jsonEncode({"answer": answer}),
-  );
+  
+  Future<http.Response> sendRequest(String t) {
+    return http.patch(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $t",
+      },
+      body: jsonEncode({"answer": answer}),
+    );
+  }
+
+  String tokenStr = await AccessTokenService.getToken() ?? "";
+  var response = await sendRequest(tokenStr);
+
+  if (response.statusCode == 401) {
+    final result = await refreshTokens();
+    final newAccessToken = result['access_token'] ?? result['accessToken'];
+    if (newAccessToken != null) {
+      await AccessTokenService.saveAccessToken(newAccessToken.toString());
+      response = await sendRequest(newAccessToken.toString());
+    }
+  }
+
   return EditAnswerResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -133,16 +219,15 @@ Future<Prescription> prescribe({
   required String confirmedDiagnosis,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/prescribe");
-  final response = await http.post(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    },
-    body: jsonEncode({"confirmed_diagnosis": confirmedDiagnosis}),
-  );
-  print(response.body);
-  return Prescription.fromJson(jsonDecode(response.body)['prescription']);
+  final response = await _authenticatedPost(url, {"confirmed_diagnosis": confirmedDiagnosis});
+  print("💊 [DEBUG] Prescribe response: ${response.body}");
+
+  final decoded = jsonDecode(response.body);
+  if (decoded is! Map<String, dynamic> || !decoded.containsKey('prescription')) {
+    throw Exception("Response does not contain prescription data.");
+  }
+
+  return Prescription.fromJson(decoded['prescription']);
 }
 
 /// POST /api/v1/consultation/{session_id}/finalize
@@ -152,10 +237,7 @@ Future<void> finalizeConsultation({
   required String sessionId,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/finalize");
-  final response = await http.post(
-    url,
-    headers: {"Authorization": "Bearer $token"},
-  );
+  await _authenticatedPost(url, {});
 }
 
 /// POST /api/v1/consultation/{session_id}/override
@@ -168,18 +250,11 @@ Future<OverrideFieldResponse> overrideField({
   String? reason,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/override");
-  final response = await http.post(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    },
-    body: jsonEncode({
-      "field": field,
-      "value": value,
-      "reason": ?reason,
-    }),
-  );
+  final response = await _authenticatedPost(url, {
+    "field": field,
+    "value": value,
+    "reason": reason,
+  });
   return OverrideFieldResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -191,10 +266,22 @@ Future<DeleteConsultationResponse> deleteConsultation({
   required String sessionId,
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId");
-  final response = await http.delete(
-    url,
-    headers: {"Authorization": "Bearer $token"},
-  );
+  
+  Future<http.Response> sendRequest(String t) {
+    return http.delete(url, headers: {"Authorization": "Bearer $t"});
+  }
+
+  String tokenStr = await AccessTokenService.getToken() ?? "";
+  var response = await sendRequest(tokenStr);
+
+  if (response.statusCode == 401) {
+    final result = await refreshTokens();
+    final newAccessToken = result['access_token'] ?? result['accessToken'];
+    if (newAccessToken != null) {
+      await AccessTokenService.saveAccessToken(newAccessToken.toString());
+      response = await sendRequest(newAccessToken.toString());
+    }
+  }
   return DeleteConsultationResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -350,5 +437,3 @@ Future<SpeechAudio> textToSpeech({
     "${response.bodyBytes.length} bytes): ${_bodyPreview(response.bodyBytes)}",
   );
 }
-
-

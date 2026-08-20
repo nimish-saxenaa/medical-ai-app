@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import '../Components/colors.dart';
+
 class Patient {
   final String patientId;
   final String? doctorId;
@@ -50,4 +53,52 @@ class Patient {
   @override
   String toString() =>
       'Patient(patientId: $patientId, name: $name, age: $age, gender: $gender, phone: $phone)';
+}
+
+enum Gender { male, female, other }
+
+extension GenderExtension on Gender {
+  String get label {
+    switch (this) {
+      case Gender.male:
+        return "Male";
+      case Gender.female:
+        return "Female";
+      case Gender.other:
+        return "Other";
+    }
+  }
+
+  Color get primaryColor {
+    switch (this) {
+      case Gender.male:
+        return AppColors.primaryMale;
+      case Gender.female:
+        return AppColors.primaryFemale;
+      case Gender.other:
+        return AppColors.primaryOther;
+    }
+  }
+
+  Color get secondaryColor {
+    switch (this) {
+      case Gender.male:
+        return AppColors.secondaryMale;
+      case Gender.female:
+        return AppColors.secondaryFemale;
+      case Gender.other:
+        return AppColors.secondaryOther;
+    }
+  }
+
+  static Gender fromString(String? gender) {
+    switch (gender?.toLowerCase()) {
+      case "male":
+        return Gender.male;
+      case "female":
+        return Gender.female;
+      default:
+        return Gender.other;
+    }
+  }
 }

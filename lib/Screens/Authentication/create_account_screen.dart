@@ -37,148 +37,191 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.heightOf(context),
-            ),
-            child: IntrinsicHeight(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LogoAndText(width: MediaQuery.of(context).size.width),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Create Your Account',
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Start taking smarter clinical histories today.',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextField(
-                    hintText: 'Dr. Priya Sharma',
-                    controller: nameController,
-                    fieldName: "Full Name",
-                  ),
-                  const SizedBox(height: 8),
-                  CustomTextField(
-                    hintText: 'dr@hospital.com',
-                    controller: emailController,
-                    fieldName: "Email address",
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 8),
-                  CustomTextField(
-                    hintText: 'Min. 8 characters',
-                    controller: passwordController,
-                    fieldName: 'Password',
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomButton(
-                    onPressed: () async {
-                      setState(() {
-                        isTapped = true;
-                      });
-                      if (emailController.text.isEmpty ||
-                          !emailController.text.contains("@")) {
-                        if (!context.mounted) return;
-                        showCustomDialog("Enter a valid Email", context);
-                        return;
-                      } else if (passwordController.text.isEmpty) {
-                        if (!context.mounted) return;
-                        showCustomDialog("Enter a valid Password", context);
-                        return;
-                      } else if (nameController.text.isEmpty) {
-                        if (!context.mounted) return;
-                        showCustomDialog("Enter a valid Name", context);
-                        return;
-                      }
-                      try {
-                        var response = await createAccount(
-                          name: nameController.text,
-                          email: emailController.text,
-                          password: passwordController.text,
-                        );
-                        if (response['access_token'] != null) {
-                          AccessTokenService.saveAccessToken(response['access_token']);
-                          AccessTokenService.saveRefreshToken(response['refresh_token']);
-                          PatientListProvider? patientList = await listPatients();
-                          patientsProvider.setPatients(patientList.patients!);
-                          if (!context.mounted) return;
-                          navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                            HomeScreen.routeName,
-                                (route) => false,
-                          );
-                        } else {
-                          if (!context.mounted) return;
-                          showCustomDialog(
-                            response['detail'].toString(),
-                            context,
-                          );
-                        }
-                      } catch (e) {
-                        setState(() {
-                          isTapped = false;
-                        });
-                        if (!context.mounted) return;
-                        showCustomDialog(
-                          "Connection error. Please check your internet or try again later.",
-                          context,
-                        );
-                      }
-                      setState(() {
-                        isTapped = false;
-                      });
-                    },
-                    child: isTapped?  Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(color: Colors.white,),
-                        const SizedBox(width: 8),
-                        Text('Creating Account...'),
-                      ],
-                    ) : Text('Create Account'),
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: RichText(
-                      text: TextSpan(
-                        text: "Already have an Account?",
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
-                        children: [
-                          TextSpan(
-                            text: " Sign In",
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                              decoration: TextDecoration.underline,
-                              decorationColor: AppColors.primary,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => LoginScreen(),
-                                  ),
-                                );
-                              },
-                          ),
-                        ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            bool isTablet = constraints.maxWidth > 600;
+            double contentWidth = isTablet ? 450 : double.infinity;
+
+            return Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 40 : 24,
+                  vertical: 32,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: contentWidth),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: isTablet ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                    children: [
+                      LogoAndText(width: isTablet ? 600 : constraints.maxWidth),
+                      
+                      const SizedBox(height: 32),
+                      
+                      Text(
+                        'Create Your Account',
+                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          fontSize: isTablet ? 36 : 28,
+                        ),
+                        textAlign: isTablet ? TextAlign.center : TextAlign.left,
                       ),
-                    ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      Text(
+                        'Start taking smarter clinical histories today.',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.greyDark,
+                          fontSize: isTablet ? 18 : 16,
+                        ),
+                        textAlign: isTablet ? TextAlign.center : TextAlign.left,
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      CustomTextField(
+                        hintText: 'Dr. Priya Sharma',
+                        controller: nameController,
+                        fieldName: "Full Name",
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      CustomTextField(
+                        hintText: 'dr@hospital.com',
+                        controller: emailController,
+                        fieldName: "Email address",
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      CustomTextField(
+                        hintText: 'Min. 8 characters',
+                        controller: passwordController,
+                        fieldName: 'Password',
+                        obscureText: true,
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      CustomButton(
+                        onPressed: () async {
+                          if (nameController.text.isEmpty) {
+                            if (!context.mounted) return;
+                            showCustomDialog("Enter a valid Name", context);
+                            return;
+                          } else if (emailController.text.isEmpty || !emailController.text.contains("@")) {
+                            if (!context.mounted) return;
+                            showCustomDialog("Enter a valid Email", context);
+                            return;
+                          } else if (passwordController.text.isEmpty) {
+                            if (!context.mounted) return;
+                            showCustomDialog("Enter a valid Password", context);
+                            return;
+                          }
+                          
+                          setState(() {
+                            isTapped = true;
+                          });
+                          
+                          try {
+                            var response = await createAccount(
+                              name: nameController.text,
+                              email: emailController.text,
+                              password: passwordController.text,
+                            );
+                            
+                            if (response['access_token'] != null) {
+                              AccessTokenService.saveAccessToken(response['access_token']);
+                              AccessTokenService.saveRefreshToken(response['refresh_token']);
+                              PatientListProvider? patientList = await listPatients();
+                              patientsProvider.setPatients(patientList.patients!);
+                              
+                              if (!context.mounted) return;
+                              navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                                HomeScreen.routeName,
+                                (route) => false,
+                              );
+                            } else {
+                              if (!context.mounted) return;
+                              showCustomDialog(response['detail'].toString(), context);
+                            }
+                          } catch (e) {
+                            setState(() {
+                              isTapped = false;
+                            });
+                            if (!context.mounted) return;
+                            showCustomDialog(
+                              "Connection error. Please check your internet or try again later.",
+                              context,
+                            );
+                          }
+                          
+                          if (mounted) {
+                            setState(() {
+                              isTapped = false;
+                            });
+                          }
+                        },
+                        child: isTapped
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text('Creating Account...'),
+                                ],
+                              )
+                            : const Text('Create Account'),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      Center(
+                        child: RichText(
+                          text: TextSpan(
+                            text: "Already have an Account?",
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AppColors.grey,
+                              fontSize: isTablet ? 16 : 14,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: " Sign In",
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const LoginScreen(),
+                                      ),
+                                    );
+                                  },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

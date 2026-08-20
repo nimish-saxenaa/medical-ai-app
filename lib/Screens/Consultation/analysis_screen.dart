@@ -207,10 +207,10 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
 
     switch (step.status) {
       case 'done':
-        bg = const Color(0xFFECFDF5); // emerald-50
-        border = const Color(0xFFA7F3D0); // emerald-200
-        iconBg = const Color(0xFF10B981); // emerald-500
-        textColor = const Color(0xFF047857); // emerald-700
+        bg = AppColors.stepSuccessBg;
+        border = AppColors.stepSuccessBorder;
+        iconBg = AppColors.success;
+        textColor = AppColors.stepSuccessText;
         break;
       case 'running':
         bg = brandLight;
@@ -220,10 +220,10 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
         fontWeight = FontWeight.w600;
         break;
       default:
-        bg = Colors.grey.shade50;
-        border = Colors.grey.shade200;
+        bg = AppColors.greyLight;
+        border = AppColors.borderLight;
         iconBg = Colors.grey.shade300;
-        textColor = Colors.grey.shade400;
+        textColor = AppColors.grey;
     }
 
     return AnimatedContainer(
