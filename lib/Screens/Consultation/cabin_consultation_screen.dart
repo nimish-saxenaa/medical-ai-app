@@ -252,7 +252,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           if (mounted) {
             setState(() => _isEnding = false);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Failed to finalize session: $e"), backgroundColor: Colors.red),
+              SnackBar(content: Text("Failed to finalize session: $e"), backgroundColor: AppColors.error),
             );
           }
         }
@@ -285,10 +285,10 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -408,13 +408,13 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
             Icon(
               icon,
               size: 16,
-              color: isActive ? Colors.white : AppColors.grey,
+              color: isActive ? AppColors.white : AppColors.grey,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.white : AppColors.grey,
+                color: isActive ? AppColors.white : AppColors.grey,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -433,9 +433,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200, width: 0.5),
+              border: Border.all(color: AppColors.dividerLight, width: 0.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -469,9 +469,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200, width: 0.5),
+                border: Border.all(color: AppColors.dividerLight, width: 0.5),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,14 +520,14 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   decoration: InputDecoration(
                     hintText: "Type a clinical note...",
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: AppColors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
+                      borderSide: BorderSide(color: AppColors.dividerLight),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
+                      borderSide: BorderSide(color: AppColors.dividerLight),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
@@ -553,7 +553,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                 backgroundColor: AppColors.primary,
                 child: IconButton(
                   onPressed: _sendNote,
-                  icon: const Icon(LucideIcons.send, color: Colors.white, size: 18),
+                  icon: const Icon(LucideIcons.send, color: AppColors.white, size: 18),
                 ),
               ),
             ],
@@ -576,7 +576,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       decoration: BoxDecoration(
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.dividerLight),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -649,9 +649,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200, width: 0.5),
+              border: Border.all(color: AppColors.dividerLight, width: 0.5),
             ),
             child: Row(
               children: [
@@ -732,7 +732,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       decoration: BoxDecoration(
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -772,7 +772,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       decoration: BoxDecoration(
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.dividerLight),
       ),
       child: Text(
         text,
@@ -788,7 +788,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200, width: 0.5),
+        border: Border.all(color: AppColors.dividerLight, width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -930,7 +930,7 @@ class TranscriptBubble extends StatelessWidget {
     final bool isPatient = utterance.role == 'patient';
     final bool isAttendee = utterance.role == 'attendee';
 
-    Color bgColor = Colors.white;
+    Color bgColor = AppColors.white;
     Color iconColor = AppColors.grey;
     String label = "U";
 
@@ -1176,7 +1176,7 @@ class _PulsatingMicButtonState extends State<PulsatingMicButton> with SingleTick
               ),
               child: Icon(
                 widget.isRecording ? LucideIcons.square : LucideIcons.mic,
-                color: Colors.white,
+                color: AppColors.white,
                 size: widget.size * 0.43,
               ),
             ),

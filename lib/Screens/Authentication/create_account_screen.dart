@@ -35,7 +35,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     final patientsProvider = context.read<PatientListProvider>();
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -172,7 +172,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                     height: 16,
                                     width: 16,
                                     child: CircularProgressIndicator(
-                                      color: Colors.white,
+                                      color: AppColors.white,
                                       strokeWidth: 2,
                                     ),
                                   ),

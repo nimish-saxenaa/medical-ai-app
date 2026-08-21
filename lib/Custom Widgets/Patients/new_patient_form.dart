@@ -52,7 +52,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.white,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -167,7 +167,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(color: Color(0xFFE5E7EB)),
+                            side: const BorderSide(color: AppColors.borderLight),
                           ),
                         ),
                         child: const Text("Cancel", style: TextStyle(fontWeight: FontWeight.w600)),
@@ -179,7 +179,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
                         onPressed: _handleCreate,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -211,7 +211,7 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: const BoxDecoration(
         color: AppColors.greyLight,
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB), width: 0.75)),
+        border: Border(bottom: BorderSide(color: AppColors.borderLight, width: 0.75)),
       ),
       child: Text(
         'New Patient',
@@ -302,11 +302,11 @@ class _InputField extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 0.75),
+          borderSide: const BorderSide(color: AppColors.borderLight, width: 0.75),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 0.75),
+          borderSide: const BorderSide(color: AppColors.borderLight, width: 0.75),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -334,7 +334,7 @@ class GenderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? gender.secondaryColor : Colors.white,
+      color: selected ? gender.secondaryColor : AppColors.white,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -345,7 +345,7 @@ class GenderButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? gender.primaryColor : const Color(0xFFE5E7EB),
+              color: selected ? gender.primaryColor : AppColors.borderLight,
               width: selected ? 1.5 : 0.75,
             ),
           ),
@@ -367,10 +367,10 @@ class GenderButton extends StatelessWidget {
 Future<void> showNewPatientDialog(BuildContext context) {
   return showDialog(
     context: context,
-    barrierColor: Colors.black.withOpacity(0.5),
+    barrierColor: AppColors.black.withOpacity(0.5),
     builder: (context) {
       return Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         insetPadding: const EdgeInsets.symmetric(horizontal: 20),

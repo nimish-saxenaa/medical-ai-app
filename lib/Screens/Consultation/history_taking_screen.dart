@@ -161,7 +161,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Voice unavailable: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
           duration: const Duration(seconds: 5),
         ),
       );
@@ -468,7 +468,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
       case VoiceStreamState.inactive:
         return AppColors.primary;
       case VoiceStreamState.recording:
-        return Colors.red;
+        return AppColors.error;
       default:
         return AppColors.greyLight;
     }
@@ -479,7 +479,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
       case VoiceStreamState.inactive:
         return AppColors.white;
       case VoiceStreamState.recording:
-        return Colors.white;
+        return AppColors.white;
       default:
         return AppColors.grey;
     }
@@ -628,9 +628,9 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                       //Recording Card
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: AppColors.dividerLight),
                         ),
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -646,7 +646,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                         width: 28,
                                         height: 28,
                                         decoration: BoxDecoration(
-                                          color: Color(0xfff0eaff),
+                                          color: AppColors.primaryLight,
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -687,16 +687,16 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                       vertical: 10,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.shade50,
+                                      color: AppColors.redFlagBg,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: Colors.red.shade200,
+                                        color: AppColors.redFlagBorder,
                                       ),
                                     ),
                                     child: Text(
                                       formatRecordingTime(recordingDuration),
-                                      style: TextStyle(
-                                        color: Colors.red.shade700,
+                                      style: const TextStyle(
+                                        color: AppColors.redFlagText,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -808,9 +808,9 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                 children: [
                   Expanded(child: SizedBox()),
                   Container(
-                    padding: EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: AppColors.grey.withAlpha(50),
@@ -882,7 +882,7 @@ class QuestionBubble extends StatelessWidget {
             : AppColors.white,
         borderColor: state == TextToSpeechState.active
             ? AppColors.primary.withAlpha(100)
-            : Colors.grey.shade200,
+            : AppColors.dividerLight,
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -972,7 +972,7 @@ class CenterCircleSnakeEmoji extends StatelessWidget {
               borderRadius: BorderRadius.circular(100),
               child: Column(
                 children: [
-                  Container(width: 100, height: 70, color: Colors.white),
+                  Container(width: 100, height: 70, color: AppColors.white),
                   Container(width: 100, height: 30, color: AppColors.grey),
                 ],
               ),
@@ -1037,7 +1037,7 @@ class BubblePainter extends CustomPainter {
 
     path.close();
 
-    canvas.drawShadow(path, Colors.black.withAlpha(50), 6, false);
+    canvas.drawShadow(path, AppColors.black.withAlpha(50), 6, false);
 
     canvas.drawPath(
       path,
@@ -1103,16 +1103,16 @@ class _RecordingCardState extends State<RecordingCard>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         border: Border.all(
-          color: const Color(0xffE2E8F0),
+          color: AppColors.slate200,
         ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             blurRadius: 8,
-            offset: Offset(0, 2),
-            color: Color(0x0A000000),
+            offset: const Offset(0, 2),
+            color: AppColors.black.withAlpha(10),
           ),
         ],
       ),
@@ -1133,7 +1133,7 @@ class _RecordingCardState extends State<RecordingCard>
                   width: 7,
                   height: 7,
                   decoration: const BoxDecoration(
-                    color: Color(0xffEF4444),
+                    color: AppColors.error,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -1146,7 +1146,7 @@ class _RecordingCardState extends State<RecordingCard>
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xff64748B),
+                  color: AppColors.slate500,
                   letterSpacing: .4,
                 ),
               ),
@@ -1172,7 +1172,7 @@ class _RecordingCardState extends State<RecordingCard>
           /// Loudness meter placeholder
           Container(
             height: 4,
-            color: Colors.grey.shade300,
+            color: AppColors.borderMedium,
           ),
         ],
       ),
@@ -1192,7 +1192,7 @@ class LiveAudioPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF33049F)
+      ..color = AppColors.primary
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round

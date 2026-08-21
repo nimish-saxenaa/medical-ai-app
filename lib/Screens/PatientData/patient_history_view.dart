@@ -155,12 +155,12 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
       SnackBar(
         content: Row(
           children: [
-            Icon(isError ? Icons.error : Icons.check_circle, color: Colors.white, size: 20),
+            Icon(isError ? Icons.error : Icons.check_circle, color: AppColors.white, size: 20),
             const SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: isError ? Colors.red : Colors.green,
+        backgroundColor: isError ? AppColors.error : AppColors.success,
         duration: const Duration(seconds: 3),
       ),
     );
@@ -328,7 +328,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
           children: [
             Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const Icon(Icons.check_circle, color: AppColors.white, size: 20),
                 const SizedBox(width: 8),
                 const Expanded(child: Text('PDF saved', style: TextStyle(fontWeight: FontWeight.bold))),
               ],
@@ -339,11 +339,11 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
             Text('Saved to: $savedIn', style: const TextStyle(fontSize: 10, color: Colors.white70)),
           ],
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
         duration: const Duration(seconds: 6),
         action: SnackBarAction(
           label: 'OPEN',
-          textColor: Colors.white,
+          textColor: AppColors.white,
           onPressed: () => OpenFile.open(filePath),
         ),
       ),
@@ -390,10 +390,10 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: AppColors.warningBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(LucideIcons.monitor, color: Colors.orange, size: 20),
+                child: const Icon(LucideIcons.monitor, color: AppColors.warning, size: 20),
               ),
               title: const Text("Cabin Flow"),
               subtitle: const Text("Doctor-led live consultation"),
@@ -591,7 +591,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
             children: [
               Material(
                 borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
+                color: AppColors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
@@ -705,7 +705,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                                         color: AppColors.primary,
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(Icons.add, color: Colors.white, size: 16),
+                                      child: const Icon(Icons.add, color: AppColors.white, size: 16),
                                     ),
                                   ),
                                 ],

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../Components/colors.dart';
 import 'ai_speaking_orb.dart';
 
 class SiriWaveform extends StatefulWidget {
@@ -107,19 +108,19 @@ class _WavePainter extends CustomPainter {
 
   static final List<_WaveData> _waves = [
     _WaveData(
-      color: const Color(0xff4F46E5),
+      color: AppColors.waveformIndigo,
       alpha: 0.9,
       phase: 0,
       frequency: 1.2,
     ),
     _WaveData(
-      color: const Color(0xff7C3AED),
+      color: AppColors.waveformPurple,
       alpha: 0.65,
       phase: math.pi / 2.5,
       frequency: 2.1,
     ),
     _WaveData(
-      color: const Color(0xff06B6D4),
+      color: AppColors.waveformCyan,
       alpha: 0.5,
       phase: math.pi * 0.7,
       frequency: 0.85,

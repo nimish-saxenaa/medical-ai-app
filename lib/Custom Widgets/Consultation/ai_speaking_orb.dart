@@ -83,11 +83,11 @@ class _AIOrbState extends State<AIOrb>
   Color get _indicatorColor {
     switch (widget.state) {
       case TextToSpeechState.active:
-        return Colors.greenAccent;
+        return AppColors.successIcon;
       case TextToSpeechState.loading:
-        return Colors.amber;
+        return AppColors.warning;
       case TextToSpeechState.idle:
-        return Colors.grey.shade400;
+        return AppColors.grey;
     }
   }
 
@@ -163,7 +163,7 @@ class _AIOrbState extends State<AIOrb>
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(width: size, height: size*2/3, color: Colors.white),
+                                  Container(width: size, height: size*2/3, color: AppColors.white),
                                   Container(width: size, height: size*1/3, color: AppColors.grey),
                                 ],
                               ),
@@ -188,7 +188,7 @@ class _AIOrbState extends State<AIOrb>
                           color: _indicatorColor,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.white,
+                            color: AppColors.white,
                             width: 2,
                           ),
                           boxShadow: [
@@ -237,7 +237,7 @@ class _GlowRing extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-              color: Colors.lightBlue.withAlpha(opacity),
+              color: AppColors.waveformCyan.withAlpha(opacity),
               width: width
           ),
         ),

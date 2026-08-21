@@ -100,7 +100,7 @@ class PrescriptionField extends StatelessWidget {
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       )
                     : const Text("Generate"),
@@ -404,7 +404,7 @@ class _WarningCard extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: const Color(0xFF991B1B),
+                color: AppColors.redFlagText,
                 height: 1.5,
               ),
             ),

@@ -46,10 +46,10 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Row(
           children: [
@@ -116,7 +116,7 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppColors.greyLight),
                           ),
@@ -153,7 +153,7 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
                       ? const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(height: 14, width: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+                            SizedBox(height: 14, width: 14, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2)),
                             SizedBox(width: 8),
                             Text('Initializing...'),
                           ],

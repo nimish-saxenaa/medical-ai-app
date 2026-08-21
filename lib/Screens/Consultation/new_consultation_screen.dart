@@ -186,7 +186,7 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                       height: 14,
                       width: 14,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.white,
                         strokeWidth: 2,
                       ),
                     ),
@@ -221,7 +221,7 @@ class PatientBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         border: Border.all(color: AppColors.greyLight),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -272,24 +272,24 @@ const specialities = [
     title: 'General Medicine',
     subtitle: 'Primary care & internal medicine',
     icon: LucideIcons.stethoscope,
-    iconBg: Color(0xFFDBEAFE),
-    iconColor: Color(0xFF2563EB),
+    iconBg: AppColors.avatarBlueBg,
+    iconColor: AppColors.blue600,
   ),
   SingleSpeciality(
     type: TypesOfSpeciality.psychotherapy,
     title: 'Mental Health',
     subtitle: 'Psychotherapy & psychiatric assessment',
     icon: LucideIcons.brain,
-    iconBg: Color(0xFFEDE9FE),
-    iconColor: Color(0xFF7C3AED),
+    iconBg: AppColors.primaryMuted,
+    iconColor: AppColors.purple600,
   ),
   SingleSpeciality(
     type: TypesOfSpeciality.gynecology,
     title: "Women's Health",
     subtitle: 'Gynaecology & obstetrics',
     icon: LucideIcons.heart,
-    iconBg: Color(0xFFFFE4E6),
-    iconColor: Color(0xFFE11D48),
+    iconBg: AppColors.avatarPinkBg,
+    iconColor: AppColors.rose600,
   ),
 ];
 
@@ -308,7 +308,7 @@ class TypeOfConsultation extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         border: Border.all(color: AppColors.greyLight),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -352,7 +352,7 @@ class SpecialitySelectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isSelected ? AppColors.primaryLight : Colors.white,
+      color: isSelected ? AppColors.primaryLight : AppColors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -409,7 +409,7 @@ class SpecialitySelectTile extends StatelessWidget {
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check, size: 12, color: Colors.white)
+                    ? const Icon(Icons.check, size: 12, color: AppColors.white)
                     : null,
               ),
             ],
@@ -437,7 +437,7 @@ class LabeledTextField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         border: Border.all(color: AppColors.greyLight),
         borderRadius: BorderRadius.circular(16),
       ),

@@ -87,7 +87,7 @@ class _FinalScreenState extends State<FinalScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Failed to generate prescription: $e'),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.error,
                   ),
                 );
               }
@@ -151,12 +151,12 @@ class _FinalScreenState extends State<FinalScreen> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(40),
+                          color: AppColors.white.withAlpha(40),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
                           Icons.monitor_heart_outlined,
-                          color: Colors.white,
+                          color: AppColors.white,
                           size: 24,
                         ),
                       ),
@@ -167,7 +167,7 @@ class _FinalScreenState extends State<FinalScreen> {
                         "Clinical Results Ready",
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(
-                              color: Colors.white,
+                              color: AppColors.white,
                               fontWeight: FontWeight.bold,
                             ),
                         textAlign: TextAlign.center,
@@ -178,7 +178,7 @@ class _FinalScreenState extends State<FinalScreen> {
                       Text(
                         "Review and share with the treating physician.",
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.white.withAlpha(180),
+                          color: AppColors.white.withAlpha(180),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -187,10 +187,10 @@ class _FinalScreenState extends State<FinalScreen> {
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: Color(0xfff3f4f6),
+                    color: AppColors.dividerLight,
                   ),
 
                   child: Row(
@@ -247,11 +247,11 @@ class _FinalScreenState extends State<FinalScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(20),
+                          color: AppColors.black.withAlpha(20),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
@@ -314,16 +314,16 @@ class PageButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.white : Color(0xfff3f4f6),
+      color: selected ? AppColors.white : AppColors.dividerLight,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         splashColor: AppColors.white,
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: Ink(
-          padding: EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: selected ? AppColors.white : Color(0xfff3f4f6),
+            color: selected ? AppColors.white : AppColors.dividerLight,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

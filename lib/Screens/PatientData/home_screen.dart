@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .toList();
 
     return Scaffold(
-      backgroundColor: Colors.white, // White background as requested
+      backgroundColor: AppColors.white, // White background as requested
       appBar: _buildAppBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showNewPatientDialog(context),
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               top: 12,
                               right: 12,
                               child: Material(
-                                color: Colors.white.withAlpha(200),
+                                color: AppColors.white.withAlpha(200),
                                 shape: const CircleBorder(),
                                 child: IconButton(
                                   onPressed: () {
@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 16),
@@ -204,14 +204,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFloatingPanel({required Widget child, Color backgroundColor = Colors.white}) {
+  Widget _buildFloatingPanel({required Widget child, Color backgroundColor = AppColors.white}) {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(20),
+            color: AppColors.black.withAlpha(20),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -332,7 +332,7 @@ class CustomPatientBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isSelected ? AppColors.primaryLight : Colors.white,
+      color: isSelected ? AppColors.primaryLight : AppColors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,

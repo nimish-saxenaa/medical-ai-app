@@ -74,13 +74,13 @@ class _DiagnosisCard extends StatelessWidget {
   Color get _borderColor => _isHigh ? AppColors.error : AppColors.success;
 
   Color get _backgroundColor =>
-      _isHigh ? const Color(0xFFFEF2F2) : const Color(0xFFF0FDF4);
+      _isHigh ? AppColors.redFlagBg : AppColors.successContainer;
 
   Color get _chipBackground =>
-      _isHigh ? const Color(0xFFFEE2E2) : const Color(0xFFDCFCE7);
+      _isHigh ? AppColors.redFlagBorder : AppColors.successBorder;
 
   Color get _chipForeground =>
-      _isHigh ? const Color(0xFFB91C1C) : const Color(0xFF15803D);
+      _isHigh ? AppColors.redFlagText : AppColors.successText;
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +208,7 @@ class UrgentConcernsSection extends StatelessWidget {
                       concern,
                       style: Theme.of(context).textTheme.bodyLarge
                           ?.copyWith(
-                        color: const Color(0xFFB91C1C),
+                        color: AppColors.redFlagText,
                         height: 1.5,
                       ),
                     ),
@@ -314,7 +314,7 @@ class PhysicianNoteSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -67,7 +67,7 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: widget.isSelected ? AppColors.primaryLight : Colors.white,
+        color: widget.isSelected ? AppColors.primaryLight : AppColors.white,
         border: Border.all(
           color: widget.isSelected ? AppColors.primary.withAlpha(100) : AppColors.dividerLight,
           width: 0.75,
@@ -136,7 +136,7 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                         AnimatedRotation(
                           turns: _expanded ? 0.5 : 0,
                           duration: const Duration(milliseconds: 200),
-                          child: const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF9CA3AF)),
+                          child: const Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.grey),
                         ),
                         const SizedBox(width: 8),
                         PopupMenuButton<String>(
@@ -163,9 +163,9 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  Icon(LucideIcons.trash2, size: 18, color: Colors.red),
-                                  SizedBox(width: 10),
-                                  Text('Delete', style: TextStyle(color: Colors.red)),
+                                  Icon(LucideIcons.trash2, size: 18, color: AppColors.error),
+                                  const SizedBox(width: 10),
+                                  const Text('Delete', style: TextStyle(color: AppColors.error)),
                                 ],
                               ),
                             ),
@@ -176,15 +176,15 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(LucideIcons.calendar, size: 12, color: Color(0xFFD1D5DB)),
+                        const Icon(LucideIcons.calendar, size: 12, color: AppColors.borderMedium),
                         const SizedBox(width: 6),
-                        Text(_formatDate(date), style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 12)),
+                        Text(_formatDate(date), style: const TextStyle(color: AppColors.grey, fontSize: 12)),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
                             '· ${session.panel?.symptoms.isNotEmpty == true ? session.panel!.symptoms.first.name : "No symptoms recorded"}',
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 12),
+                            style: const TextStyle(color: AppColors.grey, fontSize: 12),
                           ),
                         ),
                       ],

@@ -181,6 +181,6 @@ class AppTheme {
       foregroundColor: Colors.white,
     ),
 
-    dividerColor: Colors.grey.shade200,
+    dividerColor: AppColors.dividerLight,
   );
 }

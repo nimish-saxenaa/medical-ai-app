@@ -126,9 +126,9 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
                     const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade100),
+                        border: Border.all(color: AppColors.dividerLight),
                       ),
                       child: Container(
                         margin: EdgeInsets.all(16),
@@ -298,7 +298,7 @@ class _QaBlockState extends State<QaBlock> {
                           onPressed: () async {
                             await widget.onSave(controller.text.trim());
                           },
-                          icon:  widget.isEditing == EditAnswerStatus.editing? Icon(Icons.check, size: 16) : SizedBox( width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 1.5,)),
+                          icon:  widget.isEditing == EditAnswerStatus.editing? const Icon(Icons.check, size: 16) : const SizedBox( width: 16, height: 16, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 1.5,)),
                           label:  widget.isEditing == EditAnswerStatus.editing? Text("Save") : Text("Saving..."),
                         ),
 
@@ -352,19 +352,19 @@ class ClinicalAlerts extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
+        color: AppColors.redFlagBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFECACA)),
+        border: Border.all(color: AppColors.redFlagBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.warning_amber_rounded,
                 size: 18,
-                color: Colors.red.shade400,
+                color: AppColors.error,
               ),
               const SizedBox(width: 8),
               Text(
@@ -372,7 +372,7 @@ class ClinicalAlerts extends StatelessWidget {
                 style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.red.shade700,
+                  color: AppColors.redFlagText,
                 ),
               ),
             ],
@@ -391,18 +391,18 @@ class FlagContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border(left: BorderSide(color: Color(0xff92400e), width: 5)),
-        color: Color(0xfffffbeb),
+        border: const Border(left: BorderSide(color: AppColors.amber800, width: 5)),
+        color: AppColors.warningBg,
       ),
       child: RichText(
         text: TextSpan(
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
-            color: Colors.red.shade900,
+            color: AppColors.redFlagText,
             height: 1.4,
           ),
           children: [
@@ -410,7 +410,7 @@ class FlagContainer extends StatelessWidget {
             TextSpan(
               text: '${flag['flag_type']}: ',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Color(0xff92400e),
+                color: AppColors.amber800,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -418,7 +418,7 @@ class FlagContainer extends StatelessWidget {
               text: flag['description'],
               style: Theme.of(
                 context,
-              ).textTheme.bodyLarge?.copyWith(color: Color(0xff92400e)),
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.amber800),
             ),
           ],
         ),
@@ -436,9 +436,9 @@ class Header extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.dividerLight),
       ),
       child: Column(
         children: [
@@ -461,25 +461,25 @@ class Header extends StatelessWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.black,
             ),
           ),
           const SizedBox(height: 6),
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade500,
+                color: AppColors.grey,
                 height: 1.4,
               ),
               children: [
                 const TextSpan(text: 'Check what you shared. Tap '),
                 TextSpan(
                   text: 'Edit',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
+                    color: AppColors.greyDark,
                   ),
                 ),
                 const TextSpan(

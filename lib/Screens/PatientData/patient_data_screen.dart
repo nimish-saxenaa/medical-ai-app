@@ -74,10 +74,10 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: AppColors.warningBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(LucideIcons.monitor, color: Colors.orange, size: 20),
+                child: const Icon(LucideIcons.monitor, color: AppColors.warning, size: 20),
               ),
               title: const Text("Cabin Flow"),
               subtitle: const Text("Doctor-led live consultation"),

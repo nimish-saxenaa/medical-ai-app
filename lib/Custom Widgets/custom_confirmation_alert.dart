@@ -11,7 +11,7 @@ Future<dynamic> showCustomConfirmationAlert({
 }) {
   return showDialog(
     context: context,
-    barrierColor: Colors.black.withAlpha(100),
+    barrierColor: AppColors.black.withAlpha(100),
     builder: (context) {
       return Dialog(
         backgroundColor: AppColors.greyLight,
@@ -47,7 +47,7 @@ Future<dynamic> showCustomConfirmationAlert({
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(color: Color(0xFFE5E7EB)),
+                            side: const BorderSide(color: AppColors.borderLight),
                           ),
                         ),
                         child: const Text("Cancel", style: TextStyle(fontWeight: FontWeight.w600)),
@@ -59,7 +59,7 @@ Future<dynamic> showCustomConfirmationAlert({
                         onPressed: onPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: confirmColor,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

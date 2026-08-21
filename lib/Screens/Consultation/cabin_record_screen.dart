@@ -32,10 +32,10 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -97,7 +97,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text("Save & Close", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: const Text("Save & Close", style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
@@ -133,13 +133,13 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             Icon(
               icon,
               size: 16,
-              color: isActive ? Colors.white : AppColors.grey,
+              color: isActive ? AppColors.white : AppColors.grey,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.white : AppColors.grey,
+                color: isActive ? AppColors.white : AppColors.grey,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -154,9 +154,9 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200, width: 0.5),
+          border: Border.all(color: AppColors.dividerLight, width: 0.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,9 +201,9 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200, width: 0.5),
+              border: Border.all(color: AppColors.dividerLight, width: 0.5),
             ),
             child: Row(
               children: [
@@ -221,9 +221,9 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200, width: 0.5),
+              border: Border.all(color: AppColors.dividerLight, width: 0.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,7 +293,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
       decoration: BoxDecoration(
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.dividerLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,7 +315,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isHigh ? const Color(0xFFFEF2F2) : const Color(0xFFF0FDF4),
+        color: isHigh ? AppColors.redFlagBg : AppColors.successContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: isHigh ? AppColors.error : AppColors.success, width: 4)),
       ),
@@ -347,7 +347,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
       decoration: BoxDecoration(
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.dividerLight),
       ),
       child: Text(text, style: const TextStyle(fontSize: 13)),
     );

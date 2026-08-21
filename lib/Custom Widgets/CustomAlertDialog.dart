@@ -1,10 +1,11 @@
 import 'package:clinical_ai_app/Custom%20Widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import '../Components/colors.dart';
 
 Future<dynamic> showCustomDialog(String detail, BuildContext context) {
   return showDialog(
     context: context,
-    barrierColor: Colors.black.withAlpha(100),
+    barrierColor: AppColors.black.withAlpha(100),
     builder: (context) {
       return Dialog(
         insetPadding: const EdgeInsets.symmetric(horizontal: 16),

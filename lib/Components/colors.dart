@@ -50,8 +50,31 @@ class AppColors {
   
   // UI Infrastructure
   static const borderLight = Color(0xFFE5E7EB);
+  static const borderMedium = Color(0xFFD1D5DB);
   static const dividerLight = Color(0xFFF3F4F6);
   static const surfaceDark = Color(0xFF1F2937);
+
+  // Animation & Visual Effects
+  static const waveformIndigo = Color(0xFF4F46E5);
+  static const waveformPurple = Color(0xFF7C3AED);
+  static const waveformCyan = Color(0xFF06B6D4);
+
+  // Feedback & Semantic Variants
+  static const successContainer = Color(0xFFF0FDF4);
+  static const successBorder = Color(0xFFDCFCE7);
+  static const successText = Color(0xFF15803D);
+  static const successIcon = Color(0xFF34D399);
+
+  // Additional Slate/Grey shades
+  static const slate200 = Color(0xFFE2E8F0);
+  static const slate500 = Color(0xFF64748B);
+  static const slate700 = Color(0xFF374151);
+
+  // Extra Brand colors
+  static const blue600 = Color(0xFF2563EB);
+  static const purple600 = Color(0xFF7C3AED);
+  static const rose600 = Color(0xFFE11D48);
+  static const amber800 = Color(0xFF92400E);
 
   // Avatar Palettes
   static const avatarBlueBg = Color(0xFFDBEAFE);

@@ -123,9 +123,11 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        backgroundColor: AppColors.white,
+        elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Image.asset("assets/kuvaka_logo.png"),
@@ -168,14 +170,14 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF111827),
+            color: AppColors.black,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4),
         Text(
           'This takes 15–30 seconds. Please wait.',
-          style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+          style: const TextStyle(fontSize: 14, color: AppColors.grey),
           textAlign: TextAlign.center,
         ),
       ],
@@ -222,7 +224,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
       default:
         bg = AppColors.greyLight;
         border = AppColors.borderLight;
-        iconBg = Colors.grey.shade300;
+        iconBg = AppColors.borderMedium;
         textColor = AppColors.grey;
     }
 
@@ -236,7 +238,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
         boxShadow: step.status == 'running'
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: AppColors.black.withAlpha(12),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -274,17 +276,17 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
       ),
       alignment: Alignment.center,
       child: step.status == 'done'
-          ? const Icon(Icons.check, color: Colors.white, size: 18)
+          ? const Icon(Icons.check, color: AppColors.white, size: 18)
           : step.status == 'running'
           ? const SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(Colors.white),
+                valueColor: AlwaysStoppedAnimation(AppColors.white),
               ),
             )
-          : const Icon(Icons.circle_outlined, color: Colors.white, size: 18),
+          : const Icon(Icons.circle_outlined, color: AppColors.white, size: 18),
     );
   }
 }
@@ -329,10 +331,10 @@ class _StatusDotState extends State<_StatusDot>
             height: 14,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF34D399), // green-400
-              border: Border.all(color: Colors.white, width: 2),
+              color: AppColors.successIcon, // green-400
+              border: Border.all(color: AppColors.white, width: 2),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                BoxShadow(color: AppColors.black.withAlpha(25), blurRadius: 4),
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:clinical_ai_app/Screens/Authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../../Components/colors.dart';
 import '../../Custom Widgets/custom_button.dart';
 import '../../Custom Widgets/logo_text.dart';
 
@@ -11,7 +12,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
