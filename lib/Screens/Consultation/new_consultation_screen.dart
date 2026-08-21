@@ -402,7 +402,7 @@ class SpecialitySelectTile extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected ? AppColors.primary : AppColors.transparent,
                   border: Border.all(
                     color: isSelected ? AppColors.primary : AppColors.greyLight,
                     width: 2,

@@ -79,7 +79,7 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Material(
-            color: Colors.transparent,
+            color: AppColors.transparent,
             child: InkWell(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               splashColor: AppColors.primaryLight,

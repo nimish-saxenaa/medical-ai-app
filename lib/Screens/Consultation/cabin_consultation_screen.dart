@@ -397,7 +397,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.transparent,
+          color: isActive ? AppColors.primary : AppColors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive ? AppColors.primary : AppColors.grey.withAlpha(76),
@@ -617,7 +617,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         children: [
           _buildAnalysisSection(
             "Red Flags",
-            Colors.white,
+            AppColors.white,
             AppColors.primary,
             children: _suggestions?.redFlags == null || _suggestions!.redFlags.isEmpty
                 ? [const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))]
@@ -626,7 +626,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           const SizedBox(height: 16),
           _buildAnalysisSection(
             "Differentials",
-            Colors.white,
+            AppColors.white,
             AppColors.primary,
             children: _suggestions?.differentials == null || _suggestions!.differentials.isEmpty
                 ? [const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))]
@@ -667,7 +667,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           // Panel Content
           _buildAnalysisSection(
             "Clinical Panel",
-            Colors.white,
+            AppColors.white,
             AppColors.primary,
             children: [
               if (_selectedPanelTab == 0) ...[
@@ -707,7 +707,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primaryLight : Colors.transparent,
+            color: isActive ? AppColors.primaryLight : AppColors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -1027,7 +1027,7 @@ class PartialTranscriptBubble extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withAlpha(127),
+                color: AppColors.white.withAlpha(127),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.grey.withAlpha(25), style: BorderStyle.solid),
               ),

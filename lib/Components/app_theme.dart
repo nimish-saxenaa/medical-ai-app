@@ -10,7 +10,7 @@ class AppTheme {
       seedColor: AppColors.primary,
       primary: AppColors.primary,
       secondary: AppColors.primary,
-      surface: Colors.white,
+      surface: AppColors.white,
       brightness: Brightness.light,
     ),
 
@@ -125,7 +125,7 @@ class AppTheme {
     ),
 
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       foregroundColor: AppColors.black,
       elevation: 0,
       centerTitle: false,
@@ -134,7 +134,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.white,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         shape: RoundedRectangleBorder(
@@ -171,14 +171,14 @@ class AppTheme {
     ),
 
     cardTheme: CardThemeData(
-      color: Colors.white,
+      color: AppColors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
 
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.white,
     ),
 
     dividerColor: AppColors.dividerLight,

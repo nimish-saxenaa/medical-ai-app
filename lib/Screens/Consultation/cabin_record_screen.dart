@@ -122,7 +122,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.transparent,
+          color: isActive ? AppColors.primary : AppColors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive ? AppColors.primary : AppColors.grey.withAlpha(76),
@@ -267,7 +267,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primaryLight : Colors.transparent,
+            color: isActive ? AppColors.primaryLight : AppColors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

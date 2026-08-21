@@ -336,7 +336,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
             const SizedBox(height: 4),
             Text(fileName, style: const TextStyle(fontSize: 12)),
             const SizedBox(height: 2),
-            Text('Saved to: $savedIn', style: const TextStyle(fontSize: 10, color: Colors.white70)),
+            Text('Saved to: $savedIn', style: const TextStyle(fontSize: 10, color: AppColors.white)),
           ],
         ),
         backgroundColor: AppColors.success,
@@ -430,7 +430,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.transparent,
+          color: isActive ? AppColors.primary : AppColors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive ? AppColors.primary : AppColors.grey.withAlpha(76),
@@ -442,13 +442,13 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
             Icon(
               icon,
               size: 16,
-              color: isActive ? Colors.white : AppColors.grey,
+              color: isActive ? AppColors.white : AppColors.grey,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.white : AppColors.grey,
+                color: isActive ? AppColors.white : AppColors.grey,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 fontSize: 13,
               ),
