@@ -51,8 +51,9 @@ class _NewPatientFormState extends State<NewPatientForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
-      color: AppColors.white,
+      color: theme.scaffoldBackgroundColor,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -161,14 +162,14 @@ class _NewPatientFormState extends State<NewPatientForm> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.greyLight,
-                          foregroundColor: AppColors.greyDark,
-                          elevation: 0,
+                          backgroundColor: theme.colorScheme.surface,
+                          foregroundColor: theme.textTheme.bodyMedium?.color,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(color: AppColors.borderLight),
+                            side: BorderSide(color: theme.dividerColor, width: 0.5),
                           ),
+                          elevation: 0,
                         ),
                         child: const Text("Cancel", style: TextStyle(fontWeight: FontWeight.w600)),
                       ),
@@ -178,9 +179,6 @@ class _NewPatientFormState extends State<NewPatientForm> {
                       child: ElevatedButton(
                         onPressed: _handleCreate,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.white,
-                          elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -207,17 +205,17 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.greyLight,
-        border: Border(bottom: BorderSide(color: AppColors.borderLight, width: 0.75)),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        border: Border(bottom: BorderSide(color: theme.dividerColor, width: 0.5)),
       ),
       child: Text(
         'New Patient',
-        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppColors.black,
             ),
       ),
     );
@@ -239,11 +237,12 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return RichText(
       text: TextSpan(
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.bold,
-          color: AppColors.black.withOpacity(0.8),
+          color: theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
           letterSpacing: 0.5,
         ),
         children: [
@@ -256,8 +255,8 @@ class _FieldLabel extends StatelessWidget {
           if (optional)
             TextSpan(
               text: ' (OPTIONAL)',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.grey,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.textTheme.bodyMedium?.color,
                 fontWeight: FontWeight.normal,
               ),
             ),
@@ -284,34 +283,16 @@ class _InputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       textAlign: textAlign,
-      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: AppColors.black,
-        fontSize: 15,
-      ),
+      style: theme.textTheme.bodyLarge?.copyWith(fontSize: 15),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.grey.withOpacity(0.6),
-        ),
-        filled: true,
-        fillColor: AppColors.greyLight,
+        fillColor: theme.colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight, width: 0.75),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight, width: 0.75),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.0),
-        ),
       ),
     );
   }
@@ -333,11 +314,18 @@ class GenderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final selectedBg = isDark ? gender.primaryColor.withAlpha(40) : gender.secondaryColor;
+    final selectedText = isDark ? Colors.white : gender.primaryColor;
+
     return Material(
-      color: selected ? gender.secondaryColor : AppColors.white,
+      color: selected ? selectedBg : theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
+        splashColor: selectedBg,
+        highlightColor: selectedBg.withAlpha(20),
         borderRadius: BorderRadius.circular(12),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -345,14 +333,14 @@ class GenderButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? gender.primaryColor : AppColors.borderLight,
+              color: selected ? gender.primaryColor : theme.dividerColor,
               width: selected ? 1.5 : 0.75,
             ),
           ),
           child: Text(
             gender.label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: selected ? gender.primaryColor : AppColors.greyDark,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: selected ? selectedText : theme.textTheme.bodyMedium?.color,
               fontWeight: selected ? FontWeight.bold : FontWeight.w500,
               fontSize: 13,
             ),
@@ -365,13 +353,13 @@ class GenderButton extends StatelessWidget {
 
 
 Future<void> showNewPatientDialog(BuildContext context) {
+  final theme = Theme.of(context);
   return showDialog(
     context: context,
-    barrierColor: AppColors.black.withOpacity(0.5),
+    barrierColor: Colors.black.withOpacity(0.5),
     builder: (context) {
       return Dialog(
-        backgroundColor: AppColors.white,
-        elevation: 0,
+        backgroundColor: theme.scaffoldBackgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         insetPadding: const EdgeInsets.symmetric(horizontal: 20),
         child: ConstrainedBox(

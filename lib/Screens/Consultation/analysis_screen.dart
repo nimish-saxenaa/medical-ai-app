@@ -57,8 +57,8 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
     _PipelineStep(id: 'diagnose', title: 'Running AI diagnosis'),
   ];
 
-  static Color brand = AppColors.primary; // indigo-500
-  static Color brandLight = AppColors.primaryLight; // indigo-50
+  static Color brand = AppColors.brand; // indigo-500
+  static Color brandLight = AppColors.brandHighlight; // indigo-50
 
   @override
   void initState() {
@@ -123,11 +123,8 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: AppColors.white,
-        elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Image.asset("assets/kuvaka_logo.png"),
@@ -136,7 +133,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
           "Analysis",
           style: Theme.of(
             context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+          ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
         ),
       ),
       body: SafeArea(
@@ -165,19 +162,22 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
   Widget _buildHeader() {
     return Column(
       children: [
-        const Text(
+        Text(
           'Analysing your responses…',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: AppColors.black,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4),
         Text(
           'This takes 15–30 seconds. Please wait.',
-          style: const TextStyle(fontSize: 14, color: AppColors.grey),
+          style: TextStyle(
+            fontSize: 14,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -201,6 +201,8 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
   }
 
   Widget _buildStepCard(_PipelineStep step) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     late Color bg;
     late Color border;
     late Color iconBg;
@@ -209,23 +211,23 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
 
     switch (step.status) {
       case 'done':
-        bg = AppColors.stepSuccessBg;
-        border = AppColors.stepSuccessBorder;
+        bg = isDark ? AppColors.success.withAlpha(40) : AppColors.stepSuccessBg;
+        border = isDark ? AppColors.success.withAlpha(100) : AppColors.stepSuccessBorder;
         iconBg = AppColors.success;
-        textColor = AppColors.stepSuccessText;
+        textColor = isDark ? Colors.white : AppColors.stepSuccessText;
         break;
       case 'running':
-        bg = brandLight;
-        border = brand.withOpacity(0.3);
+        bg = isDark ? theme.colorScheme.primary.withAlpha(40) : brandLight;
+        border = isDark ? theme.colorScheme.primary.withAlpha(100) : brand.withOpacity(0.3);
         iconBg = brand;
-        textColor = brand;
+        textColor = isDark ? Colors.white : brand;
         fontWeight = FontWeight.w600;
         break;
       default:
-        bg = AppColors.greyLight;
-        border = AppColors.borderLight;
-        iconBg = AppColors.borderMedium;
-        textColor = AppColors.grey;
+        bg = isDark ? theme.dividerColor.withAlpha(40) : theme.colorScheme.surface;
+        border = isDark ? theme.dividerColor : theme.dividerColor;
+        iconBg = isDark ? theme.dividerColor : AppColors.outline;
+        textColor = theme.textTheme.bodyMedium?.color ?? AppColors.textDisabled;
     }
 
     return AnimatedContainer(
@@ -238,7 +240,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
         boxShadow: step.status == 'running'
             ? [
                 BoxShadow(
-                  color: AppColors.black.withAlpha(12),
+                  color: AppColors.textPrimary.withAlpha(12),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -276,17 +278,17 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
       ),
       alignment: Alignment.center,
       child: step.status == 'done'
-          ? const Icon(Icons.check, color: AppColors.white, size: 18)
+          ? const Icon(Icons.check, color: Colors.white, size: 18)
           : step.status == 'running'
           ? const SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(AppColors.white),
+                valueColor: AlwaysStoppedAnimation(Colors.white),
               ),
             )
-          : const Icon(Icons.circle_outlined, color: AppColors.white, size: 18),
+          : const Icon(Icons.circle_outlined, color: Colors.white, size: 18),
     );
   }
 }
@@ -331,10 +333,10 @@ class _StatusDotState extends State<_StatusDot>
             height: 14,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.successIcon, // green-400
-              border: Border.all(color: AppColors.white, width: 2),
+              color: AppColors.success, // green-400
+              border: Border.all(color: Theme.of(context).colorScheme.surface, width: 2),
               boxShadow: [
-                BoxShadow(color: AppColors.black.withAlpha(25), blurRadius: 4),
+                BoxShadow(color: Colors.black.withAlpha(25), blurRadius: 4),
               ],
             ),
           ),

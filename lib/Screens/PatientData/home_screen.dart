@@ -106,7 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.white, // White background as requested
       appBar: _buildAppBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showNewPatientDialog(context),
@@ -121,46 +120,41 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(24.0),
               child: Row(
                 children: [
-                  // 1/3 Master Panel
+                  // 1/3 Master Panel (List)
                   Expanded(
                     flex: 1,
-                    child: _buildFloatingPanel(
-                      backgroundColor: AppColors.greyLight,
-                      child: _buildPatientList(filteredPatientList, patientList, isTablet),
-                    ),
+                    child: _buildPatientList(filteredPatientList, patientList, isTablet),
                   ),
-                  const SizedBox(width: 24), // Space between panels
+                  const SizedBox(width: 32), // Space between panels
                   // 2/3 Detail Panel
                   Expanded(
                     flex: 2,
-                    child: _buildFloatingPanel(
-                      backgroundColor: AppColors.greyLight,
-                      child: Stack(
-                        children: [
-                          _buildDetailContent(),
-                          if (_selectedHistory != null || _isLoadingHistory)
-                            Positioned(
-                              top: 12,
-                              right: 12,
-                              child: Material(
-                                color: AppColors.white.withAlpha(200),
-                                shape: const CircleBorder(),
-                                child: IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedPatient = null;
-                                      _selectedHistory = null;
-                                      _isLoadingHistory = false;
-                                    });
-                                  },
-                                  icon: const Icon(Icons.close, size: 20, color: AppColors.greyDark),
-                                  constraints: const BoxConstraints(),
-                                  padding: const EdgeInsets.all(8),
-                                ),
+                    child: Stack(
+                      children: [
+                        _buildDetailContent(),
+                        if (_selectedHistory != null || _isLoadingHistory)
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Material(
+                              color: Theme.of(context).colorScheme.surface,
+                              shape: const CircleBorder(),
+                              elevation: 2,
+                              child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedPatient = null;
+                                    _selectedHistory = null;
+                                    _isLoadingHistory = false;
+                                  });
+                                },
+                                icon: Icon(Icons.close, size: 20, color: Theme.of(context).colorScheme.onSurface),
+                                constraints: const BoxConstraints(),
+                                padding: const EdgeInsets.all(8),
                               ),
                             ),
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -180,8 +174,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.white,
-      elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 16),
         child: Image.asset("assets/kuvaka_logo.png"),
@@ -198,24 +190,27 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             );
           },
-          icon: const Icon(LucideIcons.logOut, color: AppColors.grey),
+          icon: Icon(LucideIcons.logOut, color: Theme.of(context).colorScheme.onSurface),
         ),
       ],
     );
   }
 
-  Widget _buildFloatingPanel({required Widget child, Color backgroundColor = AppColors.white}) {
+  Widget _buildFloatingPanel({required Widget child, Color? backgroundColor}) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: backgroundColor ?? theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withAlpha(20),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: theme.brightness == Brightness.light
+            ? [
+                BoxShadow(
+                  color: Colors.black.withAlpha(20),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       clipBehavior: Clip.antiAlias,
       child: child,
@@ -246,16 +241,20 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 8),
               Text(
                 "Manage your patient records",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: searchController,
                 onChanged: (value) => setState(() {}),
                 decoration: InputDecoration(
-                  fillColor: AppColors.greyLight,
-                  filled: true,
-                  prefixIcon: const Icon(Icons.search, color: AppColors.grey),
+                  fillColor: Theme.of(context).colorScheme.surface,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
@@ -331,8 +330,9 @@ class CustomPatientBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
-      color: isSelected ? AppColors.primaryLight : AppColors.white,
+      color: isSelected ? theme.colorScheme.primaryContainer : theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -343,7 +343,7 @@ class CustomPatientBubble extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.grey.withAlpha(50),
+              color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
               width: isSelected ? 1.5 : 0.5,
             ),
           ),
@@ -358,11 +358,11 @@ class CustomPatientBubble extends StatelessWidget {
                       child: RichText(
                         text: TextSpan(
                           text: patient.name,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: theme.textTheme.bodyLarge,
                           children: [
                             TextSpan(
                               text: "\n${patient.age} Yrs · ${patient.gender ?? ""}",
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
@@ -370,18 +370,18 @@ class CustomPatientBubble extends StatelessWidget {
                     ),
                   ),
                   if (isLoading)
-                    const SizedBox(
+                    SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.primary,
+                        color: theme.colorScheme.primary,
                       ),
                     )
                   else
                     Icon(
                       Icons.keyboard_arrow_right_rounded,
-                      color: isSelected ? AppColors.primary : AppColors.grey,
+                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
                     ),
                 ],
               ),
@@ -393,7 +393,10 @@ class CustomPatientBubble extends StatelessWidget {
                   const Spacer(),
                   Text(
                     DateFormat('d MMM yy').format(parseServerDate(patient.createdAt)),
-                    style: const TextStyle(fontSize: 12, color: AppColors.grey),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
                   ),
                 ],
               ),
@@ -412,18 +415,26 @@ class GenderLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = gender.primaryColor;
+    // Adjust colors for dark mode to maintain legibility
+    final background = isDark ? primary.withAlpha(40) : gender.secondaryColor;
+    final borderColor = isDark ? primary.withAlpha(100) : primary;
+    final textColor = isDark ? Color.lerp(primary, Colors.white, 0.4) : primary;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: gender.secondaryColor,
+        color: background,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(width: 1, color: gender.primaryColor),
+        border: Border.all(width: 1, color: borderColor),
       ),
       child: Text(
         gender.label,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyLarge?.copyWith(color: gender.primaryColor),
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: textColor,
+              fontSize: 12,
+            ),
       ),
     );
   }

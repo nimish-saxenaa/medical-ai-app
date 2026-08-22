@@ -35,7 +35,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     final patientsProvider = context.read<PatientListProvider>();
     return Scaffold(
-      backgroundColor: AppColors.white,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -71,7 +70,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       Text(
                         'Start taking smarter clinical histories today.',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.greyDark,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: isTablet ? 18 : 16,
                         ),
                         textAlign: isTablet ? TextAlign.center : TextAlign.left,
@@ -172,7 +171,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                     height: 16,
                                     width: 16,
                                     child: CircularProgressIndicator(
-                                      color: AppColors.white,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -190,16 +188,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           text: TextSpan(
                             text: "Already have an Account?",
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppColors.grey,
+                              color: Theme.of(context).textTheme.bodySmall?.color,
                               fontSize: isTablet ? 16 : 14,
                             ),
                             children: [
                               TextSpan(
                                 text: " Sign In",
                                 style: const TextStyle(
-                                  color: AppColors.primary,
+                                  color: AppColors.brand,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: AppColors.primary,
+                                  decorationColor: AppColors.brand,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 recognizer: TapGestureRecognizer()

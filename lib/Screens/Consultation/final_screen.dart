@@ -128,7 +128,7 @@ class _FinalScreenState extends State<FinalScreen> {
           "Consultation Completed",
           style: Theme.of(
             context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+          ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
         ),
       ),
       body: SafeArea(
@@ -141,7 +141,7 @@ class _FinalScreenState extends State<FinalScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -151,12 +151,12 @@ class _FinalScreenState extends State<FinalScreen> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: AppColors.white.withAlpha(40),
+                          color: Theme.of(context).colorScheme.onPrimary.withAlpha(40),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.monitor_heart_outlined,
-                          color: AppColors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           size: 24,
                         ),
                       ),
@@ -167,7 +167,7 @@ class _FinalScreenState extends State<FinalScreen> {
                         "Clinical Results Ready",
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(
-                              color: AppColors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                         textAlign: TextAlign.center,
@@ -178,7 +178,7 @@ class _FinalScreenState extends State<FinalScreen> {
                       Text(
                         "Review and share with the treating physician.",
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.white.withAlpha(180),
+                          color: Theme.of(context).colorScheme.onPrimary.withAlpha(180),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -190,7 +190,7 @@ class _FinalScreenState extends State<FinalScreen> {
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: AppColors.dividerLight,
+                    color: Theme.of(context).dividerColor,
                   ),
 
                   child: Row(
@@ -247,15 +247,15 @@ class _FinalScreenState extends State<FinalScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
+                      boxShadow: Theme.of(context).brightness == Brightness.light ? [
                         BoxShadow(
-                          color: AppColors.black.withAlpha(20),
+                          color: Colors.black.withAlpha(20),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
-                      ],
+                      ] : null,
                     ),
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
@@ -313,24 +313,25 @@ class PageButton extends StatelessWidget {
   final void Function() onTap;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
-      color: selected ? AppColors.white : AppColors.dividerLight,
+      color: selected ? theme.colorScheme.surface : theme.dividerColor,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
-        splashColor: AppColors.white,
+        splashColor: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: Ink(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: selected ? AppColors.white : AppColors.dividerLight,
+            color: selected ? theme.colorScheme.surface : theme.dividerColor,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             text,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: selected ? AppColors.primary : AppColors.greyDark,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: selected ? theme.colorScheme.primary : theme.textTheme.bodyMedium?.color,
               fontWeight: FontWeight.w600,
             ),
           ),

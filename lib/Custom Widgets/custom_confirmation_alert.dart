@@ -7,14 +7,17 @@ Future<dynamic> showCustomConfirmationAlert({
   required VoidCallback onPressed,
   String title = "Confirm Action",
   String confirmText = "Confirm",
-  Color confirmColor = AppColors.primary,
+  Color? confirmColor,
 }) {
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+  final effectiveConfirmColor = confirmColor ?? theme.colorScheme.primary;
+
   return showDialog(
     context: context,
-    barrierColor: AppColors.black.withAlpha(100),
+    barrierColor: Colors.black.withAlpha(150),
     builder: (context) {
       return Dialog(
-        backgroundColor: AppColors.greyLight,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         insetPadding: const EdgeInsets.symmetric(horizontal: 16),
         child: ConstrainedBox(
@@ -27,12 +30,12 @@ Future<dynamic> showCustomConfirmationAlert({
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.black),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   detail,
-                  style: const TextStyle(fontSize: 14, color: AppColors.greyDark, height: 1.5),
+                  style: TextStyle(fontSize: 14, color: theme.textTheme.bodyMedium?.color, height: 1.5),
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -41,13 +44,12 @@ Future<dynamic> showCustomConfirmationAlert({
                       child: ElevatedButton(
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.greyLight,
-                          foregroundColor: AppColors.greyDark,
-                          elevation: 0,
+                          backgroundColor: isDark ? theme.scaffoldBackgroundColor : AppColors.background,
+                          foregroundColor: isDark ? Colors.white : theme.textTheme.bodyMedium?.color,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(color: AppColors.borderLight),
+                            side: BorderSide(color: theme.dividerColor),
                           ),
                         ),
                         child: const Text("Cancel", style: TextStyle(fontWeight: FontWeight.w600)),
@@ -58,9 +60,8 @@ Future<dynamic> showCustomConfirmationAlert({
                       child: ElevatedButton(
                         onPressed: onPressed,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: confirmColor,
-                          foregroundColor: AppColors.white,
-                          elevation: 0,
+                          backgroundColor: effectiveConfirmColor,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),

@@ -30,7 +30,7 @@ class PatientHistoryIconText extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: AppColors.grey, size: 14),
+        Icon(icon, color: Theme.of(context).textTheme.bodyMedium?.color, size: 14),
         const SizedBox(width: 8),
         Text(text),
       ],
@@ -43,13 +43,15 @@ class PatientHistoryEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 48),
       alignment: Alignment.center,
       decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.grey.withAlpha(50),
+          color: theme.dividerColor,
           width: 2,
           style: BorderStyle.solid,
         ),
@@ -62,24 +64,24 @@ class PatientHistoryEmptyState extends StatelessWidget {
             height: 48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: theme.colorScheme.primary.withAlpha(40),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
+            child: Icon(
               LucideIcons.stethoscope,
               size: 20,
-              color: AppColors.primary,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'No consultations yet',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 4),
           Text(
             'Start the first one using the button above.',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
         ],
       ),
@@ -155,7 +157,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
       SnackBar(
         content: Row(
           children: [
-            Icon(isError ? Icons.error : Icons.check_circle, color: AppColors.white, size: 20),
+            Icon(isError ? Icons.error : Icons.check_circle, color: AppColors.surface, size: 20),
             const SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
@@ -328,7 +330,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
           children: [
             Row(
               children: [
-                const Icon(Icons.check_circle, color: AppColors.white, size: 20),
+                const Icon(Icons.check_circle, color: AppColors.surface, size: 20),
                 const SizedBox(width: 8),
                 const Expanded(child: Text('PDF saved', style: TextStyle(fontWeight: FontWeight.bold))),
               ],
@@ -336,14 +338,14 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
             const SizedBox(height: 4),
             Text(fileName, style: const TextStyle(fontSize: 12)),
             const SizedBox(height: 2),
-            Text('Saved to: $savedIn', style: const TextStyle(fontSize: 10, color: AppColors.white)),
+            Text('Saved to: $savedIn', style: const TextStyle(fontSize: 10, color: AppColors.surface)),
           ],
         ),
         backgroundColor: AppColors.success,
         duration: const Duration(seconds: 6),
         action: SnackBarAction(
           label: 'OPEN',
-          textColor: AppColors.white,
+          textColor: AppColors.surface,
           onPressed: () => OpenFile.open(filePath),
         ),
       ),
@@ -363,10 +365,10 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
+                  color: AppColors.brandHighlight,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(LucideIcons.stethoscope, color: AppColors.primary, size: 20),
+                child: const Icon(LucideIcons.stethoscope, color: AppColors.brand, size: 20),
               ),
               title: const Text("Medical Consultation"),
               subtitle: const Text("Standard AI-assisted history taking"),
@@ -390,7 +392,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.warningBg,
+                  color: AppColors.warningContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(LucideIcons.monitor, color: AppColors.warning, size: 20),
@@ -417,7 +419,18 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
   }
 
   Widget _buildPageIndicator(int index, String label, IconData icon) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     bool isActive = _currentPage == index;
+    
+    final activeBg = theme.colorScheme.primary;
+    final activeFg = theme.colorScheme.onPrimary;
+    
+    final inactiveFg = isDark ? Colors.white.withAlpha(180) : theme.textTheme.bodyMedium?.color;
+    final borderColor = isActive 
+        ? activeBg 
+        : (isDark ? Colors.white.withAlpha(60) : theme.dividerColor);
+
     return GestureDetector(
       onTap: () {
         _pageController.animateToPage(
@@ -430,10 +443,10 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : AppColors.transparent,
+          color: isActive ? activeBg : AppColors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? AppColors.primary : AppColors.grey.withAlpha(76),
+            color: borderColor,
             width: 0.75,
           ),
         ),
@@ -442,13 +455,13 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
             Icon(
               icon,
               size: 16,
-              color: isActive ? AppColors.white : AppColors.grey,
+              color: isActive ? activeFg : inactiveFg,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? AppColors.white : AppColors.grey,
+                color: isActive ? activeFg : inactiveFg,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 fontSize: 13,
               ),
@@ -460,183 +473,193 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
   }
 
   Widget _buildConsultationHistoryPage() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            text: "Consultation History  ",
-            style: Theme.of(context).textTheme.displaySmall,
-            children: [
-              TextSpan(
-                text: "${history.sessions.length}",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
-              ),
-            ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: "Consultation History  ",
+              style: Theme.of(context).textTheme.displaySmall,
+              children: [
+                TextSpan(
+                  text: "${history.sessions.length}",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textDisabled),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: history.sessions.isNotEmpty
-              ? ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: history.sessions.length,
-                  itemBuilder: (context, index) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      DiagnosisCard(
-                        key: ValueKey(history.sessions[index].sessionId),
-                        index: index,
-                        patientHistory: history,
-                        isSelected: _selectedSessionIds.contains(history.sessions[index].sessionId),
-                        selectionModeActive: _selectedSessionIds.isNotEmpty || _selectedCabinIds.isNotEmpty,
-                        onSelect: () => _toggleSessionSelection(history.sessions[index].sessionId),
-                        isDownloading: downloadingSessionId == history.sessions[index].sessionId,
-                        onDelete: () => _deleteSession(history.sessions[index].sessionId),
-                        onDownload: (session) => downloadConsultationReport(session),
-                        title: getSpecialtyName(history.sessions[index].specialty ?? ""),
-                        status: getDiagnosisStatus(history.sessions[index].currentStage ?? ""),
-                        date: parseServerDate(history.sessions[index].createdAt),
-                        description: history.sessions[index].chiefComplaint ?? "",
-                        location: sessionLocations[history.sessions[index].sessionId]?.fullLocation,
-                        redFlags: history.sessions[index].diagnosis?.urgentConcerns ?? [],
-                        diagnoses: List.generate(
-                          (history.sessions[index].diagnosis?.differentialDiagnoses.length ?? 0) > 3
-                              ? 3
-                              : history.sessions[index].diagnosis?.differentialDiagnoses.length ?? 0,
-                          (diffDia) => DiagnosisItem(
-                            severity: history.sessions[index].diagnosis?.differentialDiagnoses[diffDia].likelihood ?? "",
-                            name: history.sessions[index].diagnosis?.differentialDiagnoses[diffDia].condition ?? "",
-                            code: history.sessions[index].diagnosis?.differentialDiagnoses[diffDia].icdCode ?? "",
+          const SizedBox(height: 16),
+          Expanded(
+            child: history.sessions.isNotEmpty
+                ? ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: history.sessions.length,
+                    itemBuilder: (context, index) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        DiagnosisCard(
+                          key: ValueKey(history.sessions[index].sessionId),
+                          index: index,
+                          patientHistory: history,
+                          isSelected: _selectedSessionIds.contains(history.sessions[index].sessionId),
+                          selectionModeActive: _selectedSessionIds.isNotEmpty || _selectedCabinIds.isNotEmpty,
+                          onSelect: () => _toggleSessionSelection(history.sessions[index].sessionId),
+                          isDownloading: downloadingSessionId == history.sessions[index].sessionId,
+                          onDelete: () => _deleteSession(history.sessions[index].sessionId),
+                          onDownload: (session) => downloadConsultationReport(session),
+                          title: getSpecialtyName(history.sessions[index].specialty ?? ""),
+                          status: getDiagnosisStatus(history.sessions[index].currentStage ?? ""),
+                          date: parseServerDate(history.sessions[index].createdAt),
+                          description: history.sessions[index].chiefComplaint ?? "",
+                          location: sessionLocations[history.sessions[index].sessionId]?.fullLocation,
+                          redFlags: history.sessions[index].diagnosis?.urgentConcerns ?? [],
+                          diagnoses: List.generate(
+                            (history.sessions[index].diagnosis?.differentialDiagnoses.length ?? 0) > 3
+                                ? 3
+                                : history.sessions[index].diagnosis?.differentialDiagnoses.length ?? 0,
+                            (diffDia) => DiagnosisItem(
+                              severity: history.sessions[index].diagnosis?.differentialDiagnoses[diffDia].likelihood ?? "",
+                              name: history.sessions[index].diagnosis?.differentialDiagnoses[diffDia].condition ?? "",
+                              code: history.sessions[index].diagnosis?.differentialDiagnoses[diffDia].icdCode ?? "",
+                            ),
                           ),
+                          workup: "Workup: ${history.sessions[index].diagnosis?.suggestedWorkup.take(2).join("\n") ?? ""} + ${history.sessions[index].diagnosis?.suggestedWorkup.length ?? 2 - 2} more",
+                          subjective: [
+                            SoapField(
+                              label: 'Chief complaint',
+                              value: history.sessions[index].chiefComplaint ?? history.sessions[index].summary.subjective.chiefComplaint,
+                            ),
+                            SoapField(label: 'HPI', value: history.sessions[index].summary.subjective.historyOfPresentingIllness),
+                            SoapField(label: 'Past medical history', value: history.sessions[index].summary.subjective.pastMedicalHistory),
+                            SoapField(label: 'Surgical history', value: history.sessions[index].summary.subjective.surgicalHistory),
+                            SoapField(label: 'Medications', value: history.sessions[index].summary.subjective.medications),
+                            SoapField(label: 'Allergies', value: history.sessions[index].summary.subjective.allergies),
+                            SoapField(label: 'Family history', value: history.sessions[index].summary.subjective.familyHistory),
+                            SoapField(label: 'Social history', value: history.sessions[index].summary.subjective.socialHistory),
+                            SoapField(label: 'Review of systems', value: history.sessions[index].summary.subjective.reviewOfSystems),
+                          ],
+                          objective: [
+                            SoapField(label: 'Vital signs', value: history.sessions[index].summary.objective.vitalSigns),
+                            SoapField(label: 'Physical exam', value: history.sessions[index].summary.objective.physicalExamination),
+                          ],
+                          show: history.sessions[index].diagnosis != null ? true : false,
                         ),
-                        workup: "Workup: ${history.sessions[index].diagnosis?.suggestedWorkup.take(2).join("\n") ?? ""} + ${history.sessions[index].diagnosis?.suggestedWorkup.length ?? 2 - 2} more",
-                        subjective: [
-                          SoapField(
-                            label: 'Chief complaint',
-                            value: history.sessions[index].chiefComplaint ?? history.sessions[index].summary.subjective.chiefComplaint,
-                          ),
-                          SoapField(label: 'HPI', value: history.sessions[index].summary.subjective.historyOfPresentingIllness),
-                          SoapField(label: 'Past medical history', value: history.sessions[index].summary.subjective.pastMedicalHistory),
-                          SoapField(label: 'Surgical history', value: history.sessions[index].summary.subjective.surgicalHistory),
-                          SoapField(label: 'Medications', value: history.sessions[index].summary.subjective.medications),
-                          SoapField(label: 'Allergies', value: history.sessions[index].summary.subjective.allergies),
-                          SoapField(label: 'Family history', value: history.sessions[index].summary.subjective.familyHistory),
-                          SoapField(label: 'Social history', value: history.sessions[index].summary.subjective.socialHistory),
-                          SoapField(label: 'Review of systems', value: history.sessions[index].summary.subjective.reviewOfSystems),
-                        ],
-                        objective: [
-                          SoapField(label: 'Vital signs', value: history.sessions[index].summary.objective.vitalSigns),
-                          SoapField(label: 'Physical exam', value: history.sessions[index].summary.objective.physicalExamination),
-                        ],
-                        show: history.sessions[index].diagnosis != null ? true : false,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                )
-              : const PatientHistoryEmptyState(),
-        ),
-      ],
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  )
+                : const PatientHistoryEmptyState(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildCabinHistoryPage() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            text: "Cabin Sessions  ",
-            style: Theme.of(context).textTheme.displaySmall,
-            children: [
-              TextSpan(
-                text: "${history.cabinSessions.length}",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
-              ),
-            ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: "Cabin Sessions  ",
+              style: Theme.of(context).textTheme.displaySmall,
+              children: [
+                TextSpan(
+                  text: "${history.cabinSessions.length}",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textDisabled),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: history.cabinSessions.isNotEmpty
-              ? ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: history.cabinSessions.length,
-                  itemBuilder: (context, index) {
-                    return CabinDiagnosisCard(
-                      key: ValueKey(history.cabinSessions[index].sessionId),
-                      session: history.cabinSessions[index],
-                      index: index,
-                      isSelected: _selectedCabinIds.contains(history.cabinSessions[index].sessionId),
-                      selectionModeActive: _selectedSessionIds.isNotEmpty || _selectedCabinIds.isNotEmpty,
-                      onSelect: () => _toggleCabinSelection(history.cabinSessions[index].sessionId),
-                      onDelete: () => _deleteCabinSession(history.cabinSessions[index].sessionId),
-                    );
-                  },
-                )
-              : const PatientHistoryEmptyState(),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Expanded(
+            child: history.cabinSessions.isNotEmpty
+                ? ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: history.cabinSessions.length,
+                    itemBuilder: (context, index) {
+                      return CabinDiagnosisCard(
+                        key: ValueKey(history.cabinSessions[index].sessionId),
+                        session: history.cabinSessions[index],
+                        index: index,
+                        isSelected: _selectedCabinIds.contains(history.cabinSessions[index].sessionId),
+                        selectionModeActive: _selectedSessionIds.isNotEmpty || _selectedCabinIds.isNotEmpty,
+                        onSelect: () => _toggleCabinSelection(history.cabinSessions[index].sessionId),
+                        onDelete: () => _deleteCabinSession(history.cabinSessions[index].sessionId),
+                      );
+                    },
+                  )
+                : const PatientHistoryEmptyState(),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Material(
-                borderRadius: BorderRadius.circular(16),
-                color: AppColors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomNameInitial(name: history.patient.name, size: 60),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  text: history.patient.name,
-                                  style: Theme.of(context).textTheme.headlineMedium,
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                child: Material(
+                  borderRadius: BorderRadius.circular(16),
+                  color: theme.colorScheme.surface,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomNameInitial(name: history.patient.name, size: 60),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    text: history.patient.name,
+                                    style: theme.textTheme.headlineMedium,
+                                    children: [
+                                      TextSpan(
+                                        text: "\n${history.patient.age} Yrs · ${history.patient.gender ?? ""}",
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
                                   children: [
-                                    TextSpan(
-                                      text: "\n${history.patient.age} Yrs · ${history.patient.gender ?? ""}",
-                                      style: Theme.of(context).textTheme.bodyMedium,
+                                    PatientHistoryIconText(
+                                      icon: LucideIcons.calendar,
+                                      text: DateFormat('d MMM yy').format(
+                                        parseServerDate(history.patient.createdAt),
+                                      ),
+                                    ),
+                                    PatientHistoryIconText(
+                                      icon: LucideIcons.stethoscope,
+                                      text: '${history.sessions.length + history.cabinSessions.length} Sessions',
                                     ),
                                   ],
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                children: [
-                                  PatientHistoryIconText(
-                                    icon: LucideIcons.calendar,
-                                    text: DateFormat('d MMM yy').format(
-                                      parseServerDate(history.patient.createdAt),
-                                    ),
-                                  ),
-                                  PatientHistoryIconText(
-                                    icon: LucideIcons.stethoscope,
-                                    text: '${history.sessions.length + history.cabinSessions.length} Sessions',
-                                  ),
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -655,9 +678,9 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                               key: const ValueKey('selection_bar'),
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryLight,
+                                color: theme.colorScheme.primary.withAlpha(40),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: AppColors.primary, width: 0.75),
+                                border: Border.all(color: theme.colorScheme.primary, width: 0.75),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -667,13 +690,13 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                                       _selectedSessionIds.clear();
                                       _selectedCabinIds.clear();
                                     }),
-                                    child: const Icon(Icons.close, size: 16, color: AppColors.primary),
+                                    child: Icon(Icons.close, size: 16, color: theme.colorScheme.primary),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     "${_selectedSessionIds.length + _selectedCabinIds.length} Selected",
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
+                                    style: TextStyle(
+                                      color: theme.colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                     ),
@@ -702,10 +725,10 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                                     child: Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary,
+                                        color: theme.colorScheme.primary,
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(Icons.add, color: AppColors.white, size: 16),
+                                      child: Icon(Icons.add, color: theme.colorScheme.onPrimary, size: 16),
                                     ),
                                   ),
                                 ],

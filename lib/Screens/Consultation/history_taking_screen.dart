@@ -464,24 +464,26 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
   }
 
   Color _buttonBackgroundColor() {
+    final theme = Theme.of(context);
     switch (voiceStreamState) {
       case VoiceStreamState.inactive:
-        return AppColors.primary;
+        return AppColors.brand;
       case VoiceStreamState.recording:
         return AppColors.error;
       default:
-        return AppColors.greyLight;
+        return theme.dividerColor;
     }
   }
 
   Color _buttonForegroundColor() {
+    final theme = Theme.of(context);
     switch (voiceStreamState) {
       case VoiceStreamState.inactive:
-        return AppColors.white;
+        return Colors.white;
       case VoiceStreamState.recording:
-        return AppColors.white;
+        return Colors.white;
       default:
-        return AppColors.grey;
+        return theme.textTheme.bodyMedium?.color ?? AppColors.textDisabled;
     }
   }
 
@@ -563,8 +565,8 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.greyLight,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -573,9 +575,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
         ),
         title: Text(
           "History Taking",
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+          style: theme.textTheme.bodyLarge?.copyWith(color: theme.textTheme.bodyMedium?.color),
         ),
       ),
       body: SafeArea(
@@ -628,9 +628,9 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                       //Recording Card
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: theme.colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.dividerLight),
+                          border: Border.all(color: theme.dividerColor),
                         ),
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -646,19 +646,17 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                         width: 28,
                                         height: 28,
                                         decoration: BoxDecoration(
-                                          color: AppColors.primaryLight,
+                                          color: theme.colorScheme.primary.withAlpha(30),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
                                         ),
-                                        child: Icon(LucideIcons.mic, size: 15),
+                                        child: Icon(LucideIcons.mic, size: 15, color: theme.colorScheme.primary),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         "Speak Your\nAnswer",
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge,
+                                        style: theme.textTheme.bodyLarge,
                                       ),
                                     ],
                                   ),
@@ -666,10 +664,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                 Expanded(
                                   child: Text(
                                     "-transcribed & analyzed\ninstantly",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ],
@@ -687,16 +682,16 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                       vertical: 10,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.redFlagBg,
+                                      color: theme.brightness == Brightness.light ? AppColors.errorContainer : AppColors.error.withAlpha(40),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: AppColors.redFlagBorder,
+                                        color: theme.brightness == Brightness.light ? AppColors.redFlagBorder : AppColors.error.withAlpha(100),
                                       ),
                                     ),
                                     child: Text(
                                       formatRecordingTime(recordingDuration),
-                                      style: const TextStyle(
-                                        color: AppColors.redFlagText,
+                                      style: TextStyle(
+                                        color: theme.brightness == Brightness.light ? AppColors.onErrorContainer : Colors.white,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -717,7 +712,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                         children: [
                           Expanded(
                             child: Container(
-                              color: AppColors.grey.withAlpha(100),
+                              color: theme.dividerColor,
                               height: 1,
                             ),
                           ),
@@ -726,7 +721,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                           const SizedBox(width: 8),
                           Expanded(
                             child: Container(
-                              color: AppColors.grey.withAlpha(100),
+                              color: theme.dividerColor,
                               height: 1,
                             ),
                           ),
@@ -747,56 +742,40 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                       controller: answerController,
                       keyboardType: TextInputType.multiline,
                       decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: AppColors.grey.withAlpha(50),
-                            width: 0.3,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: AppColors.grey.withAlpha(50),
-                            width: 0.3,
-                          ),
-                        ),
-                        fillColor: AppColors.white,
+                        fillColor: Theme.of(context).colorScheme.surface,
                         hintText: "Type your answer here...",
-                        hintStyle: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Material(
                     borderRadius: BorderRadius.circular(8),
-                    child: Ink(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        splashColor: AppColors.primary.withAlpha(50),
-                        onTap: () {
-                          if (answerController.text.isEmpty)
-                            showCustomDialog("Please type an answer", context);
-                          if (canAnswer)
-                            if (answerController.text.isNotEmpty) sendAnswer();
-                          FocusScope.of(context).unfocus();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: AppColors.grey.withAlpha(50),
-                              width: 0.5,
-                            ),
+                    color: theme.colorScheme.surface,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      splashColor: theme.colorScheme.primary.withAlpha(50),
+                      onTap: () {
+                        if (answerController.text.isEmpty)
+                          showCustomDialog("Please type an answer", context);
+                        if (canAnswer)
+                          if (answerController.text.isNotEmpty) sendAnswer();
+                        FocusScope.of(context).unfocus();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: theme.dividerColor,
+                            width: 0.5,
                           ),
-                          width: 50,
-                          height: 50,
-                          child: Icon(
-                            LucideIcons.send,
-                            color: canAnswer
-                                ? AppColors.grey
-                                : AppColors.grey.withAlpha(200),
-                          ),
+                        ),
+                        width: 50,
+                        height: 50,
+                        child: Icon(
+                          LucideIcons.send,
+                          color: canAnswer
+                              ? theme.colorScheme.primary
+                              : theme.textTheme.bodyMedium?.color?.withAlpha(100),
                         ),
                       ),
                     ),
@@ -810,45 +789,44 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: AppColors.grey.withAlpha(50),
+                        color: theme.dividerColor,
                         width: 0.5,
                       ),
                     ),
 
                     child: Material(
                       borderRadius: BorderRadius.circular(8),
-                      child: Ink(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(8),
-                          splashColor: AppColors.primary.withAlpha(50),
-                          onTap: () {
-                            if (canAnswer) skipQuestion();
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Icon(
-                                LucideIcons.skipForward,
-                                color: canAnswer
-                                    ? AppColors.grey
-                                    : AppColors.grey.withAlpha(200),
-                                size: 15,
-                              ),
-                              Text(
-                                "   Skip Question",
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: canAnswer
-                                          ? AppColors.grey
-                                          : AppColors.grey.withAlpha(200),
-                                    ),
-                              ),
-                            ],
-                          ),
+                      color: theme.colorScheme.surface,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        splashColor: theme.colorScheme.primary.withAlpha(50),
+                        onTap: () {
+                          if (canAnswer) skipQuestion();
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(
+                              LucideIcons.skipForward,
+                              color: canAnswer
+                                  ? theme.colorScheme.primary
+                                  : theme.textTheme.bodyMedium?.color?.withAlpha(100),
+                              size: 15,
+                            ),
+                            Text(
+                              "   Skip Question",
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: canAnswer
+                                        ? theme.colorScheme.primary
+                                        : theme.textTheme.bodyMedium?.color?.withAlpha(100),
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -875,14 +853,15 @@ class QuestionBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return CustomPaint(
       painter: BubblePainter(
         backgroundColor: state == TextToSpeechState.active
-            ? AppColors.primaryLight
-            : AppColors.white,
+            ? theme.colorScheme.primary.withAlpha(40)
+            : theme.colorScheme.surface,
         borderColor: state == TextToSpeechState.active
-            ? AppColors.primary.withAlpha(100)
-            : AppColors.dividerLight,
+            ? theme.colorScheme.primary.withAlpha(100)
+            : theme.dividerColor,
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -929,27 +908,25 @@ class WhiteSquareIconButton extends StatelessWidget {
   final IconData icon;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
-      color: AppColors.white,
+      color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(8),
-      child: Ink(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-        child: InkWell(
-          splashColor: AppColors.primary.withAlpha(50),
-          borderRadius: BorderRadius.circular(8),
-          onTap: onTap,
-          child: Container(
-            width: 35,
-            height: 35,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.grey.withAlpha(100),
-                width: 0.5,
-              ),
+      child: InkWell(
+        splashColor: theme.colorScheme.primary.withAlpha(50),
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Container(
+          width: 35,
+          height: 35,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: theme.dividerColor,
+              width: 0.5,
             ),
-            child: Icon(icon, color: AppColors.grey, size: 16),
           ),
+          child: Icon(icon, color: theme.textTheme.bodyMedium?.color, size: 16),
         ),
       ),
     );
@@ -961,6 +938,7 @@ class CenterCircleSnakeEmoji extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -972,8 +950,8 @@ class CenterCircleSnakeEmoji extends StatelessWidget {
               borderRadius: BorderRadius.circular(100),
               child: Column(
                 children: [
-                  Container(width: 100, height: 70, color: AppColors.white),
-                  Container(width: 100, height: 30, color: AppColors.grey),
+                  Container(width: 100, height: 70, color: theme.colorScheme.surface),
+                  Container(width: 100, height: 30, color: theme.dividerColor),
                 ],
               ),
             ),
@@ -1037,7 +1015,7 @@ class BubblePainter extends CustomPainter {
 
     path.close();
 
-    canvas.drawShadow(path, AppColors.black.withAlpha(50), 6, false);
+    canvas.drawShadow(path, AppColors.textPrimary.withAlpha(50), 6, false);
 
     canvas.drawPath(
       path,
@@ -1100,21 +1078,22 @@ class _RecordingCardState extends State<RecordingCard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.colorScheme.surface,
         border: Border.all(
-          color: AppColors.slate200,
+          color: theme.dividerColor,
         ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: theme.brightness == Brightness.light ? [
           BoxShadow(
             blurRadius: 8,
             offset: const Offset(0, 2),
-            color: AppColors.black.withAlpha(10),
+            color: Colors.black.withAlpha(10),
           ),
-        ],
+        ] : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1141,12 +1120,12 @@ class _RecordingCardState extends State<RecordingCard>
 
               const SizedBox(width: 8),
 
-              const Text(
+              Text(
                 "Recording",
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.slate500,
+                  color: theme.textTheme.bodyMedium?.color,
                   letterSpacing: .4,
                 ),
               ),
@@ -1163,6 +1142,7 @@ class _RecordingCardState extends State<RecordingCard>
               painter: LiveAudioPainter(
                 volume: widget.volume,
                 phase: widget.phase,
+                color: theme.colorScheme.primary,
               ),
             ),
           ),
@@ -1172,7 +1152,7 @@ class _RecordingCardState extends State<RecordingCard>
           /// Loudness meter placeholder
           Container(
             height: 4,
-            color: AppColors.borderMedium,
+            color: theme.dividerColor,
           ),
         ],
       ),
@@ -1183,16 +1163,18 @@ class _RecordingCardState extends State<RecordingCard>
 class LiveAudioPainter extends CustomPainter {
   final double volume;
   final double phase;
+  final Color color;
 
   LiveAudioPainter({
     required this.volume,
     required this.phase,
+    required this.color,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.primary
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round

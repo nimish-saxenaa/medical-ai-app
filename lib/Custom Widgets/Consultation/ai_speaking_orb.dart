@@ -83,11 +83,11 @@ class _AIOrbState extends State<AIOrb>
   Color get _indicatorColor {
     switch (widget.state) {
       case TextToSpeechState.active:
-        return AppColors.successIcon;
+        return AppColors.success;
       case TextToSpeechState.loading:
         return AppColors.warning;
       case TextToSpeechState.idle:
-        return AppColors.grey;
+        return AppColors.textDisabled;
     }
   }
 
@@ -151,7 +151,7 @@ class _AIOrbState extends State<AIOrb>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withAlpha(50),
+                                color: Theme.of(context).colorScheme.primary.withAlpha(50),
                                 blurRadius: 28,
                                 spreadRadius: 5,
                               ),
@@ -163,8 +163,8 @@ class _AIOrbState extends State<AIOrb>
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(width: size, height: size*2/3, color: AppColors.white),
-                                  Container(width: size, height: size*1/3, color: AppColors.grey),
+                                  Container(width: size, height: size*2/3, color: Theme.of(context).colorScheme.surface),
+                                  Container(width: size, height: size*1/3, color: Theme.of(context).dividerColor),
                                 ],
                               ),
                             ),
@@ -188,7 +188,7 @@ class _AIOrbState extends State<AIOrb>
                           color: _indicatorColor,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             width: 2,
                           ),
                           boxShadow: [
@@ -237,7 +237,7 @@ class _GlowRing extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-              color: AppColors.waveformCyan.withAlpha(opacity),
+              color: AppColors.vizAccent3.withAlpha(opacity),
               width: width
           ),
         ),

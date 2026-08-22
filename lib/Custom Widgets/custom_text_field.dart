@@ -34,21 +34,12 @@ class CustomTextField extends StatelessWidget {
           keyboardType: keyboardType,
           obscureText: obscureText,
           decoration: InputDecoration(
-            border: InputBorder.none,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.grey.withAlpha(50), width: 0.3),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.grey.withAlpha(50), width: 0.3),
-            ),
-
             hintText: hintText,
             hintStyle: Theme.of(
               context,
-            ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
-            fillColor: AppColors.greyLight,
+            ).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
           ),
         ),
       ],

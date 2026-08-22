@@ -27,8 +27,8 @@ class CustomNameInitial extends StatelessWidget {
   static const List<AvatarColors> _avatarPalettes = [
     // bg-brand-light text-brand
     AvatarColors(
-      background: AppColors.primaryLight,
-      foreground: AppColors.primary,
+      background: AppColors.brandHighlight,
+      foreground: AppColors.brand,
     ),
 
     // bg-blue-100 text-blue-700
@@ -68,20 +68,25 @@ class CustomNameInitial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = palette;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final basePalette = palette;
+    
+    final Color background = isDark ? basePalette.foreground.withAlpha(40) : basePalette.background;
+    final Color foreground = isDark ? basePalette.foreground : basePalette.foreground;
 
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: colors.background,
+        color: background,
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
       child: Text(
         getInitials(name),
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: colors.foreground,
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: foreground,
           fontSize: size / 2.5,
         ),
       ),

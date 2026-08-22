@@ -186,7 +186,7 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                       height: 14,
                       width: 14,
                       child: CircularProgressIndicator(
-                        color: AppColors.white,
+                        color: AppColors.surface,
                         strokeWidth: 2,
                       ),
                     ),
@@ -218,11 +218,12 @@ class PatientBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: AppColors.greyLight),
+        color: theme.colorScheme.surface,
+        border: Border.all(color: theme.dividerColor),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -232,11 +233,11 @@ class PatientBox extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(name, style: Theme.of(context).textTheme.bodyLarge),
+              Text(name, style: theme.textTheme.bodyLarge),
               const SizedBox(height: 2),
               Text(
                 '$age yrs · $gender',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium,
               ),
             ],
           ),
@@ -280,7 +281,7 @@ const specialities = [
     title: 'Mental Health',
     subtitle: 'Psychotherapy & psychiatric assessment',
     icon: LucideIcons.brain,
-    iconBg: AppColors.primaryMuted,
+    iconBg: AppColors.brandMuted,
     iconColor: AppColors.purple600,
   ),
   SingleSpeciality(
@@ -305,11 +306,12 @@ class TypeOfConsultation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: AppColors.greyLight),
+        color: theme.colorScheme.surface,
+        border: Border.all(color: theme.dividerColor),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -317,7 +319,7 @@ class TypeOfConsultation extends StatelessWidget {
         children: [
           Text(
             'TYPE OF CONSULTATION',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
           ...specialities.map((option) {
@@ -351,8 +353,10 @@ class SpecialitySelectTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Material(
-      color: isSelected ? AppColors.primaryLight : AppColors.white,
+      color: isSelected ? (isDark ? theme.colorScheme.primary.withAlpha(40) : AppColors.brandHighlight) : theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -362,7 +366,7 @@ class SpecialitySelectTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.greyLight,
+              color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
               width: 1,
             ),
           ),
@@ -373,7 +377,7 @@ class SpecialitySelectTile extends StatelessWidget {
                 height: 36,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: option.iconBg,
+                  color: isDark ? option.iconColor.withAlpha(40) : option.iconBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(option.icon, size: 20, color: option.iconColor),
@@ -385,12 +389,12 @@ class SpecialitySelectTile extends StatelessWidget {
                   children: [
                     Text(
                       option.title,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: theme.textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       option.subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium,
                     ),
                   ],
                 ),
@@ -402,14 +406,14 @@ class SpecialitySelectTile extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? AppColors.primary : AppColors.transparent,
+                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.greyLight,
+                    color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
                     width: 2,
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check, size: 12, color: AppColors.white)
+                    ? Icon(Icons.check, size: 12, color: theme.colorScheme.onPrimary)
                     : null,
               ),
             ],
@@ -434,11 +438,12 @@ class LabeledTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: AppColors.greyLight),
+        color: theme.colorScheme.surface,
+        border: Border.all(color: theme.dividerColor),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -446,15 +451,13 @@ class LabeledTextField extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
               children: [
                 TextSpan(text: label.toUpperCase()),
                 if (optionalText != null)
                   TextSpan(
                     text: ' $optionalText',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium,
                   ),
               ],
             ),
@@ -475,29 +478,14 @@ class _InputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextField(
       controller: controller,
-      style: Theme.of(context).textTheme.bodyLarge,
+      style: theme.textTheme.bodyLarge,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: Theme.of(
-          context,
-        ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
-        filled: true,
-        fillColor: AppColors.greyLight,
+        hintStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.textTheme.bodyMedium?.color),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.greyLight),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.greyLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.grey),
-        ),
       ),
     );
   }

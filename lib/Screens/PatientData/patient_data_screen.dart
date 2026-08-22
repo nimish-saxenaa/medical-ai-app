@@ -35,9 +35,16 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
   }
 
   void _showConsultationTypeDialog() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    final primaryIconColor = isDark ? Colors.white : theme.colorScheme.primary;
+    final warningIconColor = isDark ? Colors.white : AppColors.warning;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text("Start New Session"),
         content: Column(
@@ -47,10 +54,10 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
+                  color: isDark ? theme.colorScheme.primary.withAlpha(120) : theme.colorScheme.primary.withAlpha(40),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(LucideIcons.stethoscope, color: AppColors.primary, size: 20),
+                child: Icon(LucideIcons.stethoscope, color: isDark ? Colors.white : theme.colorScheme.primary, size: 20),
               ),
               title: const Text("Medical Consultation"),
               subtitle: const Text("Standard AI-assisted history taking"),
@@ -74,10 +81,10 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.warningBg,
+                  color: isDark ? AppColors.warning.withAlpha(120) : AppColors.warning.withAlpha(40),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(LucideIcons.monitor, color: AppColors.warning, size: 20),
+                child: Icon(LucideIcons.monitor, color: isDark ? Colors.white : AppColors.warning, size: 20),
               ),
               title: const Text("Cabin Flow"),
               subtitle: const Text("Doctor-led live consultation"),
@@ -136,17 +143,14 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
           ),
         ],
       ),
-      body: Container(
-        color: AppColors.greyLight,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: PatientClinicalHistoryView(
-              patientHistory: history,
-              onHistoryUpdated: () {
-                // Handle any state sync if needed
-              },
-            ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: PatientClinicalHistoryView(
+            patientHistory: history,
+            onHistoryUpdated: () {
+              // Handle any state sync if needed
+            },
           ),
         ),
       ),

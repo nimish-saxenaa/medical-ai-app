@@ -108,19 +108,19 @@ class _WavePainter extends CustomPainter {
 
   static final List<_WaveData> _waves = [
     _WaveData(
-      color: AppColors.waveformIndigo,
+      color: AppColors.vizAccent1,
       alpha: 0.9,
       phase: 0,
       frequency: 1.2,
     ),
     _WaveData(
-      color: AppColors.waveformPurple,
+      color: AppColors.vizAccent2,
       alpha: 0.65,
       phase: math.pi / 2.5,
       frequency: 2.1,
     ),
     _WaveData(
-      color: AppColors.waveformCyan,
+      color: AppColors.vizAccent3,
       alpha: 0.5,
       phase: math.pi * 0.7,
       frequency: 0.85,

@@ -8,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Models/cabin_models.dart';
 import '../../Custom Widgets/custom_confirmation_alert.dart';
 import '../../Services/Authentication/access_token.dart';
+import '../../Services/Authentication/auth_service.dart';
 import '../../Services/Cabin/cabin_service.dart';
 import '../../Services/Cabin/cabin_streaming.dart';
 import 'cabin_record_screen.dart';
@@ -32,9 +33,13 @@ class CabinConsultationScreen extends StatefulWidget {
 
 class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   final PageController _pageController = PageController();
+  final PageController _questionsPageController = PageController();
   final TextEditingController _noteController = TextEditingController();
   int _currentPage = 0;
+  int _currentQuestionIndex = 0;
   int _selectedPanelTab = 0; // 0: Symptoms, 1: Diagnoses, 2: Tests, 3: Meds
+  bool _hasNewInsights = false;
+  bool _hasNewPanel = false;
 
   final AudioRecorder _recorder = AudioRecorder();
   CabinStreamConnection? _connection;
@@ -59,6 +64,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    _questionsPageController.dispose();
     _noteController.dispose();
     _messageSubscription?.cancel();
     _amplitudeSubscription?.cancel();
@@ -78,7 +84,8 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   Future<void> _startStreaming() async {
     try {
       if (await _recorder.hasPermission()) {
-        final accessToken = await AccessTokenService.getToken();
+        // Proactively refresh/validate token before starting long-running stream
+        final accessToken = await getValidAccessToken();
         if (accessToken == null) throw Exception("No access token");
 
         // 1. Connect WebSocket
@@ -144,12 +151,14 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       case "panel":
         setState(() {
           _panel = CabinPanel.fromJson(message.data);
+          if (_currentPage != 2) _hasNewPanel = true;
         });
         break;
 
       case "suggestions":
         setState(() {
           _suggestions = CabinSuggestions.fromJson(message.data);
+          if (_currentPage != 1) _hasNewInsights = true;
         });
         break;
 
@@ -159,6 +168,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           _utterances = snapshot.utterances;
           _panel = snapshot.panel;
           _suggestions = snapshot.suggestions;
+          // Don't set notification for initial snapshot
         });
         break;
 
@@ -285,11 +295,8 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: AppColors.white,
-        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.maybePop(context),
@@ -303,7 +310,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
             ),
             Text(
               "Live Consultation",
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.grey),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
             ),
           ],
         ),
@@ -342,11 +349,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         ],
       ),
       body: SafeArea(
-        child: Container(
-          color: AppColors.greyLight,
-          child: Column(
-            children: [
-              Padding(
+        child: Column(
+          children: [
+            Padding(
                 padding: const EdgeInsets.only(top: 16.0, left: 16, right: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -354,9 +359,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   children: [
                     _buildPageIndicator(0, "Consult", LucideIcons.mic),
                     const SizedBox(width: 8),
-                    _buildPageIndicator(1, "Insights", LucideIcons.brainCircuit),
+                    _buildPageIndicator(1, "Insights", LucideIcons.brainCircuit, hasNotification: _hasNewInsights),
                     const SizedBox(width: 8),
-                    _buildPageIndicator(2, "Panel", LucideIcons.clipboardList),
+                    _buildPageIndicator(2, "Panel", LucideIcons.clipboardList, hasNotification: _hasNewPanel),
                   ],
                 ),
               ),
@@ -367,6 +372,8 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   onPageChanged: (index) {
                     setState(() {
                       _currentPage = index;
+                      if (index == 1) _hasNewInsights = false;
+                      if (index == 2) _hasNewPanel = false;
                     });
                   },
                   children: [
@@ -379,11 +386,11 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 
-  Widget _buildPageIndicator(int index, String label, IconData icon) {
+  Widget _buildPageIndicator(int index, String label, IconData icon, {bool hasNotification = false}) {
+    final theme = Theme.of(context);
     bool isActive = _currentPage == index;
     return GestureDetector(
       onTap: () {
@@ -397,27 +404,45 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : AppColors.transparent,
+          color: isActive ? theme.colorScheme.primary : AppColors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? AppColors.primary : AppColors.grey.withAlpha(76),
+            color: isActive ? theme.colorScheme.primary : theme.dividerColor,
           ),
         ),
-        child: Row(
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isActive ? AppColors.white : AppColors.grey,
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 16,
+                  color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isActive ? AppColors.white : AppColors.grey,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            if (hasNotification && !isActive)
+              Positioned(
+                top: -4,
+                right: -8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.error,
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -425,6 +450,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   }
 
   Widget _buildConsultationPage() {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -433,31 +459,50 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.dividerLight, width: 0.5),
+              border: Border.all(color: theme.dividerColor, width: 0.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const Icon(LucideIcons.messageSquareText, size: 16, color: AppColors.primary),
+                    const Icon(LucideIcons.messageSquareText, size: 16, color: AppColors.brand),
                     const SizedBox(width: 8),
                     Text(
                       "Questions to Ask",
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
+                    if (_suggestions?.questionsToAsk != null && _suggestions!.questionsToAsk.isNotEmpty) ...[
+                      const Spacer(),
+                      Text(
+                        "${_currentQuestionIndex + 1}/${_suggestions!.questionsToAsk.length}",
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.textDisabled,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  height: 130, // Increased from 120
+                  height: 110, // Reduced from 150 to remove excess space
                   child: _suggestions?.questionsToAsk == null || _suggestions!.questionsToAsk.isEmpty
-                      ? const Center(child: Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13)))
-                      : ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: _suggestions!.questionsToAsk.map((q) => _buildDetailedQuestionCard(q.question, q.reason)).toList(),
+                      ? const Center(child: Text("No data to show", style: TextStyle(color: AppColors.textDisabled, fontSize: 13)))
+                      : PageView.builder(
+                          controller: _questionsPageController,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentQuestionIndex = index;
+                            });
+                          },
+                          itemCount: _suggestions!.questionsToAsk.length,
+                          itemBuilder: (context, index) {
+                            final q = _suggestions!.questionsToAsk[index];
+                            return _buildDetailedQuestionCard(q.question, q.reason);
+                          },
                         ),
                 ),
               ],
@@ -469,9 +514,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.dividerLight, width: 0.5),
+                border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,7 +525,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.listMusic, size: 16, color: AppColors.primary),
+                        const Icon(LucideIcons.listMusic, size: 16, color: AppColors.brand),
                         const SizedBox(width: 8),
                         Text(
                           "Live Transcript",
@@ -517,19 +562,8 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                 child: TextField(
                   controller: _noteController,
                   onSubmitted: (_) => _sendNote(),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: "Type a clinical note...",
-                    filled: true,
-                    fillColor: AppColors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: AppColors.dividerLight),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: AppColors.dividerLight),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
                 ),
               ),
@@ -550,10 +584,10 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               const SizedBox(width: 8),
               CircleAvatar(
                 radius: 22,
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.brand,
                 child: IconButton(
                   onPressed: _sendNote,
-                  icon: const Icon(LucideIcons.send, color: AppColors.white, size: 18),
+                  icon: const Icon(LucideIcons.send, color: AppColors.surface, size: 18),
                 ),
               ),
             ],
@@ -565,51 +599,49 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   }
 
   Widget _buildDetailedQuestionCard(String question, String reasoning) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double cardWidth = screenWidth - 64; 
-
+    final theme = Theme.of(context);
     return Container(
-      width: cardWidth,
-      height: 130, // Force height to match the parent SizedBox
-      margin: const EdgeInsets.only(right: 16),
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.dividerLight),
+        border: Border.all(color: theme.dividerColor),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            question,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.black),
-          ),
-          if (reasoning.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Text(
-                  reasoning,
-                  style: TextStyle(
-                    fontSize: 11, 
-                    color: AppColors.greyDark, 
-                    height: 1.3,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              question,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: theme.textTheme.bodyLarge?.color,
               ),
             ),
+            if (reasoning.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                reasoning,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.textTheme.bodyMedium?.color,
+                  height: 1.3,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildAnalysisPage() {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       child: Column(
@@ -617,19 +649,19 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         children: [
           _buildAnalysisSection(
             "Red Flags",
-            AppColors.white,
-            AppColors.primary,
+            theme.colorScheme.surface,
+            theme.colorScheme.primary,
             children: _suggestions?.redFlags == null || _suggestions!.redFlags.isEmpty
-                ? [const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))]
+                ? [Text("No data to show", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))]
                 : _suggestions!.redFlags.map((f) => _buildRedFlagItem(f)).toList(),
           ),
           const SizedBox(height: 16),
           _buildAnalysisSection(
             "Differentials",
-            AppColors.white,
-            AppColors.primary,
+            theme.colorScheme.surface,
+            theme.colorScheme.primary,
             children: _suggestions?.differentials == null || _suggestions!.differentials.isEmpty
-                ? [const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))]
+                ? [Text("No data to show", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))]
                 : _suggestions!.differentials.map((d) => 
                     _buildDifferentialItem(d.condition, d.likelihood ?? "Unknown", d.reasoning ?? "")
                   ).toList(),
@@ -640,6 +672,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   }
 
   Widget _buildPanelPage() {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       child: Column(
@@ -649,9 +682,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.dividerLight, width: 0.5),
+              border: Border.all(color: theme.dividerColor, width: 0.5),
             ),
             child: Row(
               children: [
@@ -667,27 +700,27 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           // Panel Content
           _buildAnalysisSection(
             "Clinical Panel",
-            AppColors.white,
-            AppColors.primary,
+            theme.colorScheme.surface,
+            theme.colorScheme.primary,
             children: [
               if (_selectedPanelTab == 0) ...[
                 if (_panel?.symptoms == null || _panel!.symptoms.isEmpty)
-                  const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))
+                  Text("No data to show", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))
                 else
                   ..._panel!.symptoms.map((s) => _buildSymptomItem(s.name, s.description ?? "", s.reportedBy ?? "unknown")),
               ] else if (_selectedPanelTab == 1) ...[
                 if (_panel?.diagnoses == null || _panel!.diagnoses.isEmpty)
-                  const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))
+                  Text("No data to show", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))
                 else
                   ..._panel!.diagnoses.map((d) => _buildDifferentialItem(d.condition, d.likelihood ?? "Confirmed", d.reasoning ?? "")),
               ] else if (_selectedPanelTab == 2) ...[
                 if (_panel?.tests == null || _panel!.tests.isEmpty)
-                  const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))
+                  Text("No data to show", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))
                 else
                   ..._panel!.tests.map((t) => _buildSimplePanelItem(t)),
               ] else if (_selectedPanelTab == 3) ...[
                 if (_panel?.medications == null || _panel!.medications.isEmpty)
-                  const Text("No data to show", style: TextStyle(color: AppColors.grey, fontSize: 13))
+                  Text("No data to show", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))
                 else
                   ..._panel!.medications.map((m) => _buildSimplePanelItem(m.drugName)),
               ],
@@ -707,14 +740,14 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primaryLight : AppColors.transparent,
+            color: isActive ? AppColors.brandHighlight : AppColors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isActive ? AppColors.primary : AppColors.grey,
+              color: isActive ? AppColors.brand : AppColors.textDisabled,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               fontSize: 11,
             ),
@@ -725,37 +758,54 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   }
 
   Widget _buildSymptomItem(String title, String description, String reportedBy) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.dividerLight),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.black),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: theme.textTheme.bodyLarge?.color,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             description,
-            style: TextStyle(fontSize: 12, color: AppColors.greyDark, height: 1.3),
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.textTheme.bodyMedium?.color,
+              height: 1.3,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
               Text(
                 "Reported by: ",
-                style: TextStyle(fontSize: 10, color: AppColors.grey, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: theme.textTheme.bodySmall?.color,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
               Text(
                 reportedBy,
-                style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -765,30 +815,32 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   }
 
   Widget _buildSimplePanelItem(String text) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.dividerLight),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 13, color: AppColors.black),
+        style: TextStyle(fontSize: 13, color: theme.textTheme.bodyLarge?.color),
       ),
     );
   }
 
   Widget _buildAnalysisSection(String title, Color bgColor, Color accentColor, {List<Widget>? children}) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.dividerLight, width: 0.5),
+        border: Border.all(color: theme.dividerColor, width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -804,7 +856,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -812,7 +864,10 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           if (children != null && children.isNotEmpty)
             ...children
           else
-            const Text("Detailed insights will appear here live...", style: TextStyle(color: AppColors.grey, fontSize: 13)),
+            Text(
+              "Detailed insights will appear here live...",
+              style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13),
+            ),
         ],
       ),
     );
@@ -823,7 +878,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.redFlagBg,
+        color: AppColors.errorContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.redFlagBorder),
       ),
@@ -840,7 +895,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
             child: Text(
               text,
               style: const TextStyle(
-                color: AppColors.redFlagText,
+                color: AppColors.onErrorContainer,
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -852,11 +907,23 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   }
 
   Widget _buildDifferentialItem(String condition, String likelihood, String reasoning) {
+    final theme = Theme.of(context);
     final bool isHigh = likelihood.toLowerCase() == 'high';
     final Color accentColor = isHigh ? AppColors.error : AppColors.success;
-    final Color bgColor = isHigh ? AppColors.redFlagBg : AppColors.finalizedLight;
-    final Color chipBg = isHigh ? AppColors.redFlagBorder : AppColors.finalizedLight;
-    final Color chipText = isHigh ? AppColors.redFlagText : AppColors.stepSuccessText;
+    
+    // In dark mode, use lower opacity backgrounds for semantic cards
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color bgColor = isHigh 
+        ? (isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer)
+        : (isDark ? AppColors.success.withAlpha(40) : AppColors.statusFinalizedContainer);
+    
+    final Color chipBg = isHigh 
+        ? (isDark ? AppColors.error.withAlpha(60) : AppColors.redFlagBorder)
+        : (isDark ? AppColors.success.withAlpha(60) : AppColors.statusFinalizedContainer);
+    
+    final Color chipText = isHigh 
+        ? (isDark ? Colors.white : AppColors.onErrorContainer)
+        : (isDark ? Colors.white : AppColors.stepSuccessText);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -875,7 +942,11 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               Expanded(
                 child: Text(
                   condition,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.black),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
                 ),
               ),
               Container(
@@ -894,7 +965,11 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
           const SizedBox(height: 6),
           Text(
             reasoning,
-            style: TextStyle(fontSize: 12, color: AppColors.greyDark, height: 1.3),
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.textTheme.bodyMedium?.color,
+              height: 1.3,
+            ),
           ),
         ],
       ),
@@ -926,25 +1001,27 @@ class TranscriptBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
     final bool isDoctor = utterance.role == 'doctor';
     final bool isPatient = utterance.role == 'patient';
     final bool isAttendee = utterance.role == 'attendee';
 
-    Color bgColor = AppColors.white;
-    Color iconColor = AppColors.grey;
+    Color bgColor = theme.colorScheme.surface;
+    Color iconColor = theme.textTheme.bodyMedium?.color ?? AppColors.textDisabled;
     String label = "U";
 
     if (isDoctor) {
-      bgColor = AppColors.primaryLight;
-      iconColor = AppColors.primary;
+      bgColor = isDark ? theme.colorScheme.primary.withAlpha(40) : AppColors.brandHighlight;
+      iconColor = theme.colorScheme.primary;
       label = "D";
     } else if (isPatient) {
-      bgColor = AppColors.patientBg;
-      iconColor = AppColors.patientAccent;
+      bgColor = isDark ? AppColors.bubblePatientText.withAlpha(40) : AppColors.bubblePatient;
+      iconColor = isDark ? AppColors.bubblePatientText : AppColors.bubblePatientText;
       label = "P";
     } else if (isAttendee) {
-      bgColor = AppColors.attendeeBg;
-      iconColor = AppColors.attendeeAccent;
+      bgColor = isDark ? AppColors.bubbleAttendeeText.withAlpha(40) : AppColors.bubbleAttendee;
+      iconColor = isDark ? AppColors.bubbleAttendeeText : AppColors.bubbleAttendeeText;
       label = "A";
     }
 
@@ -986,14 +1063,14 @@ class TranscriptBubble extends StatelessWidget {
                       ),
                       Text(
                         _getUtteranceTime(utterance),
-                        style: TextStyle(color: AppColors.grey, fontSize: 10),
+                        style: TextStyle(color: theme.textTheme.bodySmall?.color, fontSize: 10),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     utterance.text,
-                    style: const TextStyle(color: AppColors.black, fontSize: 14),
+                    style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontSize: 14),
                   ),
                 ],
               ),
@@ -1012,6 +1089,7 @@ class PartialTranscriptBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -1019,33 +1097,36 @@ class PartialTranscriptBubble extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 14,
-            backgroundColor: AppColors.grey.withAlpha(25),
-            child: const Icon(LucideIcons.loader, size: 12, color: AppColors.grey),
+            backgroundColor: theme.textTheme.bodyMedium?.color?.withAlpha(25),
+            child: Icon(LucideIcons.loader, size: 12, color: theme.textTheme.bodyMedium?.color),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.white.withAlpha(127),
+                color: theme.colorScheme.surface.withAlpha(127),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.grey.withAlpha(25), style: BorderStyle.solid),
+                border: Border.all(color: theme.textTheme.bodyMedium?.color?.withAlpha(25) ?? Colors.transparent, style: BorderStyle.solid),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 10,
                         height: 10,
-                        child: CircularProgressIndicator(strokeWidth: 1.5, color: AppColors.grey),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         "Transcribing...",
                         style: TextStyle(
-                          color: AppColors.grey,
+                          color: theme.textTheme.bodyMedium?.color,
                           fontStyle: FontStyle.italic,
                           fontSize: 12,
                         ),
@@ -1056,7 +1137,7 @@ class PartialTranscriptBubble extends StatelessWidget {
                   Text(
                     text.isEmpty ? "..." : text,
                     style: TextStyle(
-                      color: AppColors.grey,
+                      color: theme.textTheme.bodyMedium?.color,
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
                     ),
@@ -1164,10 +1245,10 @@ class _PulsatingMicButtonState extends State<PulsatingMicButton> with SingleTick
               height: widget.size,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: widget.isRecording ? AppColors.error : AppColors.primary,
+                color: widget.isRecording ? AppColors.error : AppColors.brand,
                 boxShadow: [
                   BoxShadow(
-                    color: (widget.isRecording ? AppColors.error : AppColors.primary)
+                    color: (widget.isRecording ? AppColors.error : AppColors.brand)
                         .withAlpha((100 * volumeFactor).toInt().clamp(20, 100)),
                     blurRadius: (widget.size / 6) + (volumeFactor * 10),
                     spreadRadius: 1 + (volumeFactor * 4),
@@ -1176,7 +1257,7 @@ class _PulsatingMicButtonState extends State<PulsatingMicButton> with SingleTick
               ),
               child: Icon(
                 widget.isRecording ? LucideIcons.square : LucideIcons.mic,
-                color: AppColors.white,
+                color: AppColors.surface,
                 size: widget.size * 0.43,
               ),
             ),

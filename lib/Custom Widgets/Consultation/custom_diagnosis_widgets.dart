@@ -40,7 +40,7 @@ class DifferentialDiagnosesSection extends StatelessWidget {
         Text(
           "DIFFERENTIAL DIAGNOSES",
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.grey,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
           ),
@@ -73,20 +73,25 @@ class _DiagnosisCard extends StatelessWidget {
 
   Color get _borderColor => _isHigh ? AppColors.error : AppColors.success;
 
-  Color get _backgroundColor =>
-      _isHigh ? AppColors.redFlagBg : AppColors.successContainer;
-
-  Color get _chipBackground =>
-      _isHigh ? AppColors.redFlagBorder : AppColors.successBorder;
-
-  Color get _chipForeground =>
-      _isHigh ? AppColors.redFlagText : AppColors.successText;
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final Color backgroundColor = _isHigh 
+        ? (isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer)
+        : (isDark ? AppColors.success.withAlpha(40) : AppColors.statusFinalizedContainer);
+    
+    final Color chipBackground = _isHigh 
+        ? (isDark ? AppColors.error.withAlpha(60) : AppColors.redFlagBorder)
+        : (isDark ? AppColors.success.withAlpha(60) : AppColors.statusFinalizedContainer);
+    
+    final Color chipForeground = _isHigh 
+        ? (isDark ? Colors.white : AppColors.onErrorContainer)
+        : (isDark ? Colors.white : AppColors.stepSuccessText);
+
     return Container(
       decoration: BoxDecoration(
-        color: _backgroundColor,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: _borderColor, width: 4)),
       ),
@@ -99,13 +104,13 @@ class _DiagnosisCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _chipBackground,
+                  color: chipBackground,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   diagnosis.likelihood ?? "",
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: _chipForeground,
+                    color: chipForeground,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -118,14 +123,14 @@ class _DiagnosisCard extends StatelessWidget {
                       text: "${diagnosis.condition}  ",
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.black,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     TextSpan(
                       text: diagnosis.icdCode ?? "",
                       style: Theme.of(
                         context,
-                      ).textTheme.bodySmall?.copyWith(color: AppColors.grey),
+                      ).textTheme.bodySmall?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
                   ],
                 ),
@@ -138,7 +143,7 @@ class _DiagnosisCard extends StatelessWidget {
           Text(
             diagnosis.reasoning ?? "",
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.greyDark,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
               height: 1.5,
             ),
           ),
@@ -155,6 +160,7 @@ class UrgentConcernsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (concerns.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -173,7 +179,7 @@ class UrgentConcernsSection extends StatelessWidget {
             Text(
               "URGENT CONCERNS",
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.grey,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
               ),
@@ -208,7 +214,7 @@ class UrgentConcernsSection extends StatelessWidget {
                       concern,
                       style: Theme.of(context).textTheme.bodyLarge
                           ?.copyWith(
-                        color: AppColors.redFlagText,
+                        color: isDark ? Colors.white : AppColors.onErrorContainer,
                         height: 1.5,
                       ),
                     ),
@@ -231,6 +237,7 @@ class SuggestedWorkupSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (workup.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -240,12 +247,12 @@ class SuggestedWorkupSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.science_outlined, size: 18, color: AppColors.grey),
+            Icon(Icons.science_outlined, size: 18, color: theme.textTheme.bodyMedium?.color),
             const SizedBox(width: 8),
             Text(
               "SUGGESTED WORKUP",
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.grey,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.textTheme.bodyMedium?.color,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
               ),
@@ -267,9 +274,9 @@ class SuggestedWorkupSection extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
                       "•",
-                      style: Theme.of(context).textTheme.bodyLarge
+                      style: theme.textTheme.bodyLarge
                           ?.copyWith(
-                        color: AppColors.grey,
+                        color: theme.textTheme.bodyMedium?.color,
                         fontSize: 18,
                         height: 1,
                       ),
@@ -279,9 +286,9 @@ class SuggestedWorkupSection extends StatelessWidget {
                   Expanded(
                     child: Text(
                       item,
-                      style: Theme.of(context).textTheme.bodyLarge
+                      style: theme.textTheme.bodyLarge
                           ?.copyWith(
-                        color: AppColors.greyDark,
+                        color: theme.textTheme.bodyMedium?.color,
                         height: 1.5,
                       ),
                     ),
@@ -304,6 +311,7 @@ class PhysicianNoteSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (physicianNote == null || physicianNote!.trim().isEmpty) {
       return const SizedBox.shrink();
     }
@@ -312,19 +320,19 @@ class PhysicianNoteSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 2),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
             child: Icon(
               Icons.assignment_outlined,
               size: 18,
-              color: AppColors.grey,
+              color: theme.textTheme.bodyMedium?.color,
             ),
           ),
 
@@ -333,8 +341,8 @@ class PhysicianNoteSection extends StatelessWidget {
           Expanded(
             child: Text(
               physicianNote!.replaceFirst(RegExp(r'^">'), ''),
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.greyDark,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.textTheme.bodyMedium?.color,
                 height: 1.5,
               ),
             ),

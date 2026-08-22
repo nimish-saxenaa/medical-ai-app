@@ -96,36 +96,37 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final history = widget.patientHistory;
     Color primaryColor;
     Color lightColor;
 
     switch (widget.status) {
       case "Diagnosed":
-        primaryColor = AppColors.diagnosedPrimary;
-        lightColor = AppColors.diagnosedLight;
+        primaryColor = AppColors.statusDiagnosed;
+        lightColor = theme.brightness == Brightness.light ? AppColors.statusDiagnosedContainer : primaryColor.withAlpha(40);
         break;
 
       case "In Progress":
-        primaryColor = AppColors.progressPrimary;
-        lightColor = AppColors.progressLight;
+        primaryColor = AppColors.statusInProgress;
+        lightColor = theme.brightness == Brightness.light ? AppColors.statusInProgressContainer : primaryColor.withAlpha(40);
         break;
     case "Finalized":
-      primaryColor = AppColors.finalizedPrimary;
-      lightColor = AppColors.finalizedLight;
+      primaryColor = AppColors.statusFinalized;
+      lightColor = theme.brightness == Brightness.light ? AppColors.statusFinalizedContainer : primaryColor.withAlpha(40);
       case "Prescribed":
-        primaryColor = AppColors.prescribedPrimary;
-        lightColor = AppColors.prescribedLight;
+        primaryColor = AppColors.statusPrescribed;
+        lightColor = theme.brightness == Brightness.light ? AppColors.statusPrescribedContainer : primaryColor.withAlpha(40);
       default:
-        primaryColor = AppColors.grey;
-        lightColor = AppColors.greyLight;
+        primaryColor = theme.textTheme.bodyMedium?.color ?? AppColors.textDisabled;
+        lightColor = theme.dividerColor;
     }
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: widget.isSelected ? AppColors.primaryLight : AppColors.white,
+        color: widget.isSelected ? theme.colorScheme.primary.withAlpha(40) : theme.colorScheme.surface,
         border: Border.all(
-          color: widget.isSelected ? AppColors.primary.withAlpha(100) : AppColors.dividerLight,
+          color: widget.isSelected ? theme.colorScheme.primary : theme.dividerColor,
           width: 0.75,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -138,8 +139,8 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
             color: AppColors.transparent,
             child: InkWell(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              splashColor: AppColors.primaryLight,
-              highlightColor: AppColors.primaryLight.withAlpha(100),
+              splashColor: theme.colorScheme.primary.withAlpha(40),
+              highlightColor: theme.colorScheme.primary.withAlpha(20),
               onLongPress: widget.onSelect,
               onTap: () {
                 if (widget.selectionModeActive) {
@@ -156,9 +157,9 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                     Row(
                       children: [
                         if (widget.isSelected)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 12),
-                            child: Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
                           ),
                         Expanded(
                           child: Row(
@@ -167,7 +168,7 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                               Flexible(
                                 child: Text(
                                   widget.title,
-                                  style: Theme.of(context).textTheme.bodyLarge,
+                                  style: theme.textTheme.bodyLarge,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                 ),
@@ -188,11 +189,12 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                                 ),
                                 child: Text(
                                   widget.status,
-                                  style: Theme.of(context)
+                                  style: theme
                                       .textTheme
                                       .bodyLarge
                                       ?.copyWith(
-                                    color: primaryColor,
+                                    color: theme.brightness == Brightness.light ? primaryColor : Colors.white,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -203,10 +205,10 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                         AnimatedRotation(
                           turns: _expanded ? 0.5 : 0,
                           duration: const Duration(milliseconds: 200),
-                          child: const Icon(
+                          child: Icon(
                             Icons.keyboard_arrow_down,
                             size: 18,
-                            color: AppColors.grey,
+                            color: theme.textTheme.bodyMedium?.color,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -219,10 +221,10 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                              : const Icon(
+                              : Icon(
                             LucideIcons.moreVertical,
                             size: 18,
-                            color: AppColors.primary,
+                            color: theme.colorScheme.primary,
                           ),
                           tooltip: 'Options',
                           shape: RoundedRectangleBorder(
@@ -251,13 +253,13 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                                 ],
                               ),
                             ),
-                            const PopupMenuItem<String>(
+                            PopupMenuItem<String>(
                               value: 'delete',
                               child: Row(
                                 children: [
                                   Icon(LucideIcons.trash2, size: 18, color: AppColors.error),
                                   const SizedBox(width: 10),
-                                  const Text('Delete', style: TextStyle(color: AppColors.error)),
+                                  Text('Delete', style: TextStyle(color: AppColors.error)),
                                 ],
                               ),
                             ),
@@ -269,16 +271,16 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           LucideIcons.calendar,
                           size: 12,
-                          color: AppColors.borderMedium,
+                          color: theme.textTheme.bodySmall?.color,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           _formatDate(widget.date),
-                          style: const TextStyle(
-                            color: AppColors.grey,
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
                             fontSize: 12,
                           ),
                         ),
@@ -287,8 +289,8 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                           child: Text(
                             '· ${widget.description}',
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.grey,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyMedium?.color,
                               fontSize: 12,
                             ),
                           ),
@@ -301,18 +303,18 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.mapPin,
                             size: 12,
-                            color: AppColors.borderMedium,
+                            color: theme.textTheme.bodySmall?.color,
                           ),
                           const SizedBox(width: 6),
                           Flexible(
                             child: Text(
                               widget.location!,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: AppColors.grey,
+                              style: TextStyle(
+                                color: theme.textTheme.bodyMedium?.color,
                                 fontSize: 12,
                               ),
                             ),
@@ -337,14 +339,14 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
           if (_expanded && !widget.show)
             Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.greyLight, // gray-50/60 approximation
-                border: Border(top: BorderSide(color: AppColors.dividerLight)),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                border: Border(top: BorderSide(color: theme.dividerColor)),
               ),
               padding: const EdgeInsets.all(20.0),
               child: Text(
                 "No diagnosis recorded yet.",
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium,
               ),
             ),
         ],
@@ -376,11 +378,12 @@ class _ExpandedBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AppColors.greyLight,
-        border: Border(top: BorderSide(color: AppColors.dividerLight)),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        border: Border(top: BorderSide(color: theme.dividerColor)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Column(
@@ -410,8 +413,8 @@ class _ExpandedBody extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             workup,
-            style: const TextStyle(
-              color: AppColors.grey,
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
               fontSize: 12,
               height: 1.5,
             ),
@@ -436,8 +439,8 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text.toUpperCase(),
-      style: const TextStyle(
-        color: AppColors.grey,
+      style: TextStyle(
+        color: Theme.of(context).textTheme.bodyMedium?.color,
         fontSize: 11,
         fontWeight: FontWeight.bold,
         letterSpacing: 1.2,
@@ -452,11 +455,13 @@ class _RedFlagAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.redFlagBg,
-        border: Border.all(color: AppColors.redFlagBorder),
+        color: isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer,
+        border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -474,8 +479,8 @@ class _RedFlagAlert extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: AppColors.redFlagText, // red-700
+              style: TextStyle(
+                color: isDark ? Colors.white : AppColors.onErrorContainer,
                 fontSize: 12,
                 height: 1.5,
               ),
@@ -493,6 +498,8 @@ class _DiagnosisRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isHigh = item.severity.toLowerCase() == 'high';
     return Wrap(
       spacing: 8,
@@ -502,13 +509,17 @@ class _DiagnosisRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            color: isHigh ? AppColors.redFlagBorder : AppColors.dividerLight,
+            color: isHigh 
+                ? (isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder) 
+                : (isDark ? theme.dividerColor : AppColors.divider),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
             item.severity,
             style: TextStyle(
-              color: isHigh ? AppColors.redFlagText : AppColors.greyDark,
+              color: isHigh 
+                  ? (isDark ? Colors.white : AppColors.onErrorContainer)
+                  : theme.textTheme.bodyMedium?.color,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -516,15 +527,15 @@ class _DiagnosisRow extends StatelessWidget {
         ),
         Text(
           item.name,
-          style: const TextStyle(
-            color: AppColors.black,
+          style: TextStyle(
+            color: theme.textTheme.bodyLarge?.color,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
         ),
         Text(
           '(${item.code})',
-          style: const TextStyle(color: AppColors.grey, fontSize: 12),
+          style: TextStyle(color: theme.textTheme.bodySmall?.color, fontSize: 12),
         ),
       ],
     );
@@ -544,6 +555,7 @@ class _SoapSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -554,13 +566,13 @@ class _SoapSection extends StatelessWidget {
               height: 20,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppColors.primaryMuted, // brand-light approx
+                color: theme.colorScheme.primary.withAlpha(40),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 letter,
-                style: const TextStyle(
-                  color: AppColors.waveformPurple, // brand approx
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -569,8 +581,8 @@ class _SoapSection extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               title.toUpperCase(),
-              style: const TextStyle(
-                color: AppColors.greyDark,
+              style: TextStyle(
+                color: theme.textTheme.bodyMedium?.color,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
@@ -594,8 +606,8 @@ class _SoapSection extends StatelessWidget {
                           width: 140,
                           child: Text(
                             f.label,
-                            style: const TextStyle(
-                              color: AppColors.grey,
+                            style: TextStyle(
+                              color: theme.textTheme.bodySmall?.color,
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                               height: 1.3,
@@ -608,8 +620,8 @@ class _SoapSection extends StatelessWidget {
                             (f.value == null) ? 'Not recorded' : f.value!,
                             style: TextStyle(
                               color: (f.value == null)
-                                  ? AppColors.borderMedium
-                                  : AppColors.slate700,
+                                  ? theme.disabledColor
+                                  : theme.textTheme.bodyLarge?.color,
                               fontSize: 12,
                               height: 1.5,
                               fontStyle: (f.value == null)

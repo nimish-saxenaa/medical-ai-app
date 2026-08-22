@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'package:http/http.dart' as http;
 import '../../Models/cabin_models.dart';
 import '../Authentication/access_token.dart';
@@ -87,6 +88,8 @@ Future<CabinSessionList> listCabinSessions({
       throw Exception("Unauthorized");
     }
   }
+
+  dev.log("📜 [DEBUG] Cabin Session History Response: ${response.body}", name: "API.CabinHistory");
 
   return CabinSessionList.fromJson(jsonDecode(response.body));
 }

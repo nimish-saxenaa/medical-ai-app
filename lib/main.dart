@@ -60,6 +60,8 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       initialRoute: AuthGate.routeName,
       routes: {
         CreateAccountScreen.routeName: (context) => CreateAccountScreen(),

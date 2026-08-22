@@ -43,7 +43,7 @@ class SingleValueTitle extends StatelessWidget {
             child: Text(
               value!,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.greyDark,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
                 height: 1.5,
               ),
             ),
@@ -78,9 +78,9 @@ class SummarySection extends StatelessWidget {
 
         Container(
           padding: const EdgeInsets.only(left: 16),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(
-              left: BorderSide(color: AppColors.borderLight, width: 2),
+              left: BorderSide(color: Theme.of(context).dividerColor, width: 2),
             ),
           ),
           child: Column(
@@ -98,7 +98,7 @@ class SummarySection extends StatelessWidget {
                     Text(
                       entry.value.toString(),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.greyDark,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                         height: 1.5,
                       ),
                     ),

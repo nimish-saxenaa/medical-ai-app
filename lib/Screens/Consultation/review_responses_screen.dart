@@ -110,14 +110,14 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
           "Review Responses",
           style: Theme.of(
             context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.grey),
+          ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),
           child: loading
-              ? CircularProgressIndicator()
+              ? Center(child: CircularProgressIndicator())
               : Column(
                   children: [
                     Header(),
@@ -126,17 +126,17 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
                     const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.dividerLight),
+                        border: Border.all(color: Theme.of(context).dividerColor),
                       ),
                       child: Container(
                         margin: EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
-                              color: AppColors.greyLight,
-                              width: 5,
+                              color: Theme.of(context).dividerColor,
+                              width: 1,
                             ),
                           ),
                         ),
@@ -245,13 +245,13 @@ class _QaBlockState extends State<QaBlock> {
                     Icon(
                       LucideIcons.pencil,
                       size: 12,
-                      color: AppColors.primary,
+                      color: AppColors.brand,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       "Edit",
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.primary,
+                        color: AppColors.brand,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -298,21 +298,24 @@ class _QaBlockState extends State<QaBlock> {
                           onPressed: () async {
                             await widget.onSave(controller.text.trim());
                           },
-                          icon:  widget.isEditing == EditAnswerStatus.editing? const Icon(Icons.check, size: 16) : const SizedBox( width: 16, height: 16, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 1.5,)),
+                          icon:  widget.isEditing == EditAnswerStatus.editing? const Icon(Icons.check, size: 16) : const SizedBox( width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 1.5,)),
                           label:  widget.isEditing == EditAnswerStatus.editing? Text("Save") : Text("Saving..."),
                         ),
 
                         const SizedBox(width: 8),
 
                         FilledButton.icon(
-                          style: FilledButton.styleFrom(backgroundColor: AppColors.primaryLight),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(40),
+                            foregroundColor: Theme.of(context).colorScheme.primary,
+                          ),
                           onPressed: () {
                             controller.text =
                                 widget.qaLog["answer"]; // revert text
                             widget.onCancel();
                           },
-                          icon: const Icon(Icons.close, size: 16, color: AppColors.black),
-                          label: const Text("Cancel", style: TextStyle(color: AppColors.black)),
+                          icon: const Icon(Icons.close, size: 16),
+                          label: const Text("Cancel"),
                         ),
                       ],
                     ),
@@ -323,14 +326,14 @@ class _QaBlockState extends State<QaBlock> {
                   padding: const EdgeInsets.only(left: 10, top: 4, bottom: 4),
                   decoration: BoxDecoration(
                     border: Border(
-                      left: BorderSide(color: AppColors.grey, width: 3),
+                      left: BorderSide(color: Theme.of(context).dividerColor, width: 3),
                     ),
                   ),
                   child: Text(
                     widget.qaLog["answer"],
                     style: Theme.of(
                       context,
-                    ).textTheme.bodyLarge?.copyWith(color: AppColors.greyDark),
+                    ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
                   ),
                 ),
         ),
@@ -348,13 +351,15 @@ class ClinicalAlerts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.redFlagBg,
+        color: isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.redFlagBorder),
+        border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,10 +374,10 @@ class ClinicalAlerts extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Clinical Alerts',
-                style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                style: theme.textTheme.displayLarge?.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.redFlagText,
+                  color: isDark ? Colors.white : AppColors.onErrorContainer,
                 ),
               ),
             ],
@@ -390,35 +395,35 @@ class FlagContainer extends StatelessWidget {
   final Map<String, dynamic> flag;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: const Border(left: BorderSide(color: AppColors.amber800, width: 5)),
-        color: AppColors.warningBg,
+        border: Border(left: BorderSide(color: isDark ? Colors.white : AppColors.amber800, width: 5)),
+        color: isDark ? Colors.black.withAlpha(40) : AppColors.warningContainer,
       ),
       child: RichText(
         text: TextSpan(
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
-            color: AppColors.redFlagText,
+            color: isDark ? Colors.white : AppColors.onErrorContainer,
             height: 1.4,
           ),
           children: [
             const TextSpan(text: '🔴 '),
             TextSpan(
               text: '${flag['flag_type']}: ',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.amber800,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: isDark ? Colors.white : AppColors.amber800,
                 fontWeight: FontWeight.w900,
               ),
             ),
             TextSpan(
               text: flag['description'],
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: AppColors.amber800),
+              style: theme.textTheme.bodyLarge?.copyWith(color: isDark ? Colors.white.withAlpha(200) : AppColors.amber800),
             ),
           ],
         ),
@@ -432,13 +437,14 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.dividerLight),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         children: [
@@ -446,40 +452,40 @@ class Header extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: theme.colorScheme.primary.withAlpha(40),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_box_outlined,
-              color: AppColors.primary,
+              color: theme.colorScheme.primary,
               size: 26,
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Review Your Responses',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: AppColors.black,
+              color: theme.textTheme.bodyLarge?.color,
             ),
           ),
           const SizedBox(height: 6),
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: AppColors.grey,
+                color: theme.textTheme.bodyMedium?.color,
                 height: 1.4,
               ),
               children: [
                 const TextSpan(text: 'Check what you shared. Tap '),
                 TextSpan(
                   text: 'Edit',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.greyDark,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 const TextSpan(

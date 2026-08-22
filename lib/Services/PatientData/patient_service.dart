@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'package:clinical_ai_app/Services/Authentication/navigation_service.dart';
 import 'package:http/http.dart' as http;
 import '../../Models/patient_list_model.dart';
@@ -152,6 +153,8 @@ Future<PatientHistoryResponse> getPatientHistory({
       throw Exception("Unauthorized");
     }
   }
+
+  dev.log("📜 [DEBUG] Patient History API Response: ${response.body}", name: "API.History");
 
   return PatientHistoryResponse.fromJson(jsonDecode(response.body));
 }

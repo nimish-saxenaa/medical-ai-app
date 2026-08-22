@@ -5,7 +5,7 @@ import '../Components/colors.dart';
 Future<dynamic> showCustomDialog(String detail, BuildContext context) {
   return showDialog(
     context: context,
-    barrierColor: AppColors.black.withAlpha(100),
+    barrierColor: AppColors.textPrimary.withAlpha(100),
     builder: (context) {
       return Dialog(
         insetPadding: const EdgeInsets.symmetric(horizontal: 16),

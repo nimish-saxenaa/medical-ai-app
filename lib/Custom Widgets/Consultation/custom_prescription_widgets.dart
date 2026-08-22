@@ -31,9 +31,9 @@ class PrescriptionPage extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 300),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.dividerLight),
+            border: Border.all(color: Theme.of(context).dividerColor),
           ),
           child: PrescriptionField(controller: controller, onGenerate: onGenerate, onChanged: onChanged, isLoading: isLoading),
         ) : PrescriptionField(controller: controller, onGenerate: onGenerate, onChanged: onChanged, isLoading: isLoading),
@@ -69,7 +69,7 @@ class PrescriptionField extends StatelessWidget {
           "Enter the confirmed diagnosis to generate a personalised treatment plan.",
           style: Theme.of(
             context,
-          ).textTheme.bodyLarge?.copyWith(color: AppColors.greyDark),
+          ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
         ),
 
         const SizedBox(height: 20),
@@ -100,7 +100,7 @@ class PrescriptionField extends StatelessWidget {
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.white,
+                          color: AppColors.surface,
                         ),
                       )
                     : const Text("Generate"),
@@ -129,7 +129,7 @@ class TreatmentPlanWidget extends StatelessWidget {
             Text(
               "PHARMACOLOGICAL TREATMENT",
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.grey,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
               ),
@@ -166,14 +166,14 @@ class TreatmentPlanWidget extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primaryLight,
+                color: Theme.of(context).colorScheme.primary.withAlpha(30),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withAlpha(40)),
+                border: Border.all(color: Theme.of(context).colorScheme.primary.withAlpha(40)),
               ),
               child: Text(
                 prescription.followUp!.replaceAll('"', ''),
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.greyDark,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                   height: 1.5,
                 ),
               ),
@@ -223,6 +223,7 @@ class _MedicationCard extends StatelessWidget {
       String title,
       String? value,
       ) {
+    final theme = Theme.of(context);
     if (value == null || value.trim().isEmpty) {
       return const SizedBox.shrink();
     }
@@ -236,8 +237,8 @@ class _MedicationCard extends StatelessWidget {
             flex: 2,
             child: Text(
               title,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.grey,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.textTheme.bodyMedium?.color,
               ),
             ),
           ),
@@ -245,8 +246,8 @@ class _MedicationCard extends StatelessWidget {
             flex: 3,
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.black,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.w600,
                 height: 1.4,
               ),
@@ -259,13 +260,14 @@ class _MedicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.dividerLight,
+          color: theme.dividerColor,
         ),
       ),
       child: Column(
@@ -278,7 +280,7 @@ class _MedicationCard extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
+                  color: theme.colorScheme.primary.withAlpha(30),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(
@@ -294,9 +296,9 @@ class _MedicationCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   medication.drugName,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.black,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
                 ),
               ),
@@ -323,16 +325,16 @@ class _MedicationCard extends StatelessWidget {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: AppColors.warningBg,
+                color: theme.brightness == Brightness.light ? AppColors.warningContainer : AppColors.warning.withAlpha(40),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppColors.warningBorder,
+                  color: theme.brightness == Brightness.light ? AppColors.warningBorder : AppColors.warning.withAlpha(100),
                 ),
               ),
               child: Text(
                 "⚠️ ${medication.warnings!}",
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.warningText,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.brightness == Brightness.light ? AppColors.onWarningContainer : Colors.white,
                   height: 1.4,
                 ),
               ),
@@ -358,14 +360,14 @@ class _BulletItem extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Icon(LucideIcons.circleCheckBig, size: 16,color: AppColors.success,),
+            child: Icon(LucideIcons.circleCheckBig, size: 16,color: Theme.of(context).colorScheme.primary,),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.greyDark,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
                 height: 1.5,
               ),
             ),
@@ -383,13 +385,14 @@ class _WarningCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.redFlagBg,
+        color: isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.error.withAlpha(40)),
+        border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.error.withAlpha(40)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,7 +407,7 @@ class _WarningCard extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.redFlagText,
+                color: isDark ? Colors.white : AppColors.onErrorContainer,
                 height: 1.5,
               ),
             ),

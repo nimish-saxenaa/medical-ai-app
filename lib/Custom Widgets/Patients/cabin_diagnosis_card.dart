@@ -43,33 +43,31 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final session = widget.session;
     final date = session.createdAt != null ? DateTime.parse(session.createdAt!) : DateTime.now();
     
     // Status styling
-    Color primaryColor = AppColors.grey;
-    Color lightColor = AppColors.greyLight;
+    Color primaryColor = theme.textTheme.bodyMedium?.color ?? AppColors.textDisabled;
+    Color lightColor = theme.dividerColor;
     
     switch (session.status?.toLowerCase()) {
       case "ended":
-        primaryColor = AppColors.finalizedPrimary;
-        lightColor = AppColors.finalizedLight;
+        primaryColor = AppColors.statusFinalized;
+        lightColor = theme.brightness == Brightness.light ? AppColors.statusFinalizedContainer : primaryColor.withAlpha(40);
         break;
       case "active":
-        primaryColor = AppColors.progressPrimary;
-        lightColor = AppColors.progressLight;
+        primaryColor = AppColors.statusInProgress;
+        lightColor = theme.brightness == Brightness.light ? AppColors.statusInProgressContainer : primaryColor.withAlpha(40);
         break;
-      default:
-        primaryColor = AppColors.grey;
-        lightColor = AppColors.greyLight;
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: widget.isSelected ? AppColors.primaryLight : AppColors.white,
+        color: widget.isSelected ? theme.colorScheme.primary.withAlpha(40) : theme.colorScheme.surface,
         border: Border.all(
-          color: widget.isSelected ? AppColors.primary.withAlpha(100) : AppColors.dividerLight,
+          color: widget.isSelected ? theme.colorScheme.primary : theme.dividerColor,
           width: 0.75,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -82,8 +80,8 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
             color: AppColors.transparent,
             child: InkWell(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              splashColor: AppColors.primaryLight,
-              highlightColor: AppColors.primaryLight.withAlpha(100),
+              splashColor: theme.colorScheme.primary.withAlpha(40),
+              highlightColor: theme.colorScheme.primary.withAlpha(20),
               onLongPress: widget.onSelect,
               onTap: () {
                 if (widget.selectionModeActive) {
@@ -100,9 +98,9 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                     Row(
                       children: [
                         if (widget.isSelected)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 12),
-                            child: Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
                           ),
                         Expanded(
                           child: Row(
@@ -110,7 +108,7 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                               Flexible(
                                 child: Text(
                                   getSpecialtyName(session.specialty ?? ""),
-                                  style: Theme.of(context).textTheme.bodyLarge,
+                                  style: theme.textTheme.bodyLarge,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -124,8 +122,9 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                                 ),
                                 child: Text(
                                   session.status ?? "unknown",
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: primaryColor,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.brightness == Brightness.light ? primaryColor : Colors.white,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -136,16 +135,16 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                         AnimatedRotation(
                           turns: _expanded ? 0.5 : 0,
                           duration: const Duration(milliseconds: 200),
-                          child: const Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.grey),
+                          child: Icon(Icons.keyboard_arrow_down, size: 18, color: theme.textTheme.bodyMedium?.color),
                         ),
                         const SizedBox(width: 8),
                         PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
                           splashRadius: 10,
-                          child: const Icon(
+                          child: Icon(
                             LucideIcons.moreVertical,
                             size: 18,
-                            color: AppColors.primary,
+                            color: theme.colorScheme.primary,
                           ),
                           tooltip: 'Options',
                           shape: RoundedRectangleBorder(
@@ -159,13 +158,13 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                             }
                           },
                           itemBuilder: (context) => [
-                            const PopupMenuItem<String>(
+                            PopupMenuItem<String>(
                               value: 'delete',
                               child: Row(
                                 children: [
                                   Icon(LucideIcons.trash2, size: 18, color: AppColors.error),
                                   const SizedBox(width: 10),
-                                  const Text('Delete', style: TextStyle(color: AppColors.error)),
+                                  Text('Delete', style: TextStyle(color: AppColors.error)),
                                 ],
                               ),
                             ),
@@ -176,15 +175,15 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(LucideIcons.calendar, size: 12, color: AppColors.borderMedium),
+                        Icon(LucideIcons.calendar, size: 12, color: theme.textTheme.bodySmall?.color),
                         const SizedBox(width: 6),
-                        Text(_formatDate(date), style: const TextStyle(color: AppColors.grey, fontSize: 12)),
+                        Text(_formatDate(date), style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12)),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
                             '· ${session.panel?.symptoms.isNotEmpty == true ? session.panel!.symptoms.first.name : "No symptoms recorded"}',
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: AppColors.grey, fontSize: 12),
+                            style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12),
                           ),
                         ),
                       ],
@@ -197,18 +196,18 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
           if (_expanded)
             Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.greyLight,
-                border: Border(top: BorderSide(color: AppColors.dividerLight)),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                border: Border(top: BorderSide(color: theme.dividerColor)),
               ),
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("PANEL DATA", style: TextStyle(color: AppColors.grey, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  Text("PANEL DATA", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                   const SizedBox(height: 12),
                   if (session.panel == null)
-                    const Text("No data recorded during session.", style: TextStyle(color: AppColors.grey, fontSize: 13))
+                    Text("No data recorded during session.", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))
                   else ...[
                     // Symptoms
                     if (session.panel!.symptoms.isNotEmpty) ...[

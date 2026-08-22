@@ -41,7 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final patientsProvider = context.read<PatientListProvider>();
     return Scaffold(
-      backgroundColor: AppColors.white,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -77,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Sign in to your account to continue.',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.greyDark,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: isTablet ? 18 : 16,
                         ),
                         textAlign: isTablet ? TextAlign.center : TextAlign.left,
@@ -167,7 +166,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     height: 16,
                                     width: 16,
                                     child: CircularProgressIndicator(
-                                      color: AppColors.white,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -185,16 +183,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           text: TextSpan(
                             text: "New here?",
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppColors.grey,
+                              color: Theme.of(context).textTheme.bodySmall?.color,
                               fontSize: isTablet ? 16 : 14,
                             ),
                             children: [
                               TextSpan(
                                 text: " Create an Account",
                                 style: const TextStyle(
-                                  color: AppColors.primary,
+                                  color: AppColors.brand,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: AppColors.primary,
+                                  decorationColor: AppColors.brand,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 recognizer: TapGestureRecognizer()

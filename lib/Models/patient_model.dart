@@ -72,22 +72,22 @@ extension GenderExtension on Gender {
   Color get primaryColor {
     switch (this) {
       case Gender.male:
-        return AppColors.primaryMale;
+        return AppColors.genderMale;
       case Gender.female:
-        return AppColors.primaryFemale;
+        return AppColors.genderFemale;
       case Gender.other:
-        return AppColors.primaryOther;
+        return AppColors.genderOther;
     }
   }
 
   Color get secondaryColor {
     switch (this) {
       case Gender.male:
-        return AppColors.secondaryMale;
+        return AppColors.genderMaleContainer;
       case Gender.female:
-        return AppColors.secondaryFemale;
+        return AppColors.genderFemaleContainer;
       case Gender.other:
-        return AppColors.secondaryOther;
+        return AppColors.genderOtherContainer;
     }
   }
 
