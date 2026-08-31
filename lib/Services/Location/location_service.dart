@@ -61,7 +61,6 @@ class ConsultationLocationService {
           );
         }
       } catch (e) {
-        print('⚠️ Reverse geocoding failed: $e');
       }
 
       return ConsultationLocation(
@@ -69,7 +68,6 @@ class ConsultationLocationService {
         longitude: position.longitude,
       );
     } catch (e) {
-      print('⚠️ Location capture failed: $e');
       return null;
     }
   }
@@ -92,7 +90,6 @@ class ConsultationLocationService {
         jsonEncode(location.toJson()),
       );
     } catch (e) {
-      print('⚠️ Failed to save location for session $sessionId: $e');
     }
   }
 
@@ -107,7 +104,6 @@ class ConsultationLocationService {
       );
       return location.isEmpty ? null : location;
     } catch (e) {
-      print('⚠️ Failed to read location for session $sessionId: $e');
       return null;
     }
   }
@@ -128,7 +124,6 @@ class ConsultationLocationService {
         if (!location.isEmpty) result[sessionId] = location;
       }
     } catch (e) {
-      print('⚠️ Failed to read consultation locations: $e');
     }
     return result;
   }
@@ -139,7 +134,6 @@ class ConsultationLocationService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('$_keyPrefix$sessionId');
     } catch (e) {
-      print('⚠️ Failed to remove location for session $sessionId: $e');
     }
   }
 

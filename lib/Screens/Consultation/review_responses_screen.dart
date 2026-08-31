@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import '../../Custom Widgets/CustomAlertDialog.dart';
 import 'package:clinical_ai_app/Screens/Consultation/analysis_screen.dart';
 import 'package:clinical_ai_app/Components/colors.dart';
@@ -115,28 +116,28 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
+          padding: AppLayout.screenPadding,
           child: loading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : Column(
                   children: [
-                    Header(),
-                    const SizedBox(height: 16),
+                    const Header(),
+                    const SizedBox(height: AppLayout.space16),
                     if (flags.isNotEmpty) ClinicalAlerts(flags: flags),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppLayout.space16),
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Theme.of(context).dividerColor),
+                        borderRadius: BorderRadius.circular(AppLayout.radius16),
+                        border: Border.all(color: Theme.of(context).dividerColor, width: AppLayout.borderThin),
                       ),
                       child: Container(
-                        margin: EdgeInsets.all(16),
+                        margin: const EdgeInsets.all(AppLayout.space16),
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
                               color: Theme.of(context).dividerColor,
-                              width: 1,
+                              width: AppLayout.borderMedium,
                             ),
                           ),
                         ),
@@ -164,7 +165,7 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppLayout.space16),
                     CustomButton(
                       onPressed: () {
                         Navigator.pushReplacement(
@@ -261,7 +262,7 @@ class _QaBlockState extends State<QaBlock> {
           ],
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: AppLayout.space8),
 
         /// Question
         Text(
@@ -269,7 +270,7 @@ class _QaBlockState extends State<QaBlock> {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: AppLayout.space8),
 
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
@@ -285,12 +286,12 @@ class _QaBlockState extends State<QaBlock> {
                       maxLines: 5,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(AppLayout.radius10),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppLayout.space12),
 
                     Row(
                       children: [
@@ -299,10 +300,10 @@ class _QaBlockState extends State<QaBlock> {
                             await widget.onSave(controller.text.trim());
                           },
                           icon:  widget.isEditing == EditAnswerStatus.editing? const Icon(Icons.check, size: 16) : const SizedBox( width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 1.5,)),
-                          label:  widget.isEditing == EditAnswerStatus.editing? Text("Save") : Text("Saving..."),
+                          label:  widget.isEditing == EditAnswerStatus.editing? const Text("Save") : const Text("Saving..."),
                         ),
 
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppLayout.space8),
 
                         FilledButton.icon(
                           style: FilledButton.styleFrom(
@@ -323,7 +324,7 @@ class _QaBlockState extends State<QaBlock> {
                 )
               : Container(
                   key: const ValueKey("view"),
-                  padding: const EdgeInsets.only(left: 10, top: 4, bottom: 4),
+                  padding: const EdgeInsets.only(left: AppLayout.space10, top: AppLayout.space4, bottom: AppLayout.space4),
                   decoration: BoxDecoration(
                     border: Border(
                       left: BorderSide(color: Theme.of(context).dividerColor, width: 3),
@@ -338,7 +339,7 @@ class _QaBlockState extends State<QaBlock> {
                 ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: AppLayout.space8),
       ],
     );
   }
@@ -355,11 +356,11 @@ class ClinicalAlerts extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder, width: AppLayout.borderThin),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,7 +372,7 @@ class ClinicalAlerts extends StatelessWidget {
                 size: 18,
                 color: AppColors.error,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppLayout.space8),
               Text(
                 'Clinical Alerts',
                 style: theme.textTheme.displayLarge?.copyWith(
@@ -382,7 +383,7 @@ class ClinicalAlerts extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppLayout.space8),
           ...flags.map((flag) => FlagContainer(flag: flag)),
         ],
       ),
@@ -398,10 +399,10 @@ class FlagContainer extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: AppLayout.space16),
+      padding: const EdgeInsets.all(AppLayout.space10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppLayout.radius8),
         border: Border(left: BorderSide(color: isDark ? Colors.white : AppColors.amber800, width: 5)),
         color: isDark ? Colors.black.withAlpha(40) : AppColors.warningContainer,
       ),
@@ -440,20 +441,20 @@ class Header extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppLayout.space24),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
       ),
       child: Column(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: AppLayout.space48,
+            height: AppLayout.space48,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withAlpha(40),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppLayout.radius12),
             ),
             child: Icon(
               Icons.check_box_outlined,
@@ -461,7 +462,7 @@ class Header extends StatelessWidget {
               size: 26,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppLayout.space12),
           Text(
             'Review Your Responses',
             style: TextStyle(
@@ -470,7 +471,7 @@ class Header extends StatelessWidget {
               color: theme.textTheme.bodyLarge?.color,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppLayout.space6),
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(

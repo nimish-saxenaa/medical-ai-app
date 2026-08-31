@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import '../../Custom Widgets/CustomAlertDialog.dart';
 import '../../Custom Widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,7 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
               onTap: () => Navigator.pop(context),
               child: Row(
                 children: [
-                  Icon(Icons.arrow_back),
+                  const Icon(Icons.arrow_back),
                   Text(
                     "Back  /  ",
                     style: Theme.of(context).textTheme.bodyMedium,
@@ -70,14 +71,14 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: 10),
             child: Image.asset("assets/kuvaka_logo.png"),
           ),
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: AppLayout.screenPadding,
           child: Column(
             children: [
               Expanded(
@@ -90,12 +91,12 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                         age: widget.patientAge,
                         gender: widget.patientGender,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       TypeOfConsultation(
                         selected: _selected,
                         onSelect: (type) => setState(() => _selected = type),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
 
                       LabeledTextField(
                         label: 'Chief complaint',
@@ -105,7 +106,7 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                           hint: 'e.g. chest pain for 2 days, fever since yesterday…',
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       LabeledTextField(
                         label: 'Language preference',
                         optionalText: '(leave blank for English)',
@@ -116,7 +117,7 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                               controller: _languageController,
                               hint: 'e.g. Hindi, Arabic, French, Spanish, etc.',
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppLayout.space8),
                             Text(
                               'The AI will speak and understand your preferred language.',
                               style: Theme.of(context).textTheme.bodyMedium,
@@ -124,7 +125,7 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                     ],
                   ),
                 ),
@@ -187,14 +188,14 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                       width: 14,
                       child: CircularProgressIndicator(
                         color: AppColors.surface,
-                        strokeWidth: 2,
+                        strokeWidth: AppLayout.borderThick,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text('Starting Consultation'),
+                    const SizedBox(width: AppLayout.space8),
+                    const Text('Starting Consultation'),
                   ],
                 )
-                    : Text('Begin Consultation'),
+                    : const Text('Begin Consultation'),
               ),
             ],
           ),
@@ -220,21 +221,21 @@ class PatientBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space20, vertical: AppLayout.space16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.dividerColor),
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
       ),
       child: Row(
         children: [
           CustomNameInitial(name: name),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppLayout.space16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(name, style: theme.textTheme.bodyLarge),
-              const SizedBox(height: 2),
+              const SizedBox(height: AppLayout.space4 - 2),
               Text(
                 '$age yrs · $gender',
                 style: theme.textTheme.bodyMedium,
@@ -308,11 +309,11 @@ class TypeOfConsultation extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppLayout.space20),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.dividerColor),
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -321,11 +322,11 @@ class TypeOfConsultation extends StatelessWidget {
             'TYPE OF CONSULTATION',
             style: theme.textTheme.headlineSmall,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           ...specialities.map((option) {
             final isSelected = option.type == selected;
             return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: AppLayout.space10),
               child: SpecialitySelectTile(
                 option: option,
                 isSelected: isSelected,
@@ -357,17 +358,17 @@ class SpecialitySelectTile extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     return Material(
       color: isSelected ? (isDark ? theme.colorScheme.primary.withAlpha(40) : AppColors.brandHighlight) : theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppLayout.radius16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppLayout.radius16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppLayout.space16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppLayout.radius16),
             border: Border.all(
               color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
-              width: 1,
+              width: AppLayout.borderMedium,
             ),
           ),
           child: Row(
@@ -378,11 +379,11 @@ class SpecialitySelectTile extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: isDark ? option.iconColor.withAlpha(40) : option.iconBg,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppLayout.radius8),
                 ),
-                child: Icon(option.icon, size: 20, color: option.iconColor),
+                child: Icon(option.icon, size: AppLayout.iconMedium, color: option.iconColor),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppLayout.space16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,7 +392,7 @@ class SpecialitySelectTile extends StatelessWidget {
                       option.title,
                       style: theme.textTheme.bodyLarge,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppLayout.space4 - 2),
                     Text(
                       option.subtitle,
                       style: theme.textTheme.bodyMedium,
@@ -399,7 +400,7 @@ class SpecialitySelectTile extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppLayout.space12),
               Container(
                 width: 20,
                 height: 20,
@@ -409,7 +410,7 @@ class SpecialitySelectTile extends StatelessWidget {
                   color: isSelected ? theme.colorScheme.primary : Colors.transparent,
                   border: Border.all(
                     color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
-                    width: 2,
+                    width: AppLayout.borderThick,
                   ),
                 ),
                 child: isSelected
@@ -440,11 +441,11 @@ class LabeledTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.dividerColor),
-        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+        borderRadius: BorderRadius.circular(AppLayout.radius16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -462,7 +463,7 @@ class LabeledTextField extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppLayout.space12),
           child,
         ],
       ),
@@ -485,7 +486,7 @@ class _InputField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.textTheme.bodyMedium?.color),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: AppLayout.space8),
       ),
     );
   }

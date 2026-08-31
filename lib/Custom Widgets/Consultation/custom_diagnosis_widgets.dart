@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 
 import '../../Models/session_model.dart';
@@ -46,13 +47,13 @@ class DifferentialDiagnosesSection extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: AppLayout.space12),
 
         Column(
           children: diagnoses
               .map(
                 (diagnosis) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: AppLayout.space12),
               child: _DiagnosisCard(diagnosis: diagnosis),
             ),
           )
@@ -92,10 +93,10 @@ class _DiagnosisCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
         border: Border(left: BorderSide(color: _borderColor, width: 4)),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -105,7 +106,7 @@ class _DiagnosisCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: chipBackground,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppLayout.radius16),
                 ),
                 child: Text(
                   diagnosis.likelihood ?? "",
@@ -138,7 +139,7 @@ class _DiagnosisCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: AppLayout.space8),
 
           Text(
             diagnosis.reasoning ?? "",
@@ -175,7 +176,7 @@ class UrgentConcernsSection extends StatelessWidget {
               size: 18,
               color: AppColors.error,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppLayout.space8),
             Text(
               "URGENT CONCERNS",
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -187,13 +188,13 @@ class UrgentConcernsSection extends StatelessWidget {
           ],
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: AppLayout.space12),
 
         Column(
           children: concerns
               .map(
                 (concern) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppLayout.space8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -208,7 +209,7 @@ class UrgentConcernsSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppLayout.space8),
                   Expanded(
                     child: Text(
                       concern,
@@ -248,7 +249,7 @@ class SuggestedWorkupSection extends StatelessWidget {
         Row(
           children: [
             Icon(Icons.science_outlined, size: 18, color: theme.textTheme.bodyMedium?.color),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppLayout.space8),
             Text(
               "SUGGESTED WORKUP",
               style: theme.textTheme.labelSmall?.copyWith(
@@ -260,13 +261,13 @@ class SuggestedWorkupSection extends StatelessWidget {
           ],
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: AppLayout.space12),
 
         Column(
           children: workup
               .map(
                 (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppLayout.space8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -282,7 +283,7 @@ class SuggestedWorkupSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppLayout.space8),
                   Expanded(
                     child: Text(
                       item,
@@ -318,10 +319,10 @@ class PhysicianNoteSection extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
         border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
@@ -336,7 +337,7 @@ class PhysicianNoteSection extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: AppLayout.space8),
 
           Expanded(
             child: Text(

@@ -73,10 +73,13 @@ Future<String?> getValidAccessToken() async {
     if (newAccessToken != null && newRefreshToken != null) {
       await AccessTokenService.saveAccessToken(newAccessToken.toString());
       await AccessTokenService.saveRefreshToken(newRefreshToken.toString());
+
+      if (result['user'] != null) {
+        await AccessTokenService.saveUserData(result['user']);
+      }
       return newAccessToken.toString();
     }
   } catch (e) {
-    debugPrint("Token refresh failed: $e");
   }
   
   return token; // Fallback to current token if refresh fails

@@ -51,7 +51,7 @@ class _SiriWaveformState extends State<SiriWaveform>
       builder: (_, _) {
         final targetAmp = isSpeaking ? _activeAmp : _idleAmp;
 
-        final targetSpeed = isSpeaking ? 2.4 : 0.4;
+        final targetSpeed = isSpeaking ? 2.4 : 1.5;
         _speed += (targetSpeed - _speed) * 0.06;
 
         final targetOpacity = isSpeaking ? 1.0 : 0.35;

@@ -1,12 +1,13 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Components/colors.dart';
+import '../../Components/layout_constants.dart';
 import '../../Custom%20Widgets/Patients/cabin_diagnosis_card.dart';
 import '../../Custom%20Widgets/Patients/custom_name_initial.dart';
 import '../../Custom%20Widgets/Patients/diagnosis_card.dart';
 import '../../Custom%20Widgets/custom_confirmation_alert.dart';
+import '../../Custom%20Widgets/custom_refresh_indicator.dart';
 import '../../Models/consultation_location_model.dart';
 import '../../Models/patient_response_history_model.dart';
 import '../../Models/session_model.dart';
@@ -30,8 +31,8 @@ class PatientHistoryIconText extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Theme.of(context).textTheme.bodyMedium?.color, size: 14),
-        const SizedBox(width: 8),
+        Icon(icon, color: Theme.of(context).textTheme.bodyMedium?.color, size: AppLayout.iconSmall - 2),
+        const SizedBox(width: AppLayout.space8),
         Text(text),
       ],
     );
@@ -45,14 +46,14 @@ class PatientHistoryEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 48),
+      padding: const EdgeInsets.symmetric(vertical: AppLayout.space48),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
         border: Border.all(
           color: theme.dividerColor,
-          width: 2,
+          width: AppLayout.borderThick,
           style: BorderStyle.solid,
         ),
       ),
@@ -60,27 +61,27 @@ class PatientHistoryEmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: AppLayout.space48,
+            height: AppLayout.space48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withAlpha(40),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppLayout.radius16),
             ),
             child: Icon(
               LucideIcons.stethoscope,
-              size: 20,
+              size: AppLayout.iconMedium,
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           Text(
             'No consultations yet',
             style: theme.textTheme.bodyLarge,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppLayout.space4),
           Text(
-            'Start the first one using the button above.',
+            'Start the first one using the button below.',
             style: theme.textTheme.bodyMedium,
           ),
         ],
@@ -178,7 +179,6 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
       _loadSessionLocations();
       widget.onHistoryUpdated?.call();
     } catch (e) {
-      debugPrint("❌ Refresh error: $e");
     }
   }
 
@@ -186,8 +186,8 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
     showCustomConfirmationAlert(
       detail: "Do you want to delete this consultation?",
       context: context,
+      loadingText: "Deleting...",
       onPressed: () async {
-        Navigator.pop(context);
         try {
           String? token = await AccessTokenService.getToken();
           if (token == null) return;
@@ -210,8 +210,8 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
     showCustomConfirmationAlert(
       detail: "Do you want to delete this cabin consultation?",
       context: context,
+      loadingText: "Deleting...",
       onPressed: () async {
-        Navigator.pop(context);
         try {
           setState(() {
             history.cabinSessions.removeWhere((s) => s.sessionId == sessionId);
@@ -235,8 +235,8 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
     showCustomConfirmationAlert(
       detail: "Delete $totalSelected selected sessions?",
       context: context,
+      loadingText: "Deleting...",
       onPressed: () async {
-        Navigator.pop(context);
         setState(() => _isBulkDeleting = true);
 
         final sessionIdsToDelete = List.from(_selectedSessionIds);
@@ -426,7 +426,8 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
     final activeBg = theme.colorScheme.primary;
     final activeFg = theme.colorScheme.onPrimary;
     
-    final inactiveFg = isDark ? Colors.white.withAlpha(180) : theme.textTheme.bodyMedium?.color;
+    final inactiveFg = theme.colorScheme.onSurface;
+    final inactiveBg = theme.colorScheme.surface;
     final borderColor = isActive 
         ? activeBg 
         : (isDark ? Colors.white.withAlpha(60) : theme.dividerColor);
@@ -441,23 +442,23 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: AppLayout.space4 + 2),
         decoration: BoxDecoration(
-          color: isActive ? activeBg : AppColors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          color: isActive ? activeBg : inactiveBg,
+          borderRadius: BorderRadius.circular(AppLayout.radius20),
           border: Border.all(
             color: borderColor,
-            width: 0.75,
+            width: AppLayout.borderThin + 0.25,
           ),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              size: 16,
+              size: AppLayout.iconSmall,
               color: isActive ? activeFg : inactiveFg,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppLayout.space8),
             Text(
               label,
               style: TextStyle(
@@ -474,7 +475,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
 
   Widget _buildConsultationHistoryPage() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -490,16 +491,17 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           Expanded(
-            child: history.sessions.isNotEmpty
-                ? ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: history.sessions.length,
-                    itemBuilder: (context, index) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        DiagnosisCard(
+            child: CustomPullToRefresh(
+              onRefresh: _refreshHistory,
+              child: history.sessions.isNotEmpty
+                  ? ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: history.sessions.length,
+                      itemBuilder: (context, index) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppLayout.space16),
+                        child: DiagnosisCard(
                           key: ValueKey(history.sessions[index].sessionId),
                           index: index,
                           patientHistory: history,
@@ -546,11 +548,13 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                           ],
                           show: history.sessions[index].diagnosis != null ? true : false,
                         ),
-                        const SizedBox(height: 16),
-                      ],
+                      ),
+                    )
+                  : const SingleChildScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      child: PatientHistoryEmptyState(),
                     ),
-                  )
-                : const PatientHistoryEmptyState(),
+            ),
           ),
         ],
       ),
@@ -559,7 +563,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
 
   Widget _buildCabinHistoryPage() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -575,25 +579,34 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           Expanded(
-            child: history.cabinSessions.isNotEmpty
-                ? ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: history.cabinSessions.length,
-                    itemBuilder: (context, index) {
-                      return CabinDiagnosisCard(
-                        key: ValueKey(history.cabinSessions[index].sessionId),
-                        session: history.cabinSessions[index],
-                        index: index,
-                        isSelected: _selectedCabinIds.contains(history.cabinSessions[index].sessionId),
-                        selectionModeActive: _selectedSessionIds.isNotEmpty || _selectedCabinIds.isNotEmpty,
-                        onSelect: () => _toggleCabinSelection(history.cabinSessions[index].sessionId),
-                        onDelete: () => _deleteCabinSession(history.cabinSessions[index].sessionId),
-                      );
-                    },
-                  )
-                : const PatientHistoryEmptyState(),
+            child: CustomPullToRefresh(
+              onRefresh: _refreshHistory,
+              child: history.cabinSessions.isNotEmpty
+                  ? ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: history.cabinSessions.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: AppLayout.space16),
+                          child: CabinDiagnosisCard(
+                            key: ValueKey(history.cabinSessions[index].sessionId),
+                            session: history.cabinSessions[index],
+                            index: index,
+                            isSelected: _selectedCabinIds.contains(history.cabinSessions[index].sessionId),
+                            selectionModeActive: _selectedSessionIds.isNotEmpty || _selectedCabinIds.isNotEmpty,
+                            onSelect: () => _toggleCabinSelection(history.cabinSessions[index].sessionId),
+                            onDelete: () => _deleteCabinSession(history.cabinSessions[index].sessionId),
+                          ),
+                        );
+                      },
+                    )
+                  : const SingleChildScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      child: PatientHistoryEmptyState(),
+                    ),
+            ),
           ),
         ],
       ),
@@ -610,37 +623,28 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
+                margin: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
                 child: Material(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppLayout.radius16),
                   color: theme.colorScheme.surface,
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(AppLayout.space16),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CustomNameInitial(name: history.patient.name, size: 60),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
+                            padding: const EdgeInsets.only(left: AppLayout.space8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                RichText(
-                                  text: TextSpan(
-                                    text: history.patient.name,
-                                    style: theme.textTheme.headlineMedium,
-                                    children: [
-                                      TextSpan(
-                                        text: "\n${history.patient.age} Yrs · ${history.patient.gender ?? ""}",
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
+                                Text(history.patient.name,style: theme.textTheme.headlineMedium,maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,),
+                                Text("${history.patient.age} Yrs · ${history.patient.gender ?? ""}", style: theme.textTheme.bodyMedium,),
+                                const SizedBox(height: AppLayout.space8),
                                 Wrap(
-                                  spacing: 8,
+                                  spacing: AppLayout.space8,
                                   children: [
                                     PatientHistoryIconText(
                                       icon: LucideIcons.calendar,
@@ -663,7 +667,7 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppLayout.space16),
 
               // Page Selector or Selection Bar
               SizedBox(
@@ -676,11 +680,11 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                       child: (_selectedSessionIds.isNotEmpty || _selectedCabinIds.isNotEmpty)
                           ? Container(
                               key: const ValueKey('selection_bar'),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: AppLayout.space12, vertical: AppLayout.space8),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withAlpha(40),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: theme.colorScheme.primary, width: 0.75),
+                                color: theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(AppLayout.radius20),
+                                border: Border.all(color: theme.colorScheme.primary, width: AppLayout.borderThin + 0.25),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -690,24 +694,24 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                                       _selectedSessionIds.clear();
                                       _selectedCabinIds.clear();
                                     }),
-                                    child: Icon(Icons.close, size: 16, color: theme.colorScheme.primary),
+                                    child: Icon(Icons.close, size: AppLayout.iconSmall, color: theme.colorScheme.onSurface),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: AppLayout.space8),
                                   Text(
                                     "${_selectedSessionIds.length + _selectedCabinIds.length} Selected",
                                     style: TextStyle(
-                                      color: theme.colorScheme.primary,
+                                      color: theme.colorScheme.onSurface,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(width: AppLayout.space16),
                                   if (_isBulkDeleting)
-                                    const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                                    const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: AppLayout.borderThick))
                                   else
                                     InkWell(
                                       onTap: _deleteSelectedSessions,
-                                      child: const Icon(LucideIcons.trash2, color: AppColors.error, size: 16),
+                                      child: const Icon(LucideIcons.trash2, color: AppColors.error, size: AppLayout.iconSmall),
                                     ),
                                 ],
                               ),
@@ -717,27 +721,29 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   _buildPageIndicator(0, "History", LucideIcons.history),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(width: AppLayout.space16),
                                   _buildPageIndicator(1, "Cabin", LucideIcons.monitor),
-                                  const SizedBox(width: 16),
-                                  InkWell(
-                                    onTap: _showConsultationTypeDialog,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.primary,
-                                        shape: BoxShape.circle,
+                                  if (MediaQuery.of(context).size.width > 800) ...[
+                                    const SizedBox(width: AppLayout.space16),
+                                    InkWell(
+                                      onTap: _showConsultationTypeDialog,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(AppLayout.space8),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(Icons.add, color: theme.colorScheme.onPrimary, size: AppLayout.iconSmall),
                                       ),
-                                      child: Icon(Icons.add, color: theme.colorScheme.onPrimary, size: 16),
                                     ),
-                                  ),
+                                  ],
                                 ],
                               ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppLayout.space16),
 
               Expanded(
                 child: PageView(

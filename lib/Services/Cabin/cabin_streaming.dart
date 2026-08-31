@@ -36,17 +36,14 @@ class CabinStreamConnection {
     final uri = Uri.parse(
       "$scheme://$base/api/v1/cabin/$sessionId/stream?token=$accessToken",
     );
-    print("🔌 [CabinStream] Connecting to: $uri");
     final channel = WebSocketChannel.connect(uri);
 
     final messages = channel.stream.map((event) {
       if (event is String) {
-        print("📨 [CabinStream] JSON message: $event");
         return CabinStreamMessage.fromJson(jsonDecode(event));
       } else {
         // Binary messages are not expected from server in this protocol, 
         // but we handle them if they arrive as raw data.
-        print("📨 [CabinStream] Binary message received");
         return CabinStreamMessage(type: 'binary', data: {'bytes': event});
       }
     });

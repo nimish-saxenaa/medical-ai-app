@@ -149,14 +149,11 @@ class VoiceStreamConnection {
     final uri = Uri.parse(
       "$scheme://$base/api/v1/consultation/$sessionId/voice-stream?token=$accessToken",
     );
-    print("🔌 [DEBUG WebSocket] Connecting to: $uri");
     final channel = WebSocketChannel.connect(uri);
-    print("✅ [DEBUG WebSocket] Channel created");
 
     final messages = channel.stream
         .where((event) => event is String) // JSON text frames only
         .map((event) {
-          print("📨 [DEBUG WebSocket] Raw message received: $event");
           return VoiceStreamMessage.fromJson(
             jsonDecode(event as String) as Map<String, dynamic>,
           );
@@ -177,7 +174,6 @@ class VoiceStreamConnection {
   /// - audio/mp4 - Possible with AAC encoder
   void start({String mimeType = "audio/aac"}) {
     final message = jsonEncode({"type": "start", "mime_type": mimeType});
-    print("📤 [DEBUG WebSocket] Sending start: $message");
     _channel.sink.add(message);
   }
 
@@ -189,12 +185,10 @@ class VoiceStreamConnection {
   /// Signals the server that audio is finished; alternatively just close().
   void stopRecording() {
     final message = jsonEncode({"type": "stop"});
-    print("📤 [DEBUG WebSocket] Sending stop: $message");
     _channel.sink.add(message);
   }
 
   Future<void> close() {
-    print("🔌 [DEBUG WebSocket] Closing connection");
     return _channel.sink.close();
   }
 }

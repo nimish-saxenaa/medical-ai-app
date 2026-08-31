@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 
 import '../../Components/colors.dart';
@@ -39,7 +40,7 @@ class SingleValueTitle extends StatelessWidget {
         TitleText(title: title),
         if (value != null)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: AppLayout.space8),
             child: Text(
               value!,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -74,26 +75,26 @@ class SummarySection extends StatelessWidget {
       children: [
         TitleText(title: title.toUpperCase()),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: AppLayout.space8),
 
         Container(
-          padding: const EdgeInsets.only(left: 16),
+          padding: const EdgeInsets.only(left: AppLayout.space16),
           decoration: BoxDecoration(
             border: Border(
-              left: BorderSide(color: Theme.of(context).dividerColor, width: 2),
+              left: BorderSide(color: Theme.of(context).dividerColor, width: AppLayout.borderThick),
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: entries.map((entry) {
               return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: AppLayout.space16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TitleText(title: formatKey(entry.key)),
 
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppLayout.space4),
 
                     Text(
                       entry.value.toString(),

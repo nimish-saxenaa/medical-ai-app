@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Models/patient_response_history_model.dart';
@@ -45,19 +46,19 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppLayout.radius16)),
         title: const Text("Start New Session"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(AppLayout.space8),
                 decoration: BoxDecoration(
                   color: isDark ? theme.colorScheme.primary.withAlpha(120) : theme.colorScheme.primary.withAlpha(40),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppLayout.radius8),
                 ),
-                child: Icon(LucideIcons.stethoscope, color: isDark ? Colors.white : theme.colorScheme.primary, size: 20),
+                child: Icon(LucideIcons.stethoscope, color: isDark ? Colors.white : theme.colorScheme.primary, size: AppLayout.iconMedium),
               ),
               title: const Text("Medical Consultation"),
               subtitle: const Text("Standard AI-assisted history taking"),
@@ -79,12 +80,12 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
             const Divider(),
             ListTile(
               leading: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(AppLayout.space8),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.warning.withAlpha(120) : AppColors.warning.withAlpha(40),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppLayout.radius8),
                 ),
-                child: Icon(LucideIcons.monitor, color: isDark ? Colors.white : AppColors.warning, size: 20),
+                child: Icon(LucideIcons.monitor, color: isDark ? Colors.white : AppColors.warning, size: AppLayout.iconMedium),
               ),
               title: const Text("Cabin Flow"),
               subtitle: const Text("Doctor-led live consultation"),
@@ -130,22 +131,26 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                 ],
               ),
             ),
-            Text(
-              history.patient.name,
-              style: Theme.of(context).textTheme.bodyLarge,
+            Container(
+              width: MediaQuery.sizeOf(context).width/3,
+              child: Text(
+                history.patient.name,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: 10),
             child: Image.asset("assets/kuvaka_logo.png"),
           ),
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: AppLayout.space16),
           child: PatientClinicalHistoryView(
             patientHistory: history,
             onHistoryUpdated: () {

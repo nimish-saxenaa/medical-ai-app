@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:clinical_ai_app/Screens/Authentication/create_account_screen.dart';
 import 'package:clinical_ai_app/Screens/PatientData/home_screen.dart';
 import 'package:clinical_ai_app/Services/Authentication/auth_service.dart';
@@ -25,21 +26,68 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
-
   final TextEditingController passwordController = TextEditingController();
+  String? errorMessage;
+  bool isTapped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    emailController.addListener(_validateForm);
+    passwordController.addListener(_validateForm);
+  }
+
+  void _validateForm() {
+    setState(() {
+      errorMessage = null; // Clear error when typing
+    });
+  }
+
+  bool get _isFormValid {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    
+    // Basic email validation: something@something
+    final emailValid = email.contains('@') && 
+                       email.indexOf('@') > 0 && 
+                       email.indexOf('@') < email.length - 1;
+    
+    return emailValid && password.isNotEmpty;
+  }
+
+  void _showValidationError() {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final emailValid = email.contains('@') &&
+        email.indexOf('@') > 0 &&
+        email.indexOf('@') < email.length - 1;
+
+    setState(() {
+      if (email.isEmpty && password.isEmpty) {
+        errorMessage = "Email and Password are required.";
+      } else if (email.isEmpty) {
+        errorMessage = "Email address is required.";
+      } else if (!emailValid) {
+        errorMessage = "Please enter a valid email address (e.g., name@company.com).";
+      } else if (password.isEmpty) {
+        errorMessage = "Password is required.";
+      }
+    });
+  }
 
   @override
   void dispose() {
-    super.dispose();
+    emailController.removeListener(_validateForm);
+    passwordController.removeListener(_validateForm);
     emailController.dispose();
     passwordController.dispose();
+    super.dispose();
   }
-
-  bool isTapped = false;
 
   @override
   Widget build(BuildContext context) {
     final patientsProvider = context.read<PatientListProvider>();
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: SafeArea(
         child: LayoutBuilder(
@@ -50,19 +98,32 @@ class _LoginScreenState extends State<LoginScreen> {
             return Center(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 40 : 24,
-                  vertical: 32,
+                  horizontal: isTablet ? AppLayout.space40 : AppLayout.space24,
+                  vertical: AppLayout.space32,
                 ),
-                child: ConstrainedBox(
+                child: Container(
                   constraints: BoxConstraints(maxWidth: contentWidth),
+                  padding: isTablet ? const EdgeInsets.all(AppLayout.space40) : EdgeInsets.zero,
+                  decoration: isTablet ? BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(AppLayout.panelRadius),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(Theme.of(context).brightness == Brightness.light ? 15 : 40),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(color: Theme.of(context).dividerColor, width: AppLayout.borderThin),
+                  ) : null,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: isTablet ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                     children: [
                       LogoAndText(width: isTablet ? 600 : constraints.maxWidth),
-                      
-                      const SizedBox(height: 32),
-                      
+
+                      const SizedBox(height: AppLayout.space32),
+
                       Text(
                         'Welcome back.',
                         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -70,9 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         textAlign: isTablet ? TextAlign.center : TextAlign.left,
                       ),
-                      
-                      const SizedBox(height: 8),
-                      
+
+                      const SizedBox(height: AppLayout.space8),
+
                       Text(
                         'Sign in to your account to continue.',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -81,55 +142,72 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         textAlign: isTablet ? TextAlign.center : TextAlign.left,
                       ),
-                      
-                      const SizedBox(height: 32),
-                      
+
+                      const SizedBox(height: AppLayout.space32),
+
                       CustomTextField(
                         hintText: 'doctor@hospital.com',
                         controller: emailController,
                         fieldName: "Email address",
                         keyboardType: TextInputType.emailAddress,
                       ),
-                      
-                      const SizedBox(height: 16),
-                      
+
+                      const SizedBox(height: AppLayout.space16),
+
                       CustomTextField(
                         hintText: '••••••••',
                         controller: passwordController,
                         fieldName: 'Password',
                         obscureText: true,
                       ),
-                      
-                      const SizedBox(height: 32),
-                      
+
+                      const SizedBox(height: AppLayout.space16),
+
+                      if (errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Center(
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(height: AppLayout.space16),
+
                       CustomButton(
-                        onPressed: () async {
-                          if (emailController.text.isEmpty || !emailController.text.contains("@")) {
-                            if (!context.mounted) return;
-                            showCustomDialog("Enter a valid Email", context);
-                            return;
-                          } else if (passwordController.text.isEmpty) {
-                            if (!context.mounted) return;
-                            showCustomDialog("Enter a valid Password", context);
+                        isLoading: isTapped,
+                        isPseudoDisabled: !_isFormValid && !isTapped,
+                        onPressed: isTapped ? null : () async {
+                          if (!_isFormValid) {
+                            _showValidationError();
                             return;
                           }
-                          
+
                           setState(() {
                             isTapped = true;
+                            errorMessage = null;
                           });
-                          
+
                           try {
                             var response = await login(
-                              email: emailController.text,
+                              email: emailController.text.trim(),
                               password: passwordController.text,
                             );
-                            
+
                             if (response['access_token'] != null) {
                               AccessTokenService.saveAccessToken(response['access_token']);
                               AccessTokenService.saveRefreshToken(response['refresh_token']);
+
+                              if (response['user'] != null) {
+                                await AccessTokenService.saveUserData(response['user']);
+                              }
+
                               PatientListProvider? patientList = await listPatients();
                               patientsProvider.setPatients(patientList.patients!);
-                              
+
                               navigatorKey.currentState?.pushNamedAndRemoveUntil(
                                 HomeScreen.routeName,
                                 (route) => false,
@@ -137,47 +215,37 @@ class _LoginScreenState extends State<LoginScreen> {
                             } else {
                               setState(() {
                                 isTapped = false;
+                                errorMessage = response['detail']?.toString() ?? "Login failed";
                               });
-                              if (!context.mounted) return;
-                              showCustomDialog(response['detail'].toString(), context);
                             }
                           } catch (e) {
                             setState(() {
                               isTapped = false;
-                            });
-                            if (!context.mounted) return;
-                            showCustomDialog(
-                              "Connection error. Please check your internet or try again later.",
-                              context,
-                            );
-                          }
-                          
-                          if (mounted) {
-                            setState(() {
-                              isTapped = false;
+                              errorMessage = "Connection error. Please check your internet or try again later.";
                             });
                           }
                         },
                         child: isTapped
                             ? Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
+                                children: [
                                   SizedBox(
                                     height: 16,
                                     width: 16,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
+                                      color: colorScheme.onPrimary,
                                     ),
                                   ),
-                                  SizedBox(width: 10),
-                                  Text('Signing in...'),
+                                  const SizedBox(width: 10),
+                                  const Text('Signing in...'),
                                 ],
                               )
                             : const Text('Sign in'),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       Center(
                         child: RichText(
                           text: TextSpan(

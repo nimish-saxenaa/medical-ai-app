@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:clinical_ai_app/Screens/Authentication/login_screen.dart';
 import 'package:clinical_ai_app/Services/Authentication/auth_service.dart';
 import 'package:flutter/gestures.dart';
@@ -25,12 +26,71 @@ class CreateAccountScreen extends StatefulWidget {
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final TextEditingController nameController = TextEditingController();
-
   final TextEditingController emailController = TextEditingController();
-
   final TextEditingController passwordController = TextEditingController();
-
+  String? errorMessage;
   bool isTapped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController.addListener(_validateForm);
+    emailController.addListener(_validateForm);
+    passwordController.addListener(_validateForm);
+  }
+
+  void _validateForm() {
+    setState(() {
+      errorMessage = null; // Clear error when typing
+    });
+  }
+
+  bool get _isFormValid {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    // Email validation: something@something
+    final emailValid = email.contains('@') &&
+        email.indexOf('@') > 0 &&
+        email.indexOf('@') < email.length - 1;
+
+    return name.isNotEmpty && emailValid && password.length >= 8;
+  }
+
+  void _showValidationError() {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final emailValid = email.contains('@') &&
+        email.indexOf('@') > 0 &&
+        email.indexOf('@') < email.length - 1;
+
+    setState(() {
+      if (name.isEmpty) {
+        errorMessage = "Please enter your full name.";
+      } else if (email.isEmpty) {
+        errorMessage = "Email address is required.";
+      } else if (!emailValid) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (password.isEmpty) {
+        errorMessage = "Please create a password.";
+      } else if (password.length < 8) {
+        errorMessage = "Password must be at least 8 characters long.";
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    nameController.removeListener(_validateForm);
+    emailController.removeListener(_validateForm);
+    passwordController.removeListener(_validateForm);
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     final patientsProvider = context.read<PatientListProvider>();
@@ -44,18 +104,31 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             return Center(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 40 : 24,
-                  vertical: 32,
+                  horizontal: isTablet ? AppLayout.space40 : AppLayout.space24,
+                  vertical: AppLayout.space32,
                 ),
-                child: ConstrainedBox(
+                child: Container(
                   constraints: BoxConstraints(maxWidth: contentWidth),
+                  padding: isTablet ? const EdgeInsets.all(AppLayout.space40) : EdgeInsets.zero,
+                  decoration: isTablet ? BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(AppLayout.panelRadius),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(Theme.of(context).brightness == Brightness.light ? 15 : 40),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(color: Theme.of(context).dividerColor, width: AppLayout.borderThin),
+                  ) : null,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: isTablet ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                     children: [
                       LogoAndText(width: isTablet ? 600 : constraints.maxWidth),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: AppLayout.space32),
                       
                       Text(
                         'Create Your Account',
@@ -65,7 +138,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         textAlign: isTablet ? TextAlign.center : TextAlign.left,
                       ),
                       
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppLayout.space8),
                       
                       Text(
                         'Start taking smarter clinical histories today.',
@@ -76,7 +149,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         textAlign: isTablet ? TextAlign.center : TextAlign.left,
                       ),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: AppLayout.space32),
                       
                       CustomTextField(
                         hintText: 'Dr. Priya Sharma',
@@ -84,7 +157,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         fieldName: "Full Name",
                       ),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       
                       CustomTextField(
                         hintText: 'dr@hospital.com',
@@ -93,7 +166,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         keyboardType: TextInputType.emailAddress,
                       ),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       
                       CustomTextField(
                         hintText: 'Min. 8 characters',
@@ -102,38 +175,51 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         obscureText: true,
                       ),
                       
-                      const SizedBox(height: 32),
-                      
+                      const SizedBox(height: AppLayout.space16),
+
+                      if (errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Center(
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(height: AppLayout.space16),
+
                       CustomButton(
-                        onPressed: () async {
-                          if (nameController.text.isEmpty) {
-                            if (!context.mounted) return;
-                            showCustomDialog("Enter a valid Name", context);
-                            return;
-                          } else if (emailController.text.isEmpty || !emailController.text.contains("@")) {
-                            if (!context.mounted) return;
-                            showCustomDialog("Enter a valid Email", context);
-                            return;
-                          } else if (passwordController.text.isEmpty) {
-                            if (!context.mounted) return;
-                            showCustomDialog("Enter a valid Password", context);
+                        isLoading: isTapped,
+                        isPseudoDisabled: !_isFormValid && !isTapped,
+                        onPressed: isTapped ? null : () async {
+                          if (!_isFormValid) {
+                            _showValidationError();
                             return;
                           }
-                          
+
                           setState(() {
                             isTapped = true;
+                            errorMessage = null;
                           });
                           
                           try {
                             var response = await createAccount(
-                              name: nameController.text,
-                              email: emailController.text,
+                              name: nameController.text.trim(),
+                              email: emailController.text.trim(),
                               password: passwordController.text,
                             );
                             
                             if (response['access_token'] != null) {
                               AccessTokenService.saveAccessToken(response['access_token']);
                               AccessTokenService.saveRefreshToken(response['refresh_token']);
+
+                              if (response['user'] != null) {
+                                await AccessTokenService.saveUserData(response['user']);
+                              }
+
                               PatientListProvider? patientList = await listPatients();
                               patientsProvider.setPatients(patientList.patients!);
                               
@@ -143,39 +229,32 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 (route) => false,
                               );
                             } else {
-                              if (!context.mounted) return;
-                              showCustomDialog(response['detail'].toString(), context);
+                              setState(() {
+                                isTapped = false;
+                                errorMessage = response['detail']?.toString() ?? "Registration failed";
+                              });
                             }
                           } catch (e) {
                             setState(() {
                               isTapped = false;
-                            });
-                            if (!context.mounted) return;
-                            showCustomDialog(
-                              "Connection error. Please check your internet or try again later.",
-                              context,
-                            );
-                          }
-                          
-                          if (mounted) {
-                            setState(() {
-                              isTapped = false;
+                              errorMessage = "Connection error. Please check your internet or try again later.";
                             });
                           }
                         },
                         child: isTapped
                             ? Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
+                                children: [
                                   SizedBox(
                                     height: 16,
                                     width: 16,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
+                                      color: Theme.of(context).colorScheme.onPrimary,
                                     ),
                                   ),
-                                  SizedBox(width: 10),
-                                  Text('Creating Account...'),
+                                  const SizedBox(width: 10),
+                                  const Text('Creating Account...'),
                                 ],
                               )
                             : const Text('Create Account'),

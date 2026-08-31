@@ -546,7 +546,6 @@ class PatientPdfGenerator {
           await probe.delete();
           return downloads;
         } catch (e) {
-          print('⚠️ Public Downloads not writable ($e), using app storage');
         }
       }
       final external = await getExternalStorageDirectory();

@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Components/colors.dart';
@@ -57,12 +58,12 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: AppLayout.screenPadding,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildPageIndicator(0, "Transcript", LucideIcons.listMusic),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppLayout.space16),
                   _buildPageIndicator(1, "Clinical Panel", LucideIcons.clipboardList),
                 ],
               ),
@@ -83,14 +84,14 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             ),
             // Final Action
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: AppLayout.screenPadding,
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: AppLayout.space16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppLayout.radius12)),
                   ),
                   child: const Text("Save & Close", style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
@@ -115,22 +116,23 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: AppLayout.space8),
         decoration: BoxDecoration(
           color: isActive ? theme.colorScheme.primary : AppColors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppLayout.radius20),
           border: Border.all(
             color: isActive ? theme.colorScheme.primary : theme.dividerColor,
+            width: AppLayout.borderThin + 0.25,
           ),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              size: 16,
+              size: AppLayout.iconSmall,
               color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppLayout.space8),
             Text(
               label,
               style: TextStyle(
@@ -147,22 +149,22 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
   Widget _buildTranscriptPage() {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
       child: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.dividerColor, width: 0.5),
+          borderRadius: BorderRadius.circular(AppLayout.radius16),
+          border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(AppLayout.space16),
               child: Row(
                 children: [
-                  Icon(LucideIcons.listMusic, size: 16, color: theme.colorScheme.primary),
-                  const SizedBox(width: 8),
+                  Icon(LucideIcons.listMusic, size: AppLayout.iconSmall, color: theme.colorScheme.primary),
+                  const SizedBox(width: AppLayout.space8),
                   Text(
                     "Full Transcript",
                     style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -172,14 +174,14 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             ),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
                 itemCount: widget.record.utterances.length,
                 itemBuilder: (context, index) {
                   return TranscriptBubble(utterance: widget.record.utterances[index]);
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppLayout.space16),
           ],
         ),
       ),
@@ -190,17 +192,17 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
     final panel = widget.record.panel;
     final theme = Theme.of(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tab Selector
           Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(AppLayout.space4),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.dividerColor, width: 0.5),
+              borderRadius: BorderRadius.circular(AppLayout.radius12),
+              border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
             ),
             child: Row(
               children: [
@@ -211,16 +213,16 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           
           // Panel Content
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppLayout.space16),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: theme.dividerColor, width: 0.5),
+              borderRadius: BorderRadius.circular(AppLayout.radius16),
+              border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +251,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
         ],
       ),
     );
@@ -263,16 +265,16 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
         onTap: () => setState(() => _selectedPanelTab = index),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: AppLayout.space8),
           decoration: BoxDecoration(
-            color: isActive ? theme.colorScheme.primary.withAlpha(40) : AppColors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            color: isActive ? theme.colorScheme.primary : AppColors.transparent,
+            borderRadius: BorderRadius.circular(AppLayout.radius8),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isActive ? theme.colorScheme.primary : theme.textTheme.bodyMedium?.color,
+              color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               fontSize: 11,
             ),
@@ -287,22 +289,22 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppLayout.space12),
+      padding: const EdgeInsets.all(AppLayout.space12),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: theme.textTheme.bodyLarge?.color)),
           if (description.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppLayout.space4),
             Text(description, style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color)),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: AppLayout.space8),
           Text("Reported by: $reportedBy", style: TextStyle(fontSize: 10, color: theme.colorScheme.primary, fontStyle: FontStyle.italic)),
         ],
       ),
@@ -320,13 +322,13 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
         : (isDark ? AppColors.success.withAlpha(40) : AppColors.statusFinalizedContainer);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppLayout.space12),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
         border: Border(left: BorderSide(color: accentColor, width: 4)),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppLayout.space12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -338,7 +340,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             ],
           ),
           if (reasoning.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: AppLayout.space8 - 2),
             Text(reasoning, style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color)),
           ],
         ],
@@ -350,12 +352,12 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppLayout.space8),
+      padding: const EdgeInsets.all(AppLayout.space12),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
       ),
       child: Text(text, style: TextStyle(fontSize: 13, color: theme.textTheme.bodyLarge?.color)),
     );

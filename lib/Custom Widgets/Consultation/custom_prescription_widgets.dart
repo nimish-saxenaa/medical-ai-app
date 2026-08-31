@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:clinical_ai_app/Custom%20Widgets/Consultation/custom_clinical_note_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:clinical_ai_app/Models/consultation_models.dart';
@@ -29,10 +30,10 @@ class PrescriptionPage extends StatelessWidget {
         prescription == null ? Container(
           width: double.infinity,
           constraints: const BoxConstraints(minHeight: 300),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppLayout.space24),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppLayout.radius16),
             border: Border.all(color: Theme.of(context).dividerColor),
           ),
           child: PrescriptionField(controller: controller, onGenerate: onGenerate, onChanged: onChanged, isLoading: isLoading),
@@ -72,7 +73,7 @@ class PrescriptionField extends StatelessWidget {
           ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyMedium?.color),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: AppLayout.space20),
 
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +89,7 @@ class PrescriptionField extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 12),
+            const SizedBox(width: AppLayout.space12),
 
             SizedBox(
               height: 48,
@@ -108,7 +109,7 @@ class PrescriptionField extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppLayout.space16),
       ],
     );
   }
@@ -135,11 +136,11 @@ class TreatmentPlanWidget extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppLayout.space16),
 
             ...prescription.pharmacological.map(
               (e) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: AppLayout.space16),
                 child: _MedicationCard(medication: e),
               ),
             ),
@@ -150,7 +151,7 @@ class TreatmentPlanWidget extends StatelessWidget {
 
             const TitleText(title: "Non-Pharmacological Treatment"),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppLayout.space16),
 
             ...prescription.nonPharmacological.map((e) => _BulletItem(text: e)),
           ],
@@ -160,14 +161,14 @@ class TreatmentPlanWidget extends StatelessWidget {
 
             const TitleText(title: "Follow Up"),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppLayout.space16),
 
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppLayout.space16),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary.withAlpha(30),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppLayout.radius12),
                 border: Border.all(color: Theme.of(context).colorScheme.primary.withAlpha(40)),
               ),
               child: Text(
@@ -178,7 +179,7 @@ class TreatmentPlanWidget extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppLayout.space16),
           ],
 
           if (prescription.referrals.isNotEmpty) ...[
@@ -186,7 +187,7 @@ class TreatmentPlanWidget extends StatelessWidget {
 
             const TitleText(title: "Referrals"),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppLayout.space16),
 
             ...prescription.referrals.map((e) => _BulletItem(text: e)),
           ],
@@ -196,11 +197,11 @@ class TreatmentPlanWidget extends StatelessWidget {
 
             const TitleText(title: "Contraindication Warnings"),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppLayout.space16),
 
             ...prescription.contraindicationWarnings.map(
               (e) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: AppLayout.space12),
                 child: _WarningCard(text: e),
               ),
             ),
@@ -262,10 +263,10 @@ class _MedicationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
         border: Border.all(
           color: theme.dividerColor,
         ),
@@ -281,7 +282,7 @@ class _MedicationCard extends StatelessWidget {
                 height: 28,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary.withAlpha(30),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppLayout.radius8),
                 ),
                 child: const Center(
                   child: Text(
@@ -291,7 +292,7 @@ class _MedicationCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: AppLayout.space10),
 
               Expanded(
                 child: Text(
@@ -305,7 +306,7 @@ class _MedicationCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: AppLayout.space14),
 
           /// Information table
           _row(context, "Dose", medication.dose),
@@ -316,17 +317,17 @@ class _MedicationCard extends StatelessWidget {
           /// Warning
           if (medication.warnings != null &&
               medication.warnings!.trim().isNotEmpty) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: AppLayout.space10),
 
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
+                horizontal: AppLayout.space12,
+                vertical: AppLayout.space10,
               ),
               decoration: BoxDecoration(
                 color: theme.brightness == Brightness.light ? AppColors.warningContainer : AppColors.warning.withAlpha(40),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppLayout.radius8),
                 border: Border.all(
                   color: theme.brightness == Brightness.light ? AppColors.warningBorder : AppColors.warning.withAlpha(100),
                 ),
@@ -354,7 +355,7 @@ class _BulletItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: AppLayout.space10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -362,7 +363,7 @@ class _BulletItem extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Icon(LucideIcons.circleCheckBig, size: 16,color: Theme.of(context).colorScheme.primary,),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppLayout.space8),
           Expanded(
             child: Text(
               text,
@@ -388,10 +389,10 @@ class _WarningCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
         border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.error.withAlpha(40)),
       ),
       child: Row(
@@ -402,7 +403,7 @@ class _WarningCard extends StatelessWidget {
             color: AppColors.error,
             size: 20,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppLayout.space10),
           Expanded(
             child: Text(
               text,

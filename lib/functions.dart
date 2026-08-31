@@ -1,12 +1,10 @@
 String getInitials(String name) {
-  final parts = name.trim().split(RegExp(r'\s+'));
+  final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
 
   if (parts.isEmpty) return '';
+  if (parts.length == 1) return parts.first[0].toUpperCase();
 
-  return parts
-      .where((part) => part.isNotEmpty)
-      .map((part) => part[0].toUpperCase())
-      .join();
+  return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
 }
 
 String formatDate(DateTime d) {

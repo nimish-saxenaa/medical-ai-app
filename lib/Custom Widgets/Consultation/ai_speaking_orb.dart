@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 import '../../Components/colors.dart';
 
@@ -96,7 +97,7 @@ class _AIOrbState extends State<AIOrb>
     final size = widget.size;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 40.0),
+      padding: const EdgeInsets.only(top: AppLayout.space40),
       child: Center(
         child: AnimatedBuilder(
           animation: Listenable.merge([
@@ -159,7 +160,7 @@ class _AIOrbState extends State<AIOrb>
                           ),
                           child: Center(
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(100),
+                              borderRadius: BorderRadius.circular(AppLayout.radiusCircular),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -189,7 +190,7 @@ class _AIOrbState extends State<AIOrb>
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: Theme.of(context).colorScheme.surface,
-                            width: 2,
+                            width: AppLayout.borderThick,
                           ),
                           boxShadow: [
                             BoxShadow(

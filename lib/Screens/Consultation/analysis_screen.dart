@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:clinical_ai_app/Models/complete_analysis_model.dart';
 import 'package:flutter/material.dart';
 
@@ -139,15 +140,15 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: AppLayout.screenPadding,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: AppLayout.space24),
                 AIOrb(state: TextToSpeechState.active),
-                const SizedBox(height: 28),
+                const SizedBox(height: AppLayout.space28),
                 _buildHeader(),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppLayout.space32),
                 _buildStepsList(),
               ],
             ),
@@ -171,7 +172,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppLayout.space4),
         Text(
           'This takes 15–30 seconds. Please wait.',
           style: TextStyle(
@@ -193,7 +194,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
         children: [
           for (int i = 0; i < _steps.length; i++) ...[
             _buildStepCard(_steps[i]),
-            if (i != _steps.length - 1) const SizedBox(height: 12),
+            if (i != _steps.length - 1) const SizedBox(height: AppLayout.space12),
           ],
         ],
       ),
@@ -232,11 +233,11 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(AppLayout.radius16),
+        border: Border.all(color: border, width: AppLayout.borderMedium),
         boxShadow: step.status == 'running'
             ? [
                 BoxShadow(
@@ -250,7 +251,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
       child: Row(
         children: [
           _buildStepIcon(step, iconBg),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppLayout.space16),
           Expanded(
             child: AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
@@ -270,11 +271,11 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
   Widget _buildStepIcon(_PipelineStep step, Color iconBg) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: 32,
-      height: 32,
+      width: AppLayout.iconExtraLarge,
+      height: AppLayout.iconExtraLarge,
       decoration: BoxDecoration(
         color: iconBg,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppLayout.radius8),
       ),
       alignment: Alignment.center,
       child: step.status == 'done'

@@ -13,6 +13,7 @@ import 'package:clinical_ai_app/test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:record/record.dart';
+import '../../Components/layout_constants.dart';
 import '../../Custom Widgets/Consultation/ai_speaking_orb.dart';
 import '../../Services/Consultation/consultation_functions.dart';
 import '../../Services/Consultation/consultation_streaming.dart';
@@ -130,12 +131,6 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
     // Tells apart "the clip never decoded" (duration null/zero) from "it is
     // playing but routed somewhere inaudible" (duration present, state
     // playing) — the two have identical symptoms from the outside.
-    final duration = await _audioPlayer.getDuration();
-    print(
-      '🔊 [DEBUG] Playing ${file.path} '
-      '(${await file.length()} bytes), duration: $duration, '
-      'state: ${_audioPlayer.state}',
-    );
   }
 
   Future<void> playText({required String question, String? token}) async {
@@ -151,7 +146,6 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
     } catch (e) {
       // Previously this threw into an unawaited future and vanished, leaving a
       // silent screen with no indication anything had gone wrong.
-      print('❌ [DEBUG] Text-to-speech failed: $e');
       if (!mounted) return;
       setState(() {
         state = TextToSpeechState.idle;
@@ -303,39 +297,27 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
   }
 
   Future<void> startVoiceStreaming() async {
-    print("🎙️ [DEBUG] Starting voice streaming...");
     await _audioPlayer.stop();
     setState(() {
       voiceStreamState = VoiceStreamState.connecting;
     });
 
     String? accessToken = await AccessTokenService.getToken();
-    print("🔑 [DEBUG] Access token: ${accessToken?.substring(0, 20)}...");
-    print("📝 [DEBUG] Session ID: ${widget.sessionId}");
 
     connection = VoiceStreamConnection.connect(
       sessionId: widget.sessionId,
       accessToken: accessToken!,
     );
-    print("🔌 [DEBUG] WebSocket connection created");
 
     // Backend Protocol: Send START first, THEN wait for READY
-    print("📤 [DEBUG] Sending START message first (backend protocol)...");
-    await Future.delayed(Duration(milliseconds: 300)); // Give connection time
+    await Future.delayed(const Duration(milliseconds: 300)); // Give connection time
     connection?.start(mimeType: "audio/aac");
-    print("✅ [DEBUG] Sent start message with MIME type: audio/aac");
 
     // Now listen for messages
     connection?.messages.listen(
       (event) async {
-        print("📨 [DEBUG] Received event type: ${event.type}");
-        print("📦 [DEBUG] Event data: ${event.data}");
-
         if (event.type == "ready") {
-          print("✅ [DEBUG] Server ready! Now starting audio recording...");
-
           if (await recorder.hasPermission()) {
-            print("🎤 [DEBUG] Microphone permission granted");
             final stream = await recorder.startStream(recordConfig);
             recorder
                 .onAmplitudeChanged(
@@ -344,7 +326,6 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                 .listen((amplitude) {
               _updateWaveform(amplitude.current);
             });
-            print("🎵 [DEBUG] Audio stream started");
 
             setState(() {
               startRecordingTimer();
@@ -354,32 +335,22 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
             int chunkCount = 0;
             stream.listen((audioChunk) {
               chunkCount++;
-              if (chunkCount % 10 == 0) {
-                print(
-                  "🔊 [DEBUG] Sent $chunkCount audio chunks (${audioChunk.length} bytes each)",
-                );
-              }
               connection?.sendAudioChunk(audioChunk);
             });
           } else {
-            print("❌ [DEBUG] Microphone permission denied");
           }
         }
 
         if (event.type == "transcript") {
-          print("📝 [DEBUG] Transcript received, AI is thinking...");
           setState(() {
             voiceStreamState = VoiceStreamState.thinking;
           });
         }
 
         if (event.type == "done") {
-          print("✅ [DEBUG] Transcription complete");
           await connection?.close();
-          print("🔌 [DEBUG] WebSocket closed");
 
           if (event.data["next_question"] == null) {
-            print("🏁 [DEBUG] No more questions, navigating to review screen");
             if (!mounted) return;
             Navigator.pushReplacement(
               context,
@@ -393,8 +364,6 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
             return;
           }
 
-          print("❓ [DEBUG] Next question: ${event.data["next_question"]}");
-          print("🔊 [DEBUG] Playing next question audio...");
           setState(() {
             question = event.data["next_question"];
             voiceStreamState = VoiceStreamState.inactive;
@@ -405,14 +374,12 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
         }
 
         if (event.type == "token") {
-          print("🔤 [DEBUG] Token received: ${event.data["text"]}");
           setState(() {
             question += event.data["text"];
           });
         }
 
         if (event.type == "error") {
-          print("❌ [DEBUG] Error received: ${event.data["message"]}");
           await connection?.close();
           if (!mounted) return;
           showCustomDialog(event.data["message"], context);
@@ -420,32 +387,25 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
             voiceStreamState = VoiceStreamState.inactive;
           });
         } else {
-          print("ℹ️ [DEBUG] Other event data: ${event.data}");
         }
       },
       onError: (error) {
-        print("❌ [DEBUG] WebSocket error: $error");
         setState(() {
           voiceStreamState = VoiceStreamState.inactive;
         });
       },
       onDone: () {
-        print("🔌 [DEBUG] WebSocket stream closed");
       },
     );
   }
 
   Future<void> sendVoiceAnswer() async {
-    print("⏹️ [DEBUG] Stopping recording...");
     connection?.stopRecording();
-    print("📤 [DEBUG] Sent stop message to server");
     stopRecordingTimer();
     await recorder.stop();
-    print("🎤 [DEBUG] Audio recorder stopped");
     setState(() {
       voiceStreamState = VoiceStreamState.transcribing;
     });
-    print("⏳ [DEBUG] Waiting for transcription...");
   }
 
   Widget buildVoiceButton() {
@@ -537,8 +497,8 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
     // Decode failures surface here rather than as a thrown exception, so
     // without this listener a bad clip is indistinguishable from silence.
     _audioPlayer.onLog.listen(
-      (msg) => print('🔊 [DEBUG] AudioPlayer log: $msg'),
-      onError: (Object e) => print('❌ [DEBUG] AudioPlayer error: $e'),
+      (msg) => {},
+      onError: (Object e) => {},
     );
 
     _audioPlayer.onPlayerStateChanged.listen((PlayerState audioState) {
@@ -570,7 +530,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: 10),
           child: Image.asset("assets/kuvaka_logo.png"),
         ),
         title: Text(
@@ -580,7 +540,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: AppLayout.screenPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -589,9 +549,9 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                   child: Column(
                     children: [
                       AIOrb(state: state),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       SiriWaveform(state: state),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -607,7 +567,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                 ? LucideIcons.volumeX400
                                 : LucideIcons.volume2,
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: AppLayout.space16),
                           WhiteSquareIconButton(
                             onTap: () async {
                               if (audio != null) await playAudio(audio!);
@@ -616,24 +576,24 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       Text(
                         qnaState == QnaState.thinking
                             ? "AI is thinking..."
                             : "Question $questionNumber",
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppLayout.space4),
                       QuestionBubble(question: question, state: state),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       //Recording Card
                       Container(
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: theme.dividerColor),
+                          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+                          border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
                         ),
                         width: double.infinity,
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppLayout.space16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -648,12 +608,12 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                         decoration: BoxDecoration(
                                           color: theme.colorScheme.primary.withAlpha(30),
                                           borderRadius: BorderRadius.circular(
-                                            8,
+                                            AppLayout.radius8,
                                           ),
                                         ),
                                         child: Icon(LucideIcons.mic, size: 15, color: theme.colorScheme.primary),
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: AppLayout.space8),
                                       Text(
                                         "Speak Your\nAnswer",
                                         style: theme.textTheme.bodyLarge,
@@ -669,16 +629,16 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppLayout.space16),
                             Row(
                               children: [
                                 buildVoiceButton(),
-                                const SizedBox(width: 16),
+                                const SizedBox(width: AppLayout.space16),
                                 if (voiceStreamState ==
                                     VoiceStreamState.recording)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
+                                      horizontal: AppLayout.space12,
                                       vertical: 10,
                                     ),
                                     decoration: BoxDecoration(
@@ -686,6 +646,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
                                         color: theme.brightness == Brightness.light ? AppColors.redFlagBorder : AppColors.error.withAlpha(100),
+                                        width: AppLayout.borderMedium,
                                       ),
                                     ),
                                     child: Text(
@@ -705,7 +666,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -716,9 +677,9 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                               height: 1,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Text("or type"),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppLayout.space8),
+                          const Text("or type"),
+                          const SizedBox(width: AppLayout.space8),
                           Expanded(
                             child: Container(
                               color: theme.dividerColor,
@@ -727,7 +688,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                     ],
                   ),
                 ),
@@ -747,26 +708,28 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppLayout.space8),
                   Material(
-                    borderRadius: BorderRadius.circular(8),
-                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(AppLayout.radius8),
+                    color: theme.colorScheme.secondaryContainer,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppLayout.radius8),
                       splashColor: theme.colorScheme.primary.withAlpha(50),
                       onTap: () {
-                        if (answerController.text.isEmpty)
+                        if (answerController.text.isEmpty) {
                           showCustomDialog("Please type an answer", context);
-                        if (canAnswer)
+                        }
+                        if (canAnswer) {
                           if (answerController.text.isNotEmpty) sendAnswer();
+                        }
                         FocusScope.of(context).unfocus();
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppLayout.radius8),
                           border: Border.all(
                             color: theme.dividerColor,
-                            width: 0.5,
+                            width: AppLayout.borderThin,
                           ),
                         ),
                         width: 50,
@@ -774,7 +737,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                         child: Icon(
                           LucideIcons.send,
                           color: canAnswer
-                              ? theme.colorScheme.primary
+                              ? theme.colorScheme.onSecondaryContainer
                               : theme.textTheme.bodyMedium?.color?.withAlpha(100),
                         ),
                       ),
@@ -782,26 +745,26 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppLayout.space16),
               Row(
                 children: [
-                  Expanded(child: SizedBox()),
+                  const Expanded(child: SizedBox()),
                   Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(AppLayout.space4),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppLayout.radius8),
                       border: Border.all(
                         color: theme.dividerColor,
-                        width: 0.5,
+                        width: AppLayout.borderThin,
                       ),
                     ),
 
                     child: Material(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppLayout.radius8),
                       color: theme.colorScheme.surface,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppLayout.radius8),
                         splashColor: theme.colorScheme.primary.withAlpha(50),
                         onTap: () {
                           if (canAnswer) skipQuestion();
@@ -857,7 +820,7 @@ class QuestionBubble extends StatelessWidget {
     return CustomPaint(
       painter: BubblePainter(
         backgroundColor: state == TextToSpeechState.active
-            ? theme.colorScheme.primary.withAlpha(40)
+            ? theme.colorScheme.primaryContainer
             : theme.colorScheme.surface,
         borderColor: state == TextToSpeechState.active
             ? theme.colorScheme.primary.withAlpha(100)
@@ -911,22 +874,23 @@ class WhiteSquareIconButton extends StatelessWidget {
     final theme = Theme.of(context);
     return Material(
       color: theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(AppLayout.radius8),
       child: InkWell(
         splashColor: theme.colorScheme.primary.withAlpha(50),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppLayout.radius8),
         onTap: onTap,
         child: Container(
           width: 35,
           height: 35,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppLayout.radius8),
             border: Border.all(
               color: theme.dividerColor,
-              width: 0.5,
+              width: AppLayout.borderThin,
             ),
+            color: theme.colorScheme.secondaryContainer
           ),
-          child: Icon(icon, color: theme.textTheme.bodyMedium?.color, size: 16),
+          child: Icon(icon, color: theme.colorScheme.onSecondaryContainer, size: AppLayout.iconSmall),
         ),
       ),
     );
@@ -1015,8 +979,6 @@ class BubblePainter extends CustomPainter {
 
     path.close();
 
-    canvas.drawShadow(path, AppColors.textPrimary.withAlpha(50), 6, false);
-
     canvas.drawPath(
       path,
       Paint()
@@ -1080,13 +1042,14 @@ class _RecordingCardState extends State<RecordingCard>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border.all(
           color: theme.dividerColor,
+          width: AppLayout.borderThin,
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
         boxShadow: theme.brightness == Brightness.light ? [
           BoxShadow(
             blurRadius: 8,
@@ -1118,7 +1081,7 @@ class _RecordingCardState extends State<RecordingCard>
                 ),
               ),
 
-              const SizedBox(width: 8),
+              const SizedBox(width: AppLayout.space8),
 
               Text(
                 "Recording",
@@ -1132,7 +1095,7 @@ class _RecordingCardState extends State<RecordingCard>
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: AppLayout.space12 + 2),
 
           /// Waveform placeholder
           SizedBox(
@@ -1147,7 +1110,7 @@ class _RecordingCardState extends State<RecordingCard>
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: AppLayout.space12),
 
           /// Loudness meter placeholder
           Container(

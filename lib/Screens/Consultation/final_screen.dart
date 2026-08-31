@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:clinical_ai_app/Models/complete_analysis_model.dart';
 import 'package:clinical_ai_app/Screens/PatientData/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +80,6 @@ class _FinalScreenState extends State<FinalScreen> {
                 isGenerating = false;
               });
             } catch (e) {
-              print('❌ Prescription generation failed: $e');
               setState(() {
                 isGenerating = false;
               });
@@ -134,34 +134,34 @@ class _FinalScreenState extends State<FinalScreen> {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: AppLayout.screenPadding,
             child: Column(
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppLayout.space16),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppLayout.radius16),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 48,
-                        height: 48,
+                        width: AppLayout.space48,
+                        height: AppLayout.space48,
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.onPrimary.withAlpha(40),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppLayout.radius12),
                         ),
                         child: Icon(
                           Icons.monitor_heart_outlined,
                           color: Theme.of(context).colorScheme.onPrimary,
-                          size: 24,
+                          size: AppLayout.iconLarge,
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppLayout.space12),
 
                       Text(
                         "Clinical Results Ready",
@@ -173,7 +173,7 @@ class _FinalScreenState extends State<FinalScreen> {
                         textAlign: TextAlign.center,
                       ),
 
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppLayout.space4),
 
                       Text(
                         "Review and share with the treating physician.",
@@ -185,11 +185,11 @@ class _FinalScreenState extends State<FinalScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppLayout.space16),
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(AppLayout.space4 + 2),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppLayout.radius16),
                     color: Theme.of(context).dividerColor,
                   ),
 
@@ -210,7 +210,7 @@ class _FinalScreenState extends State<FinalScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppLayout.space4),
                       Expanded(
                         child: PageButton(
                           text: 'Diagnosis',
@@ -225,7 +225,7 @@ class _FinalScreenState extends State<FinalScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppLayout.space4),
                       Expanded(
                         child: PageButton(
                           text: 'Prescription',
@@ -243,12 +243,12 @@ class _FinalScreenState extends State<FinalScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppLayout.space16),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppLayout.radius16),
                       boxShadow: Theme.of(context).brightness == Brightness.light ? [
                         BoxShadow(
                           color: Colors.black.withAlpha(20),
@@ -258,12 +258,12 @@ class _FinalScreenState extends State<FinalScreen> {
                       ] : null,
                     ),
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(AppLayout.space16),
                       child: _buildContent(),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppLayout.space16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -272,19 +272,19 @@ class _FinalScreenState extends State<FinalScreen> {
                         onPressed: () {
                           finalize(context);
                         },
-                        child: Text(
+                        child: const Text(
                           "Save\nConsultation",
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppLayout.space16),
                     Expanded(
                       child: CustomButton(
                         onPressed: () {
                           finalize(context);
                         },
-                        child: Text(
+                        child: const Text(
                           "New\nConsultation",
                           textAlign: TextAlign.center,
                         ),

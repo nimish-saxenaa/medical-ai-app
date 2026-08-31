@@ -104,7 +104,6 @@ Future<StartConsultationResponse> startConsultation({
     "chief_complaint": chiefComplaint,
     "patient_id": patientId,
   });
-  print(response.body);
   return StartConsultationResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -115,7 +114,6 @@ Future<SessionStateResponse> getSessionState({
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId");
   final response = await _authenticatedGet(url);
-  print(response.body);
   return SessionStateResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -172,7 +170,6 @@ Future<QaLogResponse> getQaLog({
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/qa-log");
   final response = await _authenticatedGet(url);
-  print(response.body);
   return QaLogResponse.fromJson(jsonDecode(response.body));
 }
 
@@ -220,7 +217,6 @@ Future<Prescription> prescribe({
 }) async {
   Uri url = Uri.parse("$baseUrl/api/v1/consultation/$sessionId/prescribe");
   final response = await _authenticatedPost(url, {"confirmed_diagnosis": confirmedDiagnosis});
-  print("💊 [DEBUG] Prescribe response: ${response.body}");
 
   final decoded = jsonDecode(response.body);
   if (decoded is! Map<String, dynamic> || !decoded.containsKey('prescription')) {
@@ -399,10 +395,6 @@ Future<SpeechAudio> textToSpeech({
   }
 
   final contentType = response.headers["content-type"]?.split(";").first.trim();
-  print(
-    "🔊 [DEBUG] TTS response: ${response.statusCode}, "
-    "content-type: $contentType, ${response.bodyBytes.length} bytes",
-  );
 
   // Raw audio body — the common case.
   final directMime = _sniffAudioMimeType(response.bodyBytes);
@@ -421,10 +413,6 @@ Future<SpeechAudio> textToSpeech({
   final unwrapped = _decodeJsonWrappedAudio(response.bodyBytes);
   if (unwrapped != null) {
     final unwrappedMime = _sniffAudioMimeType(unwrapped);
-    print(
-      "🔊 [DEBUG] Decoded ${unwrapped.length} bytes of base64 TTS audio "
-      "(container: ${unwrappedMime ?? 'unrecognised'})",
-    );
     if (unwrappedMime != null) {
       return SpeechAudio(bytes: unwrapped, mimeType: unwrappedMime);
     }

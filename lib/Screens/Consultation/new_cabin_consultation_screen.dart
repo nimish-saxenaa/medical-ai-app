@@ -1,3 +1,4 @@
+import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Components/colors.dart';
@@ -65,14 +66,14 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: 10),
             child: Image.asset("assets/kuvaka_logo.png"),
           ),
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: AppLayout.screenPadding,
           child: Column(
             children: [
               Expanded(
@@ -88,14 +89,14 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
                           hint: 'Full name of the patient',
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
 
                       // Specialty Selection
                       TypeOfConsultation(
                         selected: _selected,
                         onSelect: (type) => setState(() => _selected = type),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
 
                       // Chief Complaint
                       LabeledTextField(
@@ -106,15 +107,15 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
                           hint: 'e.g. chronic back pain, fever...',
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
 
                       // Consent Checkbox
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppLayout.space16),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: theme.dividerColor),
+                          borderRadius: BorderRadius.circular(AppLayout.radius16),
+                          border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
                         ),
                         child: Row(
                           children: [
@@ -126,7 +127,7 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
                                 onChanged: (val) => setState(() => _consent = val ?? false),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppLayout.space8),
                             const Expanded(
                               child: Text(
                                 "Patient has provided explicit consent for audio recording and clinical processing.",
@@ -136,7 +137,7 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppLayout.space16),
                     ],
                   ),
                 ),
@@ -149,8 +150,8 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
                     ? const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: 2)),
-                            SizedBox(width: 8),
+                            SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: AppLayout.borderThick)),
+                            SizedBox(width: AppLayout.space8),
                             Text('Initializing...'),
                           ],
                         )
@@ -213,7 +214,7 @@ class _SimpleInputField extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         hintText: hint,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: AppLayout.space12),
       ),
     );
   }

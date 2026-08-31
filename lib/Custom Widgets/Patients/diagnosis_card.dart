@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Components/colors.dart';
+import '../../Components/layout_constants.dart';
 import '../../Models/patient_response_history_model.dart';
 import '../../Models/session_model.dart';
 
@@ -122,14 +123,13 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
         lightColor = theme.dividerColor;
     }
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: widget.isSelected ? theme.colorScheme.primary.withAlpha(40) : theme.colorScheme.surface,
+        color: widget.isSelected ? theme.colorScheme.primaryContainer : theme.colorScheme.surface,
         border: Border.all(
           color: widget.isSelected ? theme.colorScheme.primary : theme.dividerColor,
-          width: 0.75,
+          width: AppLayout.borderThin + 0.25,
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -138,7 +138,7 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
           Material(
             color: AppColors.transparent,
             child: InkWell(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppLayout.radius12)),
               splashColor: theme.colorScheme.primary.withAlpha(40),
               highlightColor: theme.colorScheme.primary.withAlpha(20),
               onLongPress: widget.onSelect,
@@ -150,7 +150,7 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                 }
               },
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppLayout.cardPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -158,8 +158,8 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                       children: [
                         if (widget.isSelected)
                           Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+                            padding: const EdgeInsets.only(right: AppLayout.space12),
+                            child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: AppLayout.iconMedium),
                           ),
                         Expanded(
                           child: Row(
@@ -173,18 +173,18 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                                   maxLines: 1,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppLayout.space8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
+                                  horizontal: AppLayout.space8,
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
                                   color: lightColor,
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(AppLayout.radius16),
                                   border: Border.all(
                                     color: primaryColor,
-                                    width: 0.75,
+                                    width: AppLayout.borderThin + 0.25,
                                   ),
                                 ),
                                 child: Text(
@@ -207,11 +207,11 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                           duration: const Duration(milliseconds: 200),
                           child: Icon(
                             Icons.keyboard_arrow_down,
-                            size: 18,
+                            size: AppLayout.iconSmall + 2,
                             color: theme.textTheme.bodyMedium?.color,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppLayout.space8),
                         PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
                           splashRadius: 10,
@@ -219,16 +219,16 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                               ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: AppLayout.borderThick),
                           )
                               : Icon(
                             LucideIcons.moreVertical,
-                            size: 18,
+                            size: AppLayout.iconSmall + 2,
                             color: theme.colorScheme.primary,
                           ),
                           tooltip: 'Options',
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppLayout.radius10),
                           ),
                           onSelected: (value) {
                             if (value == 'download') {
@@ -259,7 +259,7 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                                 children: [
                                   Icon(LucideIcons.trash2, size: 18, color: AppColors.error),
                                   const SizedBox(width: 10),
-                                  Text('Delete', style: TextStyle(color: AppColors.error)),
+                                  const Text('Delete', style: TextStyle(color: AppColors.error)),
                                 ],
                               ),
                             ),
@@ -267,13 +267,13 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppLayout.space4),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           LucideIcons.calendar,
-                          size: 12,
+                          size: AppLayout.iconSmall - 4,
                           color: theme.textTheme.bodySmall?.color,
                         ),
                         const SizedBox(width: 6),
@@ -299,13 +299,13 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                     ),
                     if (widget.location != null &&
                         widget.location!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppLayout.space4),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             LucideIcons.mapPin,
-                            size: 12,
+                            size: AppLayout.iconSmall - 4,
                             color: theme.textTheme.bodySmall?.color,
                           ),
                           const SizedBox(width: 6),
@@ -341,9 +341,9 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
               width: double.infinity,
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
-                border: Border(top: BorderSide(color: theme.dividerColor)),
+                border: Border(top: BorderSide(color: theme.dividerColor, width: AppLayout.borderThin + 0.5)),
               ),
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(AppLayout.space20),
               child: Text(
                 "No diagnosis recorded yet.",
                 style: theme.textTheme.bodyMedium,
@@ -383,34 +383,34 @@ class _ExpandedBody extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        border: Border(top: BorderSide(color: theme.dividerColor)),
+        border: Border(top: BorderSide(color: theme.dividerColor, width: AppLayout.borderThin + 0.5)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space20, vertical: AppLayout.space20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _SectionLabel('Diagnosis'),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppLayout.space12),
           // Red flag alerts
           Column(
             children: redFlags
                 .map(
                   (f) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: AppLayout.space8),
                     child: _RedFlagAlert(text: f),
                   ),
                 )
                 .toList(),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppLayout.space4),
           // Diagnosis rows
           ...diagnoses.map(
             (d) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppLayout.space8),
               child: _DiagnosisRow(item: d),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppLayout.space4),
           Text(
             workup,
             style: TextStyle(
@@ -419,11 +419,11 @@ class _ExpandedBody extends StatelessWidget {
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppLayout.space20),
           _SectionLabel('Clinical Summary'),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppLayout.space20),
           _SoapSection(letter: 'S', title: 'Subjective', fields: subjective),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppLayout.space20),
           _SoapSection(letter: 'O', title: 'Objective', fields: objective),
         ],
       ),
@@ -458,11 +458,11 @@ class _RedFlagAlert extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space12, vertical: AppLayout.space10),
       decoration: BoxDecoration(
         color: isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer,
-        border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder, width: AppLayout.borderMedium),
+        borderRadius: BorderRadius.circular(AppLayout.radius8),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,7 +475,7 @@ class _RedFlagAlert extends StatelessWidget {
               color: AppColors.error,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppLayout.space10),
           Expanded(
             child: Text(
               text,
@@ -502,8 +502,8 @@ class _DiagnosisRow extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final isHigh = item.severity.toLowerCase() == 'high';
     return Wrap(
-      spacing: 8,
-      runSpacing: 4,
+      spacing: AppLayout.space8,
+      runSpacing: AppLayout.space4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Container(
@@ -512,7 +512,7 @@ class _DiagnosisRow extends StatelessWidget {
             color: isHigh 
                 ? (isDark ? AppColors.error.withAlpha(100) : AppColors.redFlagBorder) 
                 : (isDark ? theme.dividerColor : AppColors.divider),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppLayout.space4),
           ),
           child: Text(
             item.severity,
@@ -562,8 +562,8 @@ class _SoapSection extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: 20,
-              height: 20,
+              width: AppLayout.space20,
+              height: AppLayout.space20,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: theme.colorScheme.primary.withAlpha(40),
@@ -578,7 +578,7 @@ class _SoapSection extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppLayout.space8),
             Text(
               title.toUpperCase(),
               style: TextStyle(
@@ -590,7 +590,7 @@ class _SoapSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppLayout.space10),
         Padding(
           padding: const EdgeInsets.only(left: 28),
           child: Column(
@@ -598,7 +598,7 @@ class _SoapSection extends StatelessWidget {
             children: fields
                 .map(
                   (f) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: AppLayout.space8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -614,7 +614,7 @@ class _SoapSection extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppLayout.space12),
                         Expanded(
                           child: Text(
                             (f.value == null) ? 'Not recorded' : f.value!,

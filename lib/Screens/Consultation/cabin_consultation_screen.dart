@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import '../../Components/colors.dart';
+import '../../Components/layout_constants.dart';
 import '../../functions.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -98,7 +99,6 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         _messageSubscription = _connection!.messages.listen((message) {
           _handleWsMessage(message);
         }, onError: (err) {
-          debugPrint("❌ WebSocket Error: $err");
           _stopStreaming();
         });
 
@@ -109,14 +109,12 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         );
       }
     } catch (e) {
-      debugPrint("❌ Start Streaming Error: $e");
     }
   }
 
   void _handleWsMessage(CabinStreamMessage message) async {
     switch (message.type) {
       case "ready":
-        debugPrint("✅ Server Ready - Starting Audio Stream");
         _startAudioRecording();
         break;
 
@@ -173,12 +171,10 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         break;
 
       case "error":
-        debugPrint("❌ Server Error: ${message.data['message']}");
         if (message.data['fatal'] == true) _stopStreaming();
         break;
 
       case "ended":
-        debugPrint("🏁 Session Ended");
         _stopStreaming();
         break;
     }
@@ -204,7 +200,6 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       });
     });
 
-    debugPrint("🎤 Audio streaming started");
   }
 
   Future<void> _stopStreaming() async {
@@ -221,9 +216,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         _currentAmplitude = -60.0;
         _partialTranscript = "";
       });
-      debugPrint("🛑 Streaming stopped");
     } catch (e) {
-      debugPrint("❌ Stop Error: $e");
     }
   }
 
@@ -258,7 +251,6 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
             ),
           );
         } catch (e) {
-          debugPrint("❌ Error ending session: $e");
           if (mounted) {
             setState(() => _isEnding = false);
             ScaffoldMessenger.of(context).showSnackBar(
@@ -288,7 +280,6 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       });
       
       _noteController.clear();
-      debugPrint("📤 Note sent and added locally: $text");
     }
   }
 
@@ -317,16 +308,16 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
         actions: [
           if (_isStreaming)
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              margin: const EdgeInsets.symmetric(vertical: AppLayout.space12, horizontal: AppLayout.space8),
+              padding: const EdgeInsets.symmetric(horizontal: AppLayout.space12),
               decoration: BoxDecoration(
                 color: AppColors.error.withAlpha(25),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppLayout.radius20),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.circle, color: AppColors.error, size: 8),
-                  const SizedBox(width: 8),
+                  const Icon(Icons.circle, color: AppColors.error, size: AppLayout.space8),
+                  const SizedBox(width: AppLayout.space8),
                   Text(
                     "LIVE",
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -339,8 +330,8 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
             ),
           _isEnding 
             ? const Center(child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.error)),
+                padding: EdgeInsets.symmetric(horizontal: AppLayout.space16),
+                child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: AppLayout.borderThick, color: AppColors.error)),
               ))
             : TextButton(
                 onPressed: _endSession,
@@ -358,14 +349,14 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _buildPageIndicator(0, "Consult", LucideIcons.mic),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppLayout.space8),
                     _buildPageIndicator(1, "Insights", LucideIcons.brainCircuit, hasNotification: _hasNewInsights),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppLayout.space8),
                     _buildPageIndicator(2, "Panel", LucideIcons.clipboardList, hasNotification: _hasNewPanel),
                   ],
                 ),
               ),
-              const SizedBox(height: 16,),
+              const SizedBox(height: AppLayout.space16),
               Expanded(
                 child: PageView(
                   controller: _pageController,
@@ -402,12 +393,13 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: AppLayout.space8),
         decoration: BoxDecoration(
           color: isActive ? theme.colorScheme.primary : AppColors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppLayout.radius20),
           border: Border.all(
             color: isActive ? theme.colorScheme.primary : theme.dividerColor,
+            width: AppLayout.borderThin + 0.25,
           ),
         ),
         child: Stack(
@@ -417,23 +409,24 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               children: [
                 Icon(
                   icon,
-                  size: 16,
+                  size: AppLayout.iconSmall,
                   color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppLayout.space8),
                 Text(
                   label,
                   style: TextStyle(
                     color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 13,
                   ),
                 ),
               ],
             ),
             if (hasNotification && !isActive)
               Positioned(
-                top: -4,
-                right: -8,
+                top: -AppLayout.space4,
+                right: -AppLayout.space8,
                 child: Container(
                   width: 8,
                   height: 8,
@@ -452,24 +445,24 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   Widget _buildConsultationPage() {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
       child: Column(
         children: [
           // 1. Questions to Ask Section
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppLayout.space16),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: theme.dividerColor, width: 0.5),
+              borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+              border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const Icon(LucideIcons.messageSquareText, size: 16, color: AppColors.brand),
-                    const SizedBox(width: 8),
+                    const Icon(LucideIcons.messageSquareText, size: AppLayout.iconSmall, color: AppColors.brand),
+                    const SizedBox(width: AppLayout.space8),
                     Text(
                       "Questions to Ask",
                       style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -486,9 +479,9 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                     ],
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppLayout.space12),
                 SizedBox(
-                  height: 110, // Reduced from 150 to remove excess space
+                  height: 110, // Keep fixed height for PageView
                   child: _suggestions?.questionsToAsk == null || _suggestions!.questionsToAsk.isEmpty
                       ? const Center(child: Text("No data to show", style: TextStyle(color: AppColors.textDisabled, fontSize: 13)))
                       : PageView.builder(
@@ -508,25 +501,25 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
 
           // 2. Live Transcript Container (Expanded to take max available space)
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Theme.of(context).dividerColor, width: 0.5),
+                borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+                border: Border.all(color: Theme.of(context).dividerColor, width: AppLayout.borderThin),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(AppLayout.space16),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.listMusic, size: 16, color: AppColors.brand),
-                        const SizedBox(width: 8),
+                        const Icon(LucideIcons.listMusic, size: AppLayout.iconSmall, color: AppColors.brand),
+                        const SizedBox(width: AppLayout.space8),
                         Text(
                           "Live Transcript",
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -536,7 +529,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   ),
                   Expanded(
                     child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
                       itemCount: _utterances.length,
                       itemBuilder: (context, index) {
                         return TranscriptBubble(utterance: _utterances[index]);
@@ -545,17 +538,17 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   ),
                   if (_isStreaming)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: AppLayout.space8),
                       child: PartialTranscriptBubble(text: _partialTranscript),
                     ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppLayout.space8),
                 ],
               ),
             ),
           ),
 
           // 3. Note Input & Controls (Sticky Bottom)
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           Row(
             children: [
               Expanded(
@@ -567,7 +560,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppLayout.space12),
               // Compact Pulsating Mic Button
               SizedBox(
                 width: 50,
@@ -581,7 +574,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppLayout.space8),
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.brand,
@@ -592,7 +585,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppLayout.space8),
         ],
       ),
     );
@@ -602,12 +595,12 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(horizontal: AppLayout.space4),
+      padding: const EdgeInsets.all(AppLayout.space12),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -623,7 +616,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               ),
             ),
             if (reasoning.isNotEmpty) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: AppLayout.space8 - 2),
               Text(
                 reasoning,
                 style: TextStyle(
@@ -643,7 +636,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   Widget _buildAnalysisPage() {
     final theme = Theme.of(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      padding: const EdgeInsets.only(left: AppLayout.space16, right: AppLayout.space16, bottom: AppLayout.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -655,7 +648,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
                 ? [Text("No data to show", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13))]
                 : _suggestions!.redFlags.map((f) => _buildRedFlagItem(f)).toList(),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           _buildAnalysisSection(
             "Differentials",
             theme.colorScheme.surface,
@@ -674,17 +667,17 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
   Widget _buildPanelPage() {
     final theme = Theme.of(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      padding: const EdgeInsets.only(left: AppLayout.space16, right: AppLayout.space16, bottom: AppLayout.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tab Selector for Clinical Panel
           Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(AppLayout.space4),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.dividerColor, width: 0.5),
+              borderRadius: BorderRadius.circular(AppLayout.radius12),
+              border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
             ),
             child: Row(
               children: [
@@ -695,7 +688,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppLayout.space16),
           
           // Panel Content
           _buildAnalysisSection(
@@ -761,12 +754,12 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppLayout.space12),
+      padding: const EdgeInsets.all(AppLayout.space12),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -779,7 +772,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               color: theme.textTheme.bodyLarge?.color,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppLayout.space4),
           Text(
             description,
             style: TextStyle(
@@ -788,7 +781,7 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               height: 1.3,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppLayout.space8),
           Row(
             children: [
               Text(
@@ -818,12 +811,12 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppLayout.space8),
+      padding: const EdgeInsets.all(AppLayout.space12),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
       ),
       child: Text(
         text,
@@ -836,11 +829,11 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppLayout.space16),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor, width: 0.5),
+        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -850,17 +843,17 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
               Icon(
                 title == "Red Flags" ? LucideIcons.alertTriangle : 
                 (title == "Differentials" ? LucideIcons.brainCircuit : LucideIcons.clipboardList),
-                size: 18,
+                size: AppLayout.iconSmall + 2,
                 color: accentColor,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppLayout.space8),
               Text(
                 title,
                 style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppLayout.space12),
           if (children != null && children.isNotEmpty)
             ...children
           else
@@ -875,22 +868,22 @@ class _CabinConsultationScreenState extends State<CabinConsultationScreen> {
 
   Widget _buildRedFlagItem(String text) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      margin: const EdgeInsets.only(bottom: AppLayout.space8),
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.space12, vertical: AppLayout.space8 + 2),
       decoration: BoxDecoration(
         color: AppColors.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.redFlagBorder),
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(color: AppColors.redFlagBorder, width: AppLayout.borderThin),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
             Icons.warning_rounded,
-            size: 16,
+            size: AppLayout.iconSmall,
             color: AppColors.error,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppLayout.space10),
           Expanded(
             child: Text(
               text,

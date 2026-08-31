@@ -89,8 +89,6 @@ Future<CabinSessionList> listCabinSessions({
     }
   }
 
-  dev.log("📜 [DEBUG] Cabin Session History Response: ${response.body}", name: "API.CabinHistory");
-
   return CabinSessionList.fromJson(jsonDecode(response.body));
 }
 

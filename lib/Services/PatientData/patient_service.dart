@@ -154,8 +154,6 @@ Future<PatientHistoryResponse> getPatientHistory({
     }
   }
 
-  dev.log("📜 [DEBUG] Patient History API Response: ${response.body}", name: "API.History");
-
   return PatientHistoryResponse.fromJson(jsonDecode(response.body));
 }
 
