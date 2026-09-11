@@ -7,13 +7,27 @@ import '../../Models/patient_list_model.dart';
 import '../../Models/patient_model.dart';
 import '../../Services/PatientData/patient_service.dart';
 
-/// Full "New Patient" sheet/dialog: header + form.
-/// Wrap in a Dialog / showModalBottomSheet / Card as needed.
+/// A form widget for creating a new patient record.
+///
+/// Encapsulates inputs for full name, age, gender, and optional phone number,
+/// handling input validation, error presentation, and submission loading states.
+/// Can be presented inside a dialog, bottom sheet, or card container.
 class NewPatientForm extends StatefulWidget {
+  /// Callback triggered when the form is dismissed or cancelled.
   final VoidCallback? onClose;
-  final Future<void> Function(String name, int age, String? gender, String? phone)?
-  onCreate;
 
+  /// Asynchronous callback invoked when the user submits a valid form.
+  ///
+  /// Passes the sanitized [name], parsed [age], optional [gender] label,
+  /// and optional [phone] number string.
+  final Future<void> Function(
+    String name,
+    int age,
+    String? gender,
+    String? phone,
+  )? onCreate;
+
+  /// Creates a [NewPatientForm] instance.
   const NewPatientForm({super.key, this.onClose, this.onCreate});
 
   @override
@@ -21,29 +35,41 @@ class NewPatientForm extends StatefulWidget {
 }
 
 class _NewPatientFormState extends State<NewPatientForm> {
+  // Text editing controllers for patient details
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  // Selected gender option; null if none selected
   Gender? _selectedGender;
+
+  // Inline error message displayed when validation or creation fails
   String? errorMessage;
+
+  // Indicates whether an asynchronous patient creation operation is in progress
   bool _isCreating = false;
 
   @override
   void initState() {
     super.initState();
+    // Clear validation error message whenever the user modifies any field
     _nameController.addListener(_onFieldChanged);
     _ageController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
   }
 
+  /// Resets the visible error message upon user interaction.
   void _onFieldChanged() {
-    setState(() {
-      errorMessage = null;
-    });
+    if (errorMessage != null) {
+      setState(() {
+        errorMessage = null;
+      });
+    }
   }
 
   @override
   void dispose() {
+    // Unregister field listeners before disposing controllers to avoid memory leaks
     _nameController.removeListener(_onFieldChanged);
     _ageController.removeListener(_onFieldChanged);
     _phoneController.removeListener(_onFieldChanged);
@@ -53,11 +79,15 @@ class _NewPatientFormState extends State<NewPatientForm> {
     super.dispose();
   }
 
+  /// Validates all form inputs and updates [errorMessage] on failure.
+  ///
+  /// Returns `true` if all validations pass; otherwise `false`.
   bool _validateForm() {
     final name = _nameController.text.trim();
     final ageStr = _ageController.text.trim();
     final phone = _phoneController.text.trim();
 
+    // Validate full name presence and minimum length
     if (name.isEmpty) {
       setState(() => errorMessage = "Name is required");
       return false;
@@ -68,6 +98,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
       return false;
     }
 
+    // Validate age presence, numeric format, and reasonable bounds
     if (ageStr.isEmpty) {
       setState(() => errorMessage = "Age is required");
       return false;
@@ -89,6 +120,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
       return false;
     }
 
+    // Validate optional phone number length limit
     if (phone.length > 15) {
       setState(() => errorMessage = "Phone number cannot exceed 15 characters");
       return false;
@@ -97,6 +129,9 @@ class _NewPatientFormState extends State<NewPatientForm> {
     return true;
   }
 
+  /// Whether all form inputs currently satisfy basic validity checks.
+  ///
+  /// Used to dynamically enable or style the submission button.
   bool get _isFormValid {
     final name = _nameController.text.trim();
     final ageStr = _ageController.text.trim();
@@ -112,6 +147,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
     return true;
   }
 
+  /// Handles form submission by validating inputs and executing [widget.onCreate].
   Future<void> _handleCreate() async {
     if (!_validateForm()) return;
     if (_isCreating) return;
@@ -141,8 +177,10 @@ class _NewPatientFormState extends State<NewPatientForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final height = MediaQuery.of(context).size.height;
+
     return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: height *0.6),
+      // Cap maximum modal height to prevent overflowing smaller screens
+      constraints: BoxConstraints(maxHeight: height * 0.6),
       child: Material(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(AppLayout.radius16),
@@ -151,20 +189,26 @@ class _NewPatientFormState extends State<NewPatientForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Modal dialog title header
             const _Header(),
             Flexible(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppLayout.space24, vertical: AppLayout.space20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppLayout.space24,
+                  vertical: AppLayout.space20,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Scrollable form fields section
                     Flexible(
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Full Name field
                             const _FieldLabel(label: 'Full name', required: true),
                             const SizedBox(height: AppLayout.space8),
                             _InputField(
@@ -173,9 +217,12 @@ class _NewPatientFormState extends State<NewPatientForm> {
                               keyboardType: TextInputType.text,
                             ),
                             const SizedBox(height: AppLayout.space16),
+
+                            // Age and Gender row
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Age input column
                                 SizedBox(
                                   width: 80,
                                   child: Column(
@@ -193,6 +240,8 @@ class _NewPatientFormState extends State<NewPatientForm> {
                                   ),
                                 ),
                                 const SizedBox(width: AppLayout.space16),
+
+                                // Gender selection buttons
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -209,6 +258,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
                                                 selected: _selectedGender == Gender.male,
                                                 onTap: () {
                                                   setState(() {
+                                                    // Toggle selection if tapped again
                                                     _selectedGender = (_selectedGender == Gender.male) ? null : Gender.male;
                                                   });
                                                 },
@@ -221,6 +271,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
                                                 selected: _selectedGender == Gender.female,
                                                 onTap: () {
                                                   setState(() {
+                                                    // Toggle selection if tapped again
                                                     _selectedGender = (_selectedGender == Gender.female) ? null : Gender.female;
                                                   });
                                                 },
@@ -233,6 +284,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
                                                 selected: _selectedGender == Gender.other,
                                                 onTap: () {
                                                   setState(() {
+                                                    // Toggle selection if tapped again
                                                     _selectedGender = (_selectedGender == Gender.other) ? null : Gender.other;
                                                   });
                                                 },
@@ -247,6 +299,8 @@ class _NewPatientFormState extends State<NewPatientForm> {
                               ],
                             ),
                             const SizedBox(height: AppLayout.space20),
+
+                            // Phone Number field (optional)
                             const _FieldLabel(label: 'Phone Number', optional: true),
                             const SizedBox(height: AppLayout.space8),
                             _InputField(
@@ -260,6 +314,8 @@ class _NewPatientFormState extends State<NewPatientForm> {
                       ),
                     ),
                     const SizedBox(height: AppLayout.space24),
+
+                    // Inline validation error message banner
                     if (errorMessage != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
@@ -275,8 +331,11 @@ class _NewPatientFormState extends State<NewPatientForm> {
                           ),
                         ),
                       ),
+
+                    // Action buttons (Cancel / Create)
                     Row(
                       children: [
+                        // Cancel button
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () => Navigator.of(context).pop(),
@@ -294,6 +353,8 @@ class _NewPatientFormState extends State<NewPatientForm> {
                           ),
                         ),
                         const SizedBox(width: AppLayout.space12),
+
+                        // Create / Submit button
                         Expanded(
                           child: ElevatedButton(
                             onPressed: _isCreating ? null : _handleCreate,
@@ -356,8 +417,7 @@ class _NewPatientFormState extends State<NewPatientForm> {
   }
 }
 
-/// ---------- Header ----------
-
+/// Header banner displaying the "New Patient" title.
 class _Header extends StatelessWidget {
   const _Header();
 
@@ -378,11 +438,15 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// ---------- Field label ----------
-
+/// Form field label with optional required asterisk or optional tag.
 class _FieldLabel extends StatelessWidget {
+  /// The text content of the label.
   final String label;
+
+  /// Whether to display a red asterisk indicating a mandatory field.
   final bool required;
+
+  /// Whether to display an "(OPTIONAL)" badge alongside the label.
   final bool optional;
 
   const _FieldLabel({
@@ -422,13 +486,21 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-/// ---------- Text input ----------
-
+/// Standard text input field styled for patient form entries.
 class _InputField extends StatelessWidget {
+  /// Controller managing the text being edited.
   final TextEditingController controller;
+
+  /// Placeholder hint text shown when the input is empty.
   final String hint;
+
+  /// Type of keyboard to display for editing.
   final TextInputType keyboardType;
+
+  /// Alignment of the text within the input field.
   final TextAlign textAlign;
+
+  /// Maximum character length limit.
   final int? maxLength;
 
   const _InputField({
@@ -458,13 +530,20 @@ class _InputField extends StatelessWidget {
   }
 }
 
-/// ---------- Gender segmented button ----------
-
+/// Segmented option button representing a patient [Gender] choice.
+///
+/// Toggles selection state with smooth color and border animations.
 class GenderButton extends StatelessWidget {
+  /// The gender category represented by this button.
   final Gender gender;
+
+  /// Whether this button is currently selected.
   final bool selected;
+
+  /// Callback triggered when the button is tapped.
   final VoidCallback onTap;
 
+  /// Creates a [GenderButton] instance.
   const GenderButton({
     super.key,
     required this.gender,
@@ -511,7 +590,10 @@ class GenderButton extends StatelessWidget {
   }
 }
 
-
+/// Displays the [NewPatientForm] in a modal dialog.
+///
+/// Handles patient creation via [createPatient], updates the [PatientListProvider]
+/// state upon success, and displays error dialog feedback if the network request fails.
 Future<void> showNewPatientDialog(BuildContext context) {
   final theme = Theme.of(context);
   return showDialog(
@@ -528,6 +610,7 @@ Future<void> showNewPatientDialog(BuildContext context) {
             onClose: () => Navigator.of(context).pop(),
             onCreate: (name, age, gender, phone) async {
               try {
+                // Send patient creation request to the API
                 await createPatient(
                   name: name,
                   gender: gender,
@@ -535,9 +618,12 @@ Future<void> showNewPatientDialog(BuildContext context) {
                   phone: phone,
                 );
                 if (!context.mounted) return;
+
+                // Refresh the global patient list provider to reflect the new record
                 final patientsProvider = context.read<PatientListProvider>();
                 PatientListProvider patientList = await listPatients();
                 patientsProvider.setPatients(patientList.patients!);
+
                 if (!context.mounted) return;
                 Navigator.of(context).pop();
               } catch (e) {
