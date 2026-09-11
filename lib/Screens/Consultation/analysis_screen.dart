@@ -40,8 +40,7 @@ class _PipelineStep {
     required this.id,
     required this.title,
     String? status,
-    this.label,
-  }) : status = status ?? 'pending';
+  }) : label = null, status = status ?? 'pending';
 }
 
 class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
@@ -219,7 +218,7 @@ class _ConsultationPipelineScreenState extends State<ConsultationPipelineScreen>
         break;
       case 'running':
         bg = isDark ? theme.colorScheme.primary.withAlpha(40) : brandLight;
-        border = isDark ? theme.colorScheme.primary.withAlpha(100) : brand.withOpacity(0.3);
+        border = isDark ? theme.colorScheme.primary.withAlpha(100) : brand.withValues(alpha: 0.3);
         iconBg = brand;
         textColor = isDark ? Colors.white : brand;
         fontWeight = FontWeight.w600;

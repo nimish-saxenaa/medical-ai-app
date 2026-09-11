@@ -1,5 +1,5 @@
 import 'package:clinical_ai_app/Components/layout_constants.dart';
-import '../../Custom Widgets/CustomAlertDialog.dart';
+import '../../Custom Widgets/custom_alert_dialog.dart';
 import '../../Custom Widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -219,6 +219,7 @@ class PatientBox extends StatelessWidget {
   }
 }
 
+// ignore: constant_identifier_names
 enum TypesOfSpeciality { general_medicine, psychotherapy, gynecology }
 
 class SingleSpeciality {

@@ -24,7 +24,6 @@ class PrescriptionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canGenerate = controller.text.trim().isNotEmpty && !isLoading;
     return Column(
       children: [
         prescription == null ? Container(

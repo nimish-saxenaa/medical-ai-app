@@ -140,7 +140,7 @@ class _WavePainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round
         ..isAntiAlias = true
         ..color =
-        wave.color.withOpacity(wave.alpha * opacityMultiplier);
+        wave.color.withValues(alpha: wave.alpha * opacityMultiplier);
 
       final path = Path();
 

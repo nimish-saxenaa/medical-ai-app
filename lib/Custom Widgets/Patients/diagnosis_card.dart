@@ -215,17 +215,6 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                         PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
                           splashRadius: 10,
-                          child: widget.isDownloading
-                              ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: AppLayout.borderThick),
-                          )
-                              : Icon(
-                            LucideIcons.moreVertical,
-                            size: AppLayout.iconSmall + 2,
-                            color: theme.colorScheme.primary,
-                          ),
                           tooltip: 'Options',
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(AppLayout.radius10),
@@ -264,6 +253,17 @@ class _DiagnosisCardState extends State<DiagnosisCard> {
                               ),
                             ),
                           ],
+                          child: widget.isDownloading
+                              ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: AppLayout.borderThick),
+                          )
+                              : Icon(
+                            LucideIcons.moreVertical,
+                            size: AppLayout.iconSmall + 2,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ],
                     ),

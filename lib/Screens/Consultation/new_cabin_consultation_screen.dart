@@ -1,7 +1,7 @@
 import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 import '../../Custom Widgets/custom_button.dart';
-import '../../Custom Widgets/CustomAlertDialog.dart';
+import '../../Custom Widgets/custom_alert_dialog.dart';
 import '../../Services/Cabin/cabin_service.dart';
 import '../../Services/Location/location_service.dart';
 import 'cabin_consultation_screen.dart';

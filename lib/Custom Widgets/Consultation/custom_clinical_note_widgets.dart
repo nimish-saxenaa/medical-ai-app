@@ -1,7 +1,6 @@
 import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
 
-import '../../Components/colors.dart';
 import '../../functions.dart';
 
 

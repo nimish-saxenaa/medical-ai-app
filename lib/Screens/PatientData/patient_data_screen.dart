@@ -58,7 +58,7 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                   color: isDark ? theme.colorScheme.primary.withAlpha(120) : theme.colorScheme.primary.withAlpha(40),
                   borderRadius: BorderRadius.circular(AppLayout.radius8),
                 ),
-                child: Icon(LucideIcons.stethoscope, color: isDark ? Colors.white : theme.colorScheme.primary, size: AppLayout.iconMedium),
+                child: Icon(LucideIcons.stethoscope, color: primaryIconColor, size: AppLayout.iconMedium),
               ),
               title: const Text("Medical Consultation"),
               subtitle: const Text("Standard AI-assisted history taking"),
@@ -85,7 +85,7 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                   color: isDark ? AppColors.warning.withAlpha(120) : AppColors.warning.withAlpha(40),
                   borderRadius: BorderRadius.circular(AppLayout.radius8),
                 ),
-                child: Icon(LucideIcons.monitor, color: isDark ? Colors.white : AppColors.warning, size: AppLayout.iconMedium),
+                child: Icon(LucideIcons.monitor, color: warningIconColor, size: AppLayout.iconMedium),
               ),
               title: const Text("Cabin Flow"),
               subtitle: const Text("Doctor-led live consultation"),
@@ -131,7 +131,7 @@ class _PatientDataScreenState extends State<PatientDataScreen> {
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.sizeOf(context).width/3,
               child: Text(
                 history.patient.name,

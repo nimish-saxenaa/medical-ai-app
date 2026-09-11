@@ -1,6 +1,5 @@
 import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:clinical_ai_app/Components/colors.dart';
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField({

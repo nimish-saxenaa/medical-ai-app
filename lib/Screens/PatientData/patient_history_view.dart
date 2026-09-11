@@ -178,7 +178,8 @@ class _PatientClinicalHistoryViewState extends State<PatientClinicalHistoryView>
       });
       _loadSessionLocations();
       widget.onHistoryUpdated?.call();
-    } catch (e) {
+    } catch (_) {
+      // Ignored: silent refresh failure
     }
   }
 

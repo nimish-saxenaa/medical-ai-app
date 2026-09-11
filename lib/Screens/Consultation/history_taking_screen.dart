@@ -7,9 +7,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:clinical_ai_app/Custom%20Widgets/Consultation/siri_waveform.dart';
-import '../../Custom Widgets/CustomAlertDialog.dart';
+import '../../Custom Widgets/custom_alert_dialog.dart';
 import 'package:clinical_ai_app/Screens/Consultation/review_responses_screen.dart';
-import 'package:clinical_ai_app/test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:record/record.dart';
@@ -332,9 +331,7 @@ class _HistoryTakingScreenState extends State<HistoryTakingScreen>
               voiceStreamState = VoiceStreamState.recording;
             });
 
-            int chunkCount = 0;
             stream.listen((audioChunk) {
-              chunkCount++;
               connection?.sendAudioChunk(audioChunk);
             });
           } else {

@@ -223,11 +223,6 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                             : PopupMenuButton<String>(
                                 padding: EdgeInsets.zero,
                                 splashRadius: 10,
-                                child: Icon(
-                                  LucideIcons.moreVertical,
-                                  size: AppLayout.iconSmall + 2,
-                                  color: theme.colorScheme.primary,
-                                ),
                                 tooltip: 'Options',
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(AppLayout.radius10),
@@ -290,6 +285,11 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                                     ),
                                   ),
                                 ],
+                                child: Icon(
+                                  LucideIcons.moreVertical,
+                                  size: AppLayout.iconSmall + 2,
+                                  color: theme.colorScheme.primary,
+                                ),
                               ),
                       ],
                     ),

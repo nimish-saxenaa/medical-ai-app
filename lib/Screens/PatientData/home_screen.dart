@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../Components/colors.dart';
 import '../../Components/layout_constants.dart';
 import '../../Custom Widgets/Patients/custom_name_initial.dart';
 import '../../Custom Widgets/Patients/new_patient_form.dart';
@@ -60,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
       try {
         final list = await listPatients();
         provider.setPatients(list.patients!);
-      } catch (e) {
       } finally {
         if (mounted) setState(() => _isInitialLoading = false);
       }
@@ -82,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       try {
         var history = await getPatientHistory(patientId: patient.patientId);
-        if (!context.mounted) return;
+        if (!mounted) return;
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -90,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       } catch (e) {
-        if (!context.mounted) return;
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Failed to fetch patient history.")),
         );
@@ -134,7 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final list = await listPatients();
       provider.setPatients(list.patients!);
-    } catch (e) {
+    } catch (_) {
+      // Ignored: silent refresh failure
     }
   }
 

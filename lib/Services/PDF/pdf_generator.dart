@@ -545,7 +545,8 @@ class PatientPdfGenerator {
           await probe.writeAsString('');
           await probe.delete();
           return downloads;
-        } catch (e) {
+        } catch (_) {
+          // Probe failed; fall back to external storage directory
         }
       }
       final external = await getExternalStorageDirectory();

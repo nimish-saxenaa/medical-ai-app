@@ -268,7 +268,8 @@ class CabinConsultationService extends StateNotifier<CabinConsultationState> {
         partialTranscript: "",
       );
       _connection = null;
-    } catch (e) {
+    } catch (_) {
+      // Ignored: cleanup errors can be safely bypassed
     }
   }
 
@@ -308,13 +309,13 @@ class CabinConsultationService extends StateNotifier<CabinConsultationState> {
             conn.stop();
             await Future.delayed(const Duration(milliseconds: 300));
           } catch (_) {
+            // Ignored: ready timeout or stop error
           } finally {
             await sub.cancel();
             await conn.close();
           }
         }
       }
-    } catch (e) {
     } finally {
       await stopStreaming();
     }

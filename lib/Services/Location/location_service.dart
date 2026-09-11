@@ -60,7 +60,8 @@ class ConsultationLocationService {
             longitude: position.longitude,
           );
         }
-      } catch (e) {
+      } catch (_) {
+        // Geocoding can fail silently; fall back to coordinates
       }
 
       return ConsultationLocation(
@@ -89,7 +90,8 @@ class ConsultationLocationService {
         '$_keyPrefix$sessionId',
         jsonEncode(location.toJson()),
       );
-    } catch (e) {
+    } catch (_) {
+      // Ignored: non-critical preference save failure
     }
   }
 
@@ -123,7 +125,8 @@ class ConsultationLocationService {
         );
         if (!location.isEmpty) result[sessionId] = location;
       }
-    } catch (e) {
+    } catch (_) {
+      // Ignored: lookup error falls back to partial results
     }
     return result;
   }
@@ -133,7 +136,8 @@ class ConsultationLocationService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('$_keyPrefix$sessionId');
-    } catch (e) {
+    } catch (_) {
+      // Ignored: deletion error
     }
   }
 

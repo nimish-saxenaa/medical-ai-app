@@ -116,7 +116,7 @@ class _HomeSkeletonState extends State<HomeSkeleton> with SingleTickerProviderSt
           child: ListView.builder(
             itemCount: 6,
             padding: EdgeInsets.zero,
-            itemBuilder: (_, __) => const Padding(
+            itemBuilder: (_, _) => const Padding(
               padding: EdgeInsets.only(bottom: AppLayout.space12),
               child: _PatientBubbleSkeleton(),
             ),
@@ -168,7 +168,7 @@ class _HomeSkeletonState extends State<HomeSkeleton> with SingleTickerProviderSt
           child: ListView.builder(
             itemCount: 3,
             padding: EdgeInsets.zero,
-            itemBuilder: (_, __) => Padding(
+            itemBuilder: (_, _) => Padding(
               padding: const EdgeInsets.only(bottom: AppLayout.space16),
               child: Container(
                 height: 140,

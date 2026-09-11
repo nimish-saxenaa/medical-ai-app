@@ -4,7 +4,8 @@ import 'package:clinical_ai_app/Screens/Authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider;
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    hide ChangeNotifierProvider;
 import 'Components/app_theme.dart';
 import 'Custom Widgets/home_skeleton.dart';
 import 'Models/patient_list_model.dart';
@@ -15,7 +16,6 @@ import 'Screens/Authentication/welcome_screen.dart';
 import 'Services/Authentication/auth_service.dart';
 import 'Services/Authentication/navigation_service.dart';
 import 'Services/Authentication/access_token.dart';
-import 'package:device_preview/device_preview.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +32,7 @@ Future<void> main() async {
       ),
       android: AudioContextAndroid(
         isSpeakerphoneOn: true,
-        stayAwake: true, 
+        stayAwake: true,
         contentType: AndroidContentType.speech,
         usageType: AndroidUsageType.assistant,
         audioFocus: AndroidAudioFocus.gainTransientMayDuck,
@@ -50,7 +50,6 @@ Future<void> main() async {
         child: const MyApp(),
       ),
     ),*/
-
     ProviderScope(
       child: ChangeNotifierProvider(
         create: (_) => PatientListProvider(),
@@ -92,7 +91,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     try {
       final token = await TokenManager.getValidAccessToken();
       // If we had a session but refresh failed (returned null), log out
-      final hasRefreshToken = (await AccessTokenService.getRequestToken()) != null;
+      final hasRefreshToken =
+          (await AccessTokenService.getRequestToken()) != null;
       if (hasRefreshToken && token == null) {
         logout();
       }
@@ -116,10 +116,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         HomeScreen.routeName: (context) => HomeScreen(),
         WelcomeScreen.routeName: (context) => WelcomeScreen(),
         AuthGate.routeName: (context) => AuthGate(),
-        ReviewResponsesScreen.routeName: (context) => ReviewResponsesScreen(
-              token: '',
-              sessionId: '',
-            ),
+        ReviewResponsesScreen.routeName: (context) =>
+            ReviewResponsesScreen(token: '', sessionId: ''),
       },
     );
   }
@@ -204,85 +202,89 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    // If we're checking but don't have a token yet, show a blank scaffold 
+
+    // If we're checking but don't have a token yet, show a blank scaffold
     // to avoid flashing the skeleton to first-time users.
     if (_isChecking && !_showSkeleton) {
       return const Scaffold();
     }
 
     return Scaffold(
-      appBar: _showSkeleton ? AppBar(
-        automaticallyImplyLeading: false,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: AppLayout.space16),
-          child: Image.asset("assets/kuvaka_logo.png"),
-        ),
-        // Placeholder actions to match HomeScreen layout exactly
-        actions: [
-          IconButton(
-            onPressed: null,
-            icon: Icon(LucideIcons.logOut, color: Colors.transparent),
-          ),
-        ],
-      ) : null,
+      appBar: _showSkeleton
+          ? AppBar(
+              automaticallyImplyLeading: false,
+              leading: Padding(
+                padding: const EdgeInsets.only(left: AppLayout.space16),
+                child: Image.asset("assets/kuvaka_logo.png"),
+              ),
+              // Placeholder actions to match HomeScreen layout exactly
+              actions: [
+                IconButton(
+                  onPressed: null,
+                  icon: Icon(LucideIcons.logOut, color: Colors.transparent),
+                ),
+              ],
+            )
+          : null,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _isChecking
             ? const HomeSkeleton()
             : _hasConnectionError
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppLayout.space32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(AppLayout.space20),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.error.withAlpha(20),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.wifi_off_rounded,
-                              size: AppLayout.iconExtraLarge + 16,
-                              color: theme.colorScheme.error,
-                            ),
-                          ),
-                          const SizedBox(height: AppLayout.space24),
-                          Text(
-                            "Connection Issue",
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: AppLayout.space8),
-                          Text(
-                            "We couldn't reach our clinical servers. Please check your internet connection and try again.",
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.textTheme.bodyMedium?.color,
-                            ),
-                          ),
-                          const SizedBox(height: AppLayout.space32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _performAuthCheck,
-                              child: const Text("Try Again"),
-                            ),
-                          ),
-                          const SizedBox(height: AppLayout.space12),
-                          TextButton(
-                            onPressed: () async {
-                              await AccessTokenService.clear();
-                              _goTo(const WelcomeScreen());
-                            },
-                            child: const Text("Sign Out"),
-                          ),
-                        ],
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppLayout.space32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(AppLayout.space20),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.error.withAlpha(20),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.wifi_off_rounded,
+                          size: AppLayout.iconExtraLarge + 16,
+                          color: theme.colorScheme.error,
+                        ),
                       ),
-                    ),
-                  )
-                : const SizedBox(),
+                      const SizedBox(height: AppLayout.space24),
+                      Text(
+                        "Connection Issue",
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: AppLayout.space8),
+                      Text(
+                        "We couldn't reach our clinical servers. Please check your internet connection and try again.",
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                      const SizedBox(height: AppLayout.space32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _performAuthCheck,
+                          child: const Text("Try Again"),
+                        ),
+                      ),
+                      const SizedBox(height: AppLayout.space12),
+                      TextButton(
+                        onPressed: () async {
+                          await AccessTokenService.clear();
+                          _goTo(const WelcomeScreen());
+                        },
+                        child: const Text("Sign Out"),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : const SizedBox(),
       ),
     );
   }
