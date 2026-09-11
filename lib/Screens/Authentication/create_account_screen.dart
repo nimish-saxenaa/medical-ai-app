@@ -4,14 +4,12 @@ import 'package:clinical_ai_app/Services/Authentication/auth_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../Custom Widgets/CustomAlertDialog.dart';
 import '../../Custom Widgets/custom_button.dart';
 import '../../Custom Widgets/custom_text_field.dart';
 import '../../Custom Widgets/logo_text.dart';
 import '../../Models/patient_list_model.dart';
 import '../../Services/Authentication/navigation_service.dart';
 import '../../Services/PatientData/patient_service.dart';
-import '../../Services/Authentication/access_token.dart';
 import '../../Components/colors.dart';
 import '../PatientData/home_screen.dart';
 import 'package:provider/provider.dart';
@@ -162,7 +160,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       CustomTextField(
                         hintText: 'dr@hospital.com',
                         controller: emailController,
-                        fieldName: "Email address",
+                        fieldName: "Email Address",
                         keyboardType: TextInputType.emailAddress,
                       ),
                       
@@ -192,16 +190,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         const SizedBox(height: AppLayout.space16),
 
                       CustomButton(
-                        isLoading: isTapped,
-                        isPseudoDisabled: !_isFormValid && !isTapped,
-                        onPressed: isTapped ? null : () async {
+                        text: 'Create Account',
+                        loadingText: 'Creating Account...',
+                        isPseudoDisabled: !_isFormValid,
+                        onTap: () async {
                           if (!_isFormValid) {
                             _showValidationError();
                             return;
                           }
 
                           setState(() {
-                            isTapped = true;
                             errorMessage = null;
                           });
                           
@@ -213,13 +211,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             );
                             
                             if (response['access_token'] != null) {
-                              AccessTokenService.saveAccessToken(response['access_token']);
-                              AccessTokenService.saveRefreshToken(response['refresh_token']);
-
-                              if (response['user'] != null) {
-                                await AccessTokenService.saveUserData(response['user']);
-                              }
-
                               PatientListProvider? patientList = await listPatients();
                               patientsProvider.setPatients(patientList.patients!);
                               
@@ -230,34 +221,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               );
                             } else {
                               setState(() {
-                                isTapped = false;
                                 errorMessage = response['detail']?.toString() ?? "Registration failed";
                               });
                             }
                           } catch (e) {
                             setState(() {
-                              isTapped = false;
                               errorMessage = "Connection error. Please check your internet or try again later.";
                             });
                           }
                         },
-                        child: isTapped
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text('Creating Account...'),
-                                ],
-                              )
-                            : const Text('Create Account'),
                       ),
                       
                       const SizedBox(height: 24),

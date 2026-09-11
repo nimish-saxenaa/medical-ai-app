@@ -23,8 +23,8 @@ Future<dynamic> showCustomDialog(String detail, BuildContext context) {
                 Text(detail, style: Theme.of(context).textTheme.bodyLarge),
                 const SizedBox(height: AppLayout.space16),
                 CustomButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("OK"),
+                  text: "OK",
+                  onTap: () => Navigator.pop(context),
                 ),
               ],
             ),

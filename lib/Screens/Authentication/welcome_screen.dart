@@ -2,7 +2,6 @@ import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:clinical_ai_app/Screens/Authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../../Components/colors.dart';
 import '../../Custom Widgets/custom_button.dart';
 import '../../Custom Widgets/logo_text.dart';
 
@@ -83,7 +82,8 @@ class WelcomeScreen extends StatelessWidget {
                       const SizedBox(height: AppLayout.space56),
                       
                       CustomButton(
-                        onPressed: () {
+                        text: 'Get Started',
+                        onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -91,7 +91,6 @@ class WelcomeScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Text('Get Started'),
                       ),
                     ],
                   ),

@@ -245,6 +245,8 @@ class Medication {
   final String? duration;
   final String? instructions;
   final String? warnings;
+  final String? action;
+  final String? note;
 
   Medication({
     required this.drugName,
@@ -253,6 +255,8 @@ class Medication {
     this.duration,
     this.instructions,
     this.warnings,
+    this.action,
+    this.note,
   });
 
   factory Medication.fromJson(Map<String, dynamic>? json) {
@@ -265,6 +269,8 @@ class Medication {
       duration: json['duration']?.toString(),
       instructions: json['instructions']?.toString(),
       warnings: json['warnings']?.toString(),
+      action: json['action']?.toString(),
+      note: json['note']?.toString(),
     );
   }
 
@@ -275,6 +281,8 @@ class Medication {
     'duration': duration,
     'instructions': instructions,
     'warnings': warnings,
+    'action': action,
+    'note': note,
   };
 
   @override

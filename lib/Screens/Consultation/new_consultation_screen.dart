@@ -8,7 +8,6 @@ import '../../Services/Consultation/consultation_functions.dart';
 import '../../Services/Authentication/access_token.dart';
 import '../../Services/Location/location_service.dart';
 import '../../Components/colors.dart';
-import '../../test_screen.dart';
 import 'history_taking_screen.dart';
 
 class NewConsultationScreen extends StatefulWidget {
@@ -35,7 +34,6 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
   TypesOfSpeciality _selected = TypesOfSpeciality.general_medicine;
   final _complaintController = TextEditingController();
   final _languageController = TextEditingController();
-  bool isTapped = false;
 
   @override
   void dispose() {
@@ -131,11 +129,9 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                 ),
               ),
               CustomButton(
-                onPressed: () async {
-                  setState(() {
-                    isTapped = true;
-                  });
-
+                text: 'Begin Consultation',
+                loadingText: 'Starting Consultation...',
+                onTap: () async {
                   try {
                     String? token = await AccessTokenService.getToken();
                     var response = await startConsultation(
@@ -149,8 +145,6 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                           ? _complaintController.text
                           : null,
                     );
-                    // Record where this consultation is taking place. Stored
-                    // locally against the session id — never blocks the flow.
                     await ConsultationLocationService.captureAndSaveForSession(
                       response.sessionId,
                     );
@@ -171,31 +165,8 @@ class _NewConsultationScreenState extends State<NewConsultationScreen> {
                       "Failed to start consultation. Please check your connection.",
                       context,
                     );
-                  } finally {
-                    if (mounted) {
-                      setState(() {
-                        isTapped = false;
-                      });
-                    }
                   }
                 },
-                child: isTapped
-                    ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 14,
-                      width: 14,
-                      child: CircularProgressIndicator(
-                        color: AppColors.surface,
-                        strokeWidth: AppLayout.borderThick,
-                      ),
-                    ),
-                    const SizedBox(width: AppLayout.space8),
-                    const Text('Starting Consultation'),
-                  ],
-                )
-                    : const Text('Begin Consultation'),
               ),
             ],
           ),

@@ -1,20 +1,17 @@
-import 'package:clinical_ai_app/Components/layout_constants.dart';
-import 'package:clinical_ai_app/Screens/Authentication/create_account_screen.dart';
-import 'package:clinical_ai_app/Screens/PatientData/home_screen.dart';
 import 'package:clinical_ai_app/Services/Authentication/auth_service.dart';
 import 'package:clinical_ai_app/Services/Authentication/navigation_service.dart';
 import 'package:clinical_ai_app/Services/PatientData/patient_service.dart';
-import 'package:clinical_ai_app/Services/Authentication/access_token.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../Custom Widgets/CustomAlertDialog.dart';
+import '../../Components/layout_constants.dart';
 import '../../Custom Widgets/custom_button.dart';
 import '../../Custom Widgets/custom_text_field.dart';
 import '../../Custom Widgets/logo_text.dart';
 import '../../Models/patient_list_model.dart';
 import '../../Components/colors.dart';
+import '../PatientData/home_screen.dart';
+import 'create_account_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -148,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomTextField(
                         hintText: 'doctor@hospital.com',
                         controller: emailController,
-                        fieldName: "Email address",
+                        fieldName: "Email Address",
                         keyboardType: TextInputType.emailAddress,
                       ),
 
@@ -178,16 +175,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: AppLayout.space16),
 
                       CustomButton(
-                        isLoading: isTapped,
-                        isPseudoDisabled: !_isFormValid && !isTapped,
-                        onPressed: isTapped ? null : () async {
+                        text: 'Sign in',
+                        loadingText: 'Signing in...',
+                        isPseudoDisabled: !_isFormValid,
+                        onTap: () async {
                           if (!_isFormValid) {
                             _showValidationError();
                             return;
                           }
 
                           setState(() {
-                            isTapped = true;
                             errorMessage = null;
                           });
 
@@ -198,13 +195,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
 
                             if (response['access_token'] != null) {
-                              AccessTokenService.saveAccessToken(response['access_token']);
-                              AccessTokenService.saveRefreshToken(response['refresh_token']);
-
-                              if (response['user'] != null) {
-                                await AccessTokenService.saveUserData(response['user']);
-                              }
-
                               PatientListProvider? patientList = await listPatients();
                               patientsProvider.setPatients(patientList.patients!);
 
@@ -214,34 +204,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             } else {
                               setState(() {
-                                isTapped = false;
                                 errorMessage = response['detail']?.toString() ?? "Login failed";
                               });
                             }
                           } catch (e) {
                             setState(() {
-                              isTapped = false;
                               errorMessage = "Connection error. Please check your internet or try again later.";
                             });
                           }
                         },
-                        child: isTapped
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text('Signing in...'),
-                                ],
-                              )
-                            : const Text('Sign in'),
                       ),
 
                       const SizedBox(height: 24),

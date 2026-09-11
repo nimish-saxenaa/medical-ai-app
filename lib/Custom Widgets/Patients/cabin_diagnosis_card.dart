@@ -3,6 +3,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Components/colors.dart';
 import '../../Components/layout_constants.dart';
 import '../../Models/cabin_models.dart';
+import '../../Screens/Consultation/cabin_consultation_screen.dart';
+import '../../Screens/Consultation/cabin_record_screen.dart';
+import '../../Services/Cabin/cabin_service.dart';
 import '../../functions.dart';
 
 class CabinDiagnosisCard extends StatefulWidget {
@@ -29,6 +32,48 @@ class CabinDiagnosisCard extends StatefulWidget {
 
 class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
   bool _expanded = false;
+  bool _isLoadingRecord = false;
+
+  Future<void> _viewRecord() async {
+    setState(() => _isLoadingRecord = true);
+    try {
+      final record = await getCabinRecord(widget.session.sessionId);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CabinRecordScreen(
+            record: record,
+            patientName: widget.session.patientName ?? "Patient",
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to load record: $e"),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingRecord = false);
+    }
+  }
+
+  void _rejoinSession() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CabinConsultationScreen(
+          patientId: widget.session.patientId ?? "",
+          patientName: widget.session.patientName ?? "Patient",
+          sessionId: widget.session.sessionId,
+        ),
+      ),
+    );
+  }
 
   String _formatDate(DateTime d) {
     const months = [
@@ -121,7 +166,7 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                                   border: Border.all(color: primaryColor, width: AppLayout.borderThin + 0.25),
                                 ),
                                 child: Text(
-                                  session.status ?? "unknown",
+                                  toTitleCase(session.status ?? "unknown"),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.brightness == Brightness.light ? primaryColor : Colors.white,
                                     fontSize: 10,
@@ -129,6 +174,35 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                                   ),
                                 ),
                               ),
+                              if (session.status?.toLowerCase() == 'active') ...[
+                                const SizedBox(width: AppLayout.space8),
+                                InkWell(
+                                  onTap: _rejoinSession,
+                                  borderRadius: BorderRadius.circular(AppLayout.radius12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.statusInProgress,
+                                      borderRadius: BorderRadius.circular(AppLayout.radius12),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(LucideIcons.radio, size: 11, color: Colors.white),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          "Re-join",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -138,38 +212,85 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                           child: Icon(Icons.keyboard_arrow_down, size: AppLayout.iconSmall + 2, color: theme.textTheme.bodyMedium?.color),
                         ),
                         const SizedBox(width: AppLayout.space8),
-                        PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          splashRadius: 10,
-                          child: Icon(
-                            LucideIcons.moreVertical,
-                            size: AppLayout.iconSmall + 2,
-                            color: theme.colorScheme.primary,
-                          ),
-                          tooltip: 'Options',
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppLayout.radius10),
-                          ),
-                          onSelected: (value) {
-                            if (value == 'delete') {
-                              if (widget.onDelete != null) {
-                                widget.onDelete!();
-                              }
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem<String>(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(LucideIcons.trash2, size: 18, color: AppColors.error),
-                                  const SizedBox(width: 10),
-                                  const Text('Delete', style: TextStyle(color: AppColors.error)),
+                        _isLoadingRecord
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : PopupMenuButton<String>(
+                                padding: EdgeInsets.zero,
+                                splashRadius: 10,
+                                child: Icon(
+                                  LucideIcons.moreVertical,
+                                  size: AppLayout.iconSmall + 2,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                tooltip: 'Options',
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppLayout.radius10),
+                                ),
+                                onSelected: (value) {
+                                  if (value == 'delete') {
+                                    if (widget.onDelete != null) {
+                                      widget.onDelete!();
+                                    }
+                                  } else if (value == 'record') {
+                                    _viewRecord();
+                                  } else if (value == 'rejoin') {
+                                    _rejoinSession();
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  if (session.status?.toLowerCase() == 'active')
+                                    PopupMenuItem<String>(
+                                      value: 'rejoin',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            LucideIcons.radio,
+                                            size: 18,
+                                            color: AppColors.statusInProgress,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          const Text(
+                                            'Re-join Session',
+                                            style: TextStyle(
+                                              color: AppColors.statusInProgress,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  PopupMenuItem<String>(
+                                    value: 'record',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          LucideIcons.fileText,
+                                          size: 18,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        const Text('View Detailed Record'),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem<String>(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        Icon(LucideIcons.trash2, size: 18, color: AppColors.error),
+                                        const SizedBox(width: 10),
+                                        const Text('Delete', style: TextStyle(color: AppColors.error)),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                     const SizedBox(height: AppLayout.space4),
@@ -181,7 +302,7 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            '· ${session.panel?.symptoms.isNotEmpty == true ? session.panel!.symptoms.first.name : "No symptoms recorded"}',
+                            '· ${session.panel?.symptoms.isNotEmpty == true ? toTitleCase(session.panel!.symptoms.first.name) : "No symptoms recorded"}',
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12),
                           ),
@@ -214,23 +335,55 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                       const Text("Symptoms:", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ...session.panel!.symptoms.map((s) => Padding(
                         padding: const EdgeInsets.only(top: AppLayout.space4),
-                        child: Text("• ${s.name} (${s.reportedBy ?? 'unknown'})", style: const TextStyle(fontSize: 12)),
+                        child: Text("• ${toTitleCase(s.name)} (${toTitleCase(s.reportedBy ?? 'unknown')})", style: const TextStyle(fontSize: 12)),
                       )),
                       const SizedBox(height: AppLayout.space12),
                     ],
                     // Diagnoses
                     if (session.panel!.diagnoses.isNotEmpty) ...[
                       const Text("Diagnoses:", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                      ...session.panel!.diagnoses.map((d) => Padding(
-                        padding: const EdgeInsets.only(top: AppLayout.space4),
-                        child: Text("• ${d.condition} - ${d.likelihood ?? 'N/A'}", style: const TextStyle(fontSize: 12)),
-                      )),
+                      ...session.panel!.diagnoses.map((d) {
+                        final bool isHigh = d.likelihood?.toLowerCase() == 'high' || d.likelihood?.toLowerCase() == 'suspected';
+                        final Color accentColor = isHigh ? AppColors.error : AppColors.success;
+                        final Color lightColor = isHigh
+                            ? (theme.brightness == Brightness.dark ? AppColors.error.withAlpha(60) : AppColors.redFlagBorder)
+                            : (theme.brightness == Brightness.dark ? AppColors.success.withAlpha(60) : AppColors.statusFinalizedContainer);
+
+                        return Padding(
+                          padding: const EdgeInsets.only(top: AppLayout.space8),
+                          child: Row(
+                            children: [
+                              Text("• ${toTitleCase(d.condition)}", style: const TextStyle(fontSize: 12)),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: lightColor,
+                                  borderRadius: BorderRadius.circular(AppLayout.radius16),
+                                  border: Border.all(color: accentColor, width: AppLayout.borderThin),
+                                ),
+                                child: Text(
+                                  toTitleCase(d.likelihood ?? 'N/A'),
+                                  style: TextStyle(
+                                    color: theme.brightness == Brightness.light ? accentColor : Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                       const SizedBox(height: AppLayout.space12),
                     ],
                     // Tests
                     if (session.panel!.tests.isNotEmpty) ...[
                       const Text("Tests Considered:", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                      Text(session.panel!.tests.join(", "), style: const TextStyle(fontSize: 12)),
+                      ...session.panel!.tests.map((t) => Padding(
+                        padding: const EdgeInsets.only(top: AppLayout.space4),
+                        child: Text("• ${toTitleCase(t.name)}", style: const TextStyle(fontSize: 12)),
+                      )),
                       const SizedBox(height: AppLayout.space12),
                     ],
                     // Meds
@@ -238,7 +391,7 @@ class _CabinDiagnosisCardState extends State<CabinDiagnosisCard> {
                       const Text("Medications:", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ...session.panel!.medications.map((m) => Padding(
                         padding: const EdgeInsets.only(top: AppLayout.space4),
-                        child: Text("• ${m.drugName} - ${m.dose ?? ''}", style: const TextStyle(fontSize: 12)),
+                        child: Text("• ${toTitleCase(m.drugName)} - ${m.dose ?? ''}", style: const TextStyle(fontSize: 12)),
                       )),
                     ],
                   ],

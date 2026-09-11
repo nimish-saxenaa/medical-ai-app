@@ -4,6 +4,7 @@ import 'package:clinical_ai_app/Screens/Authentication/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide ChangeNotifierProvider;
 import 'Components/app_theme.dart';
 import 'Custom Widgets/home_skeleton.dart';
 import 'Models/patient_list_model.dart';
@@ -31,7 +32,7 @@ Future<void> main() async {
       ),
       android: AudioContextAndroid(
         isSpeakerphoneOn: true,
-        stayAwake: true,
+        stayAwake: true, 
         contentType: AndroidContentType.speech,
         usageType: AndroidUsageType.assistant,
         audioFocus: AndroidAudioFocus.gainTransientMayDuck,
@@ -50,15 +51,55 @@ Future<void> main() async {
       ),
     ),*/
 
-    ChangeNotifierProvider(
+    ProviderScope(
+      child: ChangeNotifierProvider(
         create: (_) => PatientListProvider(),
         child: const MyApp(),
       ),
+    ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Requirements Part 7: Check token on app resume
+      _checkTokenOnResume();
+    }
+  }
+
+  Future<void> _checkTokenOnResume() async {
+    try {
+      final token = await TokenManager.getValidAccessToken();
+      // If we had a session but refresh failed (returned null), log out
+      final hasRefreshToken = (await AccessTokenService.getRequestToken()) != null;
+      if (hasRefreshToken && token == null) {
+        logout();
+      }
+    } catch (e) {
+      debugPrint("Token check on resume failed: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,24 +162,22 @@ class _AuthGateState extends State<AuthGate> {
     });
 
     try {
-      // 3. Attempt to refresh tokens to ensure session is valid
-      final result = await refreshTokens();
-      final newAccessToken = result['access_token'] ?? result['accessToken'];
-      final newRefreshToken = result['refresh_token'] ?? result['refreshToken'];
+      // 3. Use TokenManager to ensure we have a valid token (startup check)
+      final token = await TokenManager.getValidAccessToken();
 
-      if (newAccessToken != null && newRefreshToken != null) {
-        await AccessTokenService.saveAccessToken(newAccessToken.toString());
-        await AccessTokenService.saveRefreshToken(newRefreshToken.toString());
+      if (token != null) {
+        // 4. Navigate immediately to HomeScreen.
+        _goTo(const HomeScreen());
+      } else {
+        // Refresh failed and we have no valid token
+        await AccessTokenService.clear();
+        _goTo(const WelcomeScreen());
       }
-      
-      // 4. Navigate immediately to HomeScreen. 
-      _goTo(const HomeScreen());
     } catch (e) {
-      
       final errorStr = e.toString().toLowerCase();
-      if (errorStr.contains("socketexception") || 
-          errorStr.contains("httpapi") || 
-          errorStr.contains("connection") || 
+      if (errorStr.contains("socketexception") ||
+          errorStr.contains("httpapi") ||
+          errorStr.contains("connection") ||
           errorStr.contains("timeout")) {
         setState(() {
           _isChecking = false;

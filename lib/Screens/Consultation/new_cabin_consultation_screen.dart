@@ -1,10 +1,7 @@
 import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../../Components/colors.dart';
 import '../../Custom Widgets/custom_button.dart';
 import '../../Custom Widgets/CustomAlertDialog.dart';
-import '../../Services/Authentication/access_token.dart';
 import '../../Services/Cabin/cabin_service.dart';
 import '../../Services/Location/location_service.dart';
 import 'cabin_consultation_screen.dart';
@@ -29,7 +26,6 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
   final _nameController = TextEditingController();
   final _complaintController = TextEditingController();
   bool _consent = true;
-  bool _isTapped = false;
 
   @override
   void initState() {
@@ -145,17 +141,9 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
 
               // Begin Button
               CustomButton(
-                onPressed: _startCabinFlow,
-                child: _isTapped
-                    ? const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: AppLayout.borderThick)),
-                            SizedBox(width: AppLayout.space8),
-                            Text('Initializing...'),
-                          ],
-                        )
-                      : const Text('Begin Consultation'),
+                text: 'Begin Consultation',
+                loadingText: 'Initializing...',
+                onTap: _startCabinFlow,
               ),
             ],
           ),
@@ -169,8 +157,6 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
       showCustomDialog("Patient consent is required to proceed.", context);
       return;
     }
-
-    setState(() => _isTapped = true);
 
     try {
       final session = await createCabinSession(
@@ -197,8 +183,7 @@ class _NewCabinConsultationScreenState extends State<NewCabinConsultationScreen>
       if (!mounted) return;
       showCustomDialog("Failed to start cabin flow. Please check your connection.", context);
     } finally {
-      if (mounted) setState(() => _isTapped = false);
-    }
+          }
   }
 }
 

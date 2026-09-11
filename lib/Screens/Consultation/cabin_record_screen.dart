@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../Components/colors.dart';
 import '../../Models/cabin_models.dart';
+import '../../Models/consultation_models.dart';
+import '../../functions.dart';
 import 'cabin_consultation_screen.dart'; // To reuse TranscriptBubble and other helper widgets if possible or just redefine
 
 class CabinRecordScreen extends StatefulWidget {
@@ -43,13 +45,12 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.patientName,
-              style: theme.textTheme.bodyLarge,
-            ),
+            Text(widget.patientName, style: theme.textTheme.bodyLarge),
             Text(
               "Consultation Record",
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.textTheme.bodyMedium?.color),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.textTheme.bodyMedium?.color,
+              ),
             ),
           ],
         ),
@@ -64,7 +65,11 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
                 children: [
                   _buildPageIndicator(0, "Transcript", LucideIcons.listMusic),
                   const SizedBox(width: AppLayout.space16),
-                  _buildPageIndicator(1, "Clinical Panel", LucideIcons.clipboardList),
+                  _buildPageIndicator(
+                    1,
+                    "Clinical Panel",
+                    LucideIcons.clipboardList,
+                  ),
                 ],
               ),
             ),
@@ -76,10 +81,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
                     _currentPage = index;
                   });
                 },
-                children: [
-                  _buildTranscriptPage(),
-                  _buildPanelPage(),
-                ],
+                children: [_buildTranscriptPage(), _buildPanelPage()],
               ),
             ),
             // Final Action
@@ -90,10 +92,17 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppLayout.space16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppLayout.radius12)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppLayout.space16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppLayout.radius12),
+                    ),
                   ),
-                  child: const Text("Save & Close", style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Save & Close",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
@@ -116,7 +125,10 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16, vertical: AppLayout.space8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppLayout.space16,
+          vertical: AppLayout.space8,
+        ),
         decoration: BoxDecoration(
           color: isActive ? theme.colorScheme.primary : AppColors.transparent,
           borderRadius: BorderRadius.circular(AppLayout.radius20),
@@ -130,13 +142,17 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             Icon(
               icon,
               size: AppLayout.iconSmall,
-              color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
+              color: isActive
+                  ? theme.colorScheme.onPrimary
+                  : theme.textTheme.bodyMedium?.color,
             ),
             const SizedBox(width: AppLayout.space8),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
+                color: isActive
+                    ? theme.colorScheme.onPrimary
+                    : theme.textTheme.bodyMedium?.color,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -154,7 +170,10 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppLayout.radius16),
-          border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+          border: Border.all(
+            color: theme.dividerColor,
+            width: AppLayout.borderThin,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,23 +182,43 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
               padding: const EdgeInsets.all(AppLayout.space16),
               child: Row(
                 children: [
-                  Icon(LucideIcons.listMusic, size: AppLayout.iconSmall, color: theme.colorScheme.primary),
+                  Icon(
+                    LucideIcons.listMusic,
+                    size: AppLayout.iconSmall,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: AppLayout.space8),
                   Text(
                     "Full Transcript",
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: AppLayout.space16),
-                itemCount: widget.record.utterances.length,
-                itemBuilder: (context, index) {
-                  return TranscriptBubble(utterance: widget.record.utterances[index]);
-                },
-              ),
+              child: widget.record.utterances.isEmpty
+                  ? Center(
+                      child: Text(
+                        "No Transcript recorded",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          fontSize: 13,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppLayout.space16,
+                      ),
+                      itemCount: widget.record.utterances.length,
+                      itemBuilder: (context, index) {
+                        return TranscriptBubble(
+                          utterance: widget.record.utterances[index],
+                        );
+                      },
+                    ),
             ),
             const SizedBox(height: AppLayout.space16),
           ],
@@ -202,7 +241,10 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(AppLayout.radius12),
-              border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+              border: Border.all(
+                color: theme.dividerColor,
+                width: AppLayout.borderThin,
+              ),
             ),
             child: Row(
               children: [
@@ -214,7 +256,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             ),
           ),
           const SizedBox(height: AppLayout.space16),
-          
+
           // Panel Content
           Container(
             width: double.infinity,
@@ -222,31 +264,78 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(AppLayout.radius16),
-              border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+              border: Border.all(
+                color: theme.dividerColor,
+                width: AppLayout.borderThin,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (_selectedPanelTab == 0) ...[
                   if (panel.symptoms.isEmpty)
-                    Center(child: Text("No symptoms recorded", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13)))
+                    Center(
+                      child: Text(
+                        "No symptoms recorded",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          fontSize: 13,
+                        ),
+                      ),
+                    )
                   else
-                    ...panel.symptoms.map((s) => _buildSymptomItem(s.name, s.description ?? "", s.reportedBy ?? "unknown")),
+                    ...panel.symptoms.map(
+                      (s) => _buildSymptomItem(
+                        s.name,
+                        s.detail ?? "",
+                        s.reportedBy ?? "unknown",
+                      ),
+                    ),
                 ] else if (_selectedPanelTab == 1) ...[
                   if (panel.diagnoses.isEmpty)
-                    Center(child: Text("No diagnoses recorded", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13)))
+                    Center(
+                      child: Text(
+                        "No diagnoses recorded",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          fontSize: 13,
+                        ),
+                      ),
+                    )
                   else
-                    ...panel.diagnoses.map((d) => _buildDifferentialItem(d.condition, d.likelihood ?? "Confirmed", d.reasoning ?? "")),
+                    ...panel.diagnoses.map(
+                      (d) => _buildDifferentialItem(
+                        d.condition,
+                        d.likelihood ?? "Confirmed",
+                        d.reasoning ?? "",
+                      ),
+                    ),
                 ] else if (_selectedPanelTab == 2) ...[
                   if (panel.tests.isEmpty)
-                    Center(child: Text("No tests recorded", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13)))
+                    Center(
+                      child: Text(
+                        "No tests recorded",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          fontSize: 13,
+                        ),
+                      ),
+                    )
                   else
-                    ...panel.tests.map((t) => _buildSimplePanelItem(t)),
+                    ...panel.tests.map((t) => _buildTestItem(t)),
                 ] else if (_selectedPanelTab == 3) ...[
                   if (panel.medications.isEmpty)
-                    Center(child: Text("No medications recorded", style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13)))
+                    Center(
+                      child: Text(
+                        "No medications recorded",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          fontSize: 13,
+                        ),
+                      ),
+                    )
                   else
-                    ...panel.medications.map((m) => _buildSimplePanelItem(m.drugName)),
+                    ...panel.medications.map((m) => _buildMedicationItem(m)),
                 ],
               ],
             ),
@@ -274,7 +363,9 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isActive ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
+              color: isActive
+                  ? theme.colorScheme.onPrimary
+                  : theme.textTheme.bodyMedium?.color,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               fontSize: 11,
             ),
@@ -285,7 +376,7 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
   }
 
   // Re-implementing helper widgets for the record screen
-  Widget _buildSymptomItem(String title, String description, String reportedBy) {
+  Widget _buildSymptomItem(String title, String detail, String reportedBy) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -294,32 +385,67 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(AppLayout.radius12),
-        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+        border: Border.all(
+          color: theme.dividerColor,
+          width: AppLayout.borderThin,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: theme.textTheme.bodyLarge?.color)),
-          if (description.isNotEmpty) ...[
+          Text(
+            toTitleCase(title),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: theme.textTheme.bodyLarge?.color,
+            ),
+          ),
+          if (detail.isNotEmpty) ...[
             const SizedBox(height: AppLayout.space4),
-            Text(description, style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color)),
+            Text(
+              toTitleCase(detail),
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.textTheme.bodyMedium?.color,
+              ),
+            ),
           ],
           const SizedBox(height: AppLayout.space8),
-          Text("Reported by: $reportedBy", style: TextStyle(fontSize: 10, color: theme.colorScheme.primary, fontStyle: FontStyle.italic)),
+          Text(
+            "Reported by: ${toTitleCase(reportedBy)}",
+            style: TextStyle(
+              fontSize: 10,
+              color: theme.colorScheme.primary,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDifferentialItem(String condition, String likelihood, String reasoning) {
+  Widget _buildDifferentialItem(
+    String condition,
+    String likelihood,
+    String reasoning,
+  ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final bool isHigh = likelihood.toLowerCase() == 'high';
-    
+
     final Color accentColor = isHigh ? AppColors.error : AppColors.success;
-    final Color bgColor = isHigh 
+    final Color bgColor = isHigh
         ? (isDark ? AppColors.error.withAlpha(40) : AppColors.errorContainer)
-        : (isDark ? AppColors.success.withAlpha(40) : AppColors.statusFinalizedContainer);
+        : (isDark
+              ? AppColors.success.withAlpha(40)
+              : AppColors.statusFinalizedContainer);
+
+    final Color lightColor = isHigh
+        ? (isDark ? AppColors.error.withAlpha(60) : AppColors.redFlagBorder)
+        : (isDark
+              ? AppColors.success.withAlpha(60)
+              : AppColors.statusFinalizedContainer);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppLayout.space12),
@@ -335,21 +461,64 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: Text(condition, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: theme.textTheme.bodyLarge?.color))),
-              Text(likelihood, style: TextStyle(color: accentColor, fontSize: 10, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text(
+                  toTitleCase(condition), 
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: lightColor,
+                  borderRadius: BorderRadius.circular(AppLayout.radius16),
+                  border: Border.all(
+                    color: accentColor,
+                    width: AppLayout.borderThin,
+                  ),
+                ),
+                child: Text(
+                  toTitleCase(likelihood),
+                  style: TextStyle(
+                    color: theme.brightness == Brightness.light
+                        ? accentColor
+                        : Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
           if (reasoning.isNotEmpty) ...[
             const SizedBox(height: AppLayout.space8 - 2),
-            Text(reasoning, style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color)),
+            Text(
+              reasoning,
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.textTheme.bodyMedium?.color,
+              ),
+            ),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildSimplePanelItem(String text) {
+  Widget _buildTestItem(CabinTest test) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Status color logic (can be expanded)
+    final Color accentColor = AppColors.brand;
+    final Color lightColor = isDark
+        ? AppColors.brand.withAlpha(40)
+        : AppColors.brandHighlight;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: AppLayout.space8),
@@ -357,10 +526,125 @@ class _CabinRecordScreenState extends State<CabinRecordScreen> {
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(AppLayout.radius12),
-        border: Border.all(color: theme.dividerColor, width: AppLayout.borderThin),
+        border: Border.all(
+          color: theme.dividerColor,
+          width: AppLayout.borderThin,
+        ),
       ),
-      child: Text(text, style: TextStyle(fontSize: 13, color: theme.textTheme.bodyLarge?.color)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              toTitleCase(test.name),
+              style: TextStyle(
+                fontSize: 13,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+            ),
+          ),
+          if (test.status != null && test.status!.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: lightColor,
+                borderRadius: BorderRadius.circular(AppLayout.radius16),
+                border: Border.all(
+                  color: accentColor.withAlpha(100),
+                  width: AppLayout.borderThin,
+                ),
+              ),
+              child: Text(
+                toTitleCase(test.status!),
+                style: TextStyle(
+                  color: isDark ? Colors.white : accentColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedicationItem(Medication med) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Action color logic
+    final Color accentColor = AppColors.brand;
+    final Color lightColor = isDark
+        ? AppColors.brand.withAlpha(40)
+        : AppColors.brandHighlight;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: AppLayout.space8),
+      padding: const EdgeInsets.all(AppLayout.space12),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(AppLayout.radius12),
+        border: Border.all(
+          color: theme.dividerColor,
+          width: AppLayout.borderThin,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  toTitleCase(med.drugName),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.textTheme.bodyLarge?.color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "Dose: ${(med.dose != null && med.dose!.isNotEmpty) ? med.dose! : "Not Provided"}",
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: theme.textTheme.bodyMedium?.color,
+                  ),
+                ),
+                Text(
+                  "Frequency: ${(med.frequency != null && med.frequency!.isNotEmpty) ? toTitleCase(med.frequency!) : "Not Provided"}",
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: theme.textTheme.bodyMedium?.color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (med.action != null && med.action!.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: lightColor,
+                borderRadius: BorderRadius.circular(AppLayout.radius16),
+                border: Border.all(
+                  color: accentColor.withAlpha(100),
+                  width: AppLayout.borderThin,
+                ),
+              ),
+              child: Text(
+                toTitleCase(med.action!),
+                style: TextStyle(
+                  color: isDark ? Colors.white : accentColor,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
-

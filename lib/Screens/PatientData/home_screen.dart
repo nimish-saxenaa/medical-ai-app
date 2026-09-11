@@ -337,7 +337,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: _refreshPatients,
             child: filtered.isNotEmpty
                 ? ListView.builder(
-                    padding: isTablet ? const EdgeInsets.symmetric(horizontal: AppLayout.space16) : EdgeInsets.zero,
+                    padding: EdgeInsets.only(
+                      left: isTablet ? AppLayout.space16 : 0,
+                      right: isTablet ? AppLayout.space16 : 0,
+                      bottom: 100, // Extra space at bottom to avoid FAB overlap
+                    ),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final patient = filtered[index];
@@ -427,7 +431,7 @@ class CustomPatientBubble extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CustomNameInitial(name: patient.name),
+                  CustomNameInitial(name: toTitleCase(patient.name)),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(left: AppLayout.space8),
@@ -435,7 +439,7 @@ class CustomPatientBubble extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(patient.name,style: theme.textTheme.bodyLarge,maxLines: 1,
+                          Text(toTitleCase(patient.name),style: theme.textTheme.bodyLarge,maxLines: 1,
                         overflow: TextOverflow.ellipsis,),
                           Text("${patient.age} Yrs · ${patient.gender ?? ""}", style: theme.textTheme.bodyMedium,)
                         ],

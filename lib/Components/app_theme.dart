@@ -311,6 +311,8 @@ class AppTheme {
       foregroundColor: AppDarkColors.textPrimary,
       elevation: 0,
       centerTitle: false,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
     ),
 
     elevatedButtonTheme: ElevatedButtonThemeData(

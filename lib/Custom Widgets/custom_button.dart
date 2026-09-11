@@ -1,17 +1,45 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:clinical_ai_app/Components/colors.dart';
-class CustomButton extends StatelessWidget {
+
+typedef CustomButtonCallback = FutureOr<void> Function();
+
+class CustomButton extends StatefulWidget {
   const CustomButton({
     super.key,
-    required this.onPressed,
-    required this.child,
+    required this.text,
+    required this.onTap,
+    this.loadingText,
     this.isPseudoDisabled = false,
-    this.isLoading = false,
   });
-  final VoidCallback? onPressed;
-  final Widget child;
+
+  final String text;
+  final CustomButtonCallback? onTap;
+  final String? loadingText;
   final bool isPseudoDisabled;
-  final bool isLoading;
+
+  @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton> {
+  bool _isLoading = false;
+
+  void _handleTap() async {
+    if (_isLoading || widget.onTap == null) return;
+
+    final result = widget.onTap!();
+    if (result is Future) {
+      setState(() => _isLoading = true);
+      try {
+        await result;
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +47,49 @@ class CustomButton extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     ButtonStyle? style;
-    if (isLoading) {
+    if (_isLoading) {
       style = ElevatedButton.styleFrom(
         disabledBackgroundColor: isDark ? AppDarkColors.brand : AppColors.brand,
         disabledForegroundColor: isDark ? AppDarkColors.textPrimary : AppColors.surface,
       );
-    } else if (isPseudoDisabled) {
+    } else if (widget.isPseudoDisabled) {
       style = ElevatedButton.styleFrom(
-        backgroundColor: isDark ? const Color(0xFF2C2745) : const Color(0xFFE5E7EB),
-        foregroundColor: isDark ? const Color(0xFF9691AD) : const Color(0xFF9CA3AF),
+        backgroundColor: isDark ? AppDarkColors.outlineVariant : AppColors.outlineVariant,
+        foregroundColor: isDark ? AppDarkColors.textDisabled : AppColors.textDisabled,
         elevation: 0,
+      );
+    }
+
+    Widget content;
+    if (_isLoading) {
+      content = Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 16,
+            width: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: isDark ? AppDarkColors.textPrimary : AppColors.surface,
+            ),
+          ),
+          if (widget.loadingText != null && widget.loadingText!.isNotEmpty) ...[
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                widget.loadingText!,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ],
+      );
+    } else {
+      content = Text(
+        widget.text,
+        textAlign: TextAlign.center,
       );
     }
 
@@ -38,9 +99,9 @@ class CustomButton extends StatelessWidget {
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: onPressed,
+            onPressed: _isLoading ? null : _handleTap,
             style: style,
-            child: child,
+            child: content,
           ),
         ),
       ),

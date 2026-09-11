@@ -167,7 +167,8 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
                     ),
                     const SizedBox(height: AppLayout.space16),
                     CustomButton(
-                      onPressed: () {
+                      text: "Go to analysis",
+                      onTap: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -178,7 +179,6 @@ class _ReviewResponsesScreenState extends State<ReviewResponsesScreen> {
                           ),
                         );
                       },
-                      child: Text("Go to analysis"),
                     ),
                   ],
                 ),

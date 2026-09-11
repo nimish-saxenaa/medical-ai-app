@@ -19,6 +19,7 @@ dependencies:
   flutter_secure_storage:
   intl:
   provider:
+  flutter_riverpod: ^2.6.1
   record:
   path_provider:
   permission_handler:

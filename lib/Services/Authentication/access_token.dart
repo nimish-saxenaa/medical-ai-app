@@ -3,10 +3,17 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AccessTokenService {
   static const _storage = FlutterSecureStorage();
 
-  static Future<void> saveAccessToken(String accessToken) async {
+  static Future<void> saveAccessToken(String accessToken, [int? expiresInSeconds]) async {
     await _storage.write(
       key: "access_token",
       value: accessToken,
+    );
+    // Requirements Part 1: Default to 900 seconds (15 mins) if expires_in is missing
+    final effectiveExpiresIn = expiresInSeconds ?? 900;
+    final expiry = DateTime.now().add(Duration(seconds: effectiveExpiresIn));
+    await _storage.write(
+      key: "access_token_expiry",
+      value: expiry.toIso8601String(),
     );
   }
 
@@ -15,6 +22,19 @@ class AccessTokenService {
       key: "refresh_token",
       value: refreshToken,
     );
+  }
+
+  static Future<DateTime?> getAccessTokenExpiry() async {
+    final expiryStr = await _storage.read(key: "access_token_expiry");
+    if (expiryStr == null) return null;
+    return DateTime.tryParse(expiryStr);
+  }
+
+  static Future<bool> isTokenNearExpiry() async {
+    final expiry = await getAccessTokenExpiry();
+    if (expiry == null) return true;
+    // 1 minute safety margin
+    return DateTime.now().isAfter(expiry.subtract(const Duration(minutes: 1)));
   }
 
   static Future<void> saveUserName(String name) async {

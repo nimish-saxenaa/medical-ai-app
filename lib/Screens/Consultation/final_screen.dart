@@ -269,25 +269,19 @@ class _FinalScreenState extends State<FinalScreen> {
                   children: [
                     Expanded(
                       child: CustomButton(
-                        onPressed: () {
-                          finalize(context);
+                        text: "Save\nConsultation",
+                        onTap: () async {
+                          await finalize(context);
                         },
-                        child: const Text(
-                          "Save\nConsultation",
-                          textAlign: TextAlign.center,
-                        ),
                       ),
                     ),
                     const SizedBox(width: AppLayout.space16),
                     Expanded(
                       child: CustomButton(
-                        onPressed: () {
-                          finalize(context);
+                        text: "New\nConsultation",
+                        onTap: () async {
+                          await finalize(context);
                         },
-                        child: const Text(
-                          "New\nConsultation",
-                          textAlign: TextAlign.center,
-                        ),
                       ),
                     ),
                   ],

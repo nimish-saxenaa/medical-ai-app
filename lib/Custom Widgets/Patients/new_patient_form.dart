@@ -1,5 +1,4 @@
 import '../CustomAlertDialog.dart';
-import '../custom_button.dart';
 import 'package:clinical_ai_app/Components/colors.dart';
 import 'package:clinical_ai_app/Components/layout_constants.dart';
 import 'package:flutter/material.dart';
@@ -32,24 +31,22 @@ class _NewPatientFormState extends State<NewPatientForm> {
   @override
   void initState() {
     super.initState();
-    _nameController.addListener(_clearError);
-    _ageController.addListener(_clearError);
-    _phoneController.addListener(_clearError);
+    _nameController.addListener(_onFieldChanged);
+    _ageController.addListener(_onFieldChanged);
+    _phoneController.addListener(_onFieldChanged);
   }
 
-  void _clearError() {
-    if (errorMessage != null) {
-      setState(() {
-        errorMessage = null;
-      });
-    }
+  void _onFieldChanged() {
+    setState(() {
+      errorMessage = null;
+    });
   }
 
   @override
   void dispose() {
-    _nameController.removeListener(_clearError);
-    _ageController.removeListener(_clearError);
-    _phoneController.removeListener(_clearError);
+    _nameController.removeListener(_onFieldChanged);
+    _ageController.removeListener(_onFieldChanged);
+    _phoneController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _ageController.dispose();
     _phoneController.dispose();
@@ -328,13 +325,20 @@ class _NewPatientFormState extends State<NewPatientForm> {
                               elevation: 0,
                             ),
                             child: _isCreating
-                                ? SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                    ),
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 18,
+                                        width: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Theme.of(context).colorScheme.onPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      const Text("Creating...", style: TextStyle(fontWeight: FontWeight.w600)),
+                                    ],
                                   )
                                 : const Text("Create", style: TextStyle(fontWeight: FontWeight.w600)),
                           ),
@@ -394,7 +398,7 @@ class _FieldLabel extends StatelessWidget {
       text: TextSpan(
         style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.bold,
-          color: theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
+          color: theme.textTheme.bodyLarge?.color?.withAlpha(204),
           letterSpacing: 0.5,
         ),
         children: [
@@ -512,7 +516,7 @@ Future<void> showNewPatientDialog(BuildContext context) {
   final theme = Theme.of(context);
   return showDialog(
     context: context,
-    barrierColor: Colors.black.withOpacity(0.5),
+    barrierColor: Colors.black.withAlpha(127),
     builder: (context) {
       return Dialog(
         backgroundColor: theme.scaffoldBackgroundColor,
